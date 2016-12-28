@@ -1,11 +1,14 @@
 // @flow
 
-import React, { Component } from 'react'
+import React, { PropTypes, Component } from 'react'
 import { ScrollView, Image, BackAndroid } from 'react-native'
+import { connect } from 'react-redux'
 import styles from './Styles/DrawerContentStyle'
 import { Images } from '../Themes'
 import DrawerButton from '../Components/DrawerButton'
+import LoginActions, { isLoggedIn } from '../Redux/LoginRedux'
 import { Actions as NavigationActions } from 'react-native-router-flux'
+import I18n from 'react-native-i18n'
 
 class DrawerContent extends Component {
 
@@ -33,30 +36,41 @@ class DrawerContent extends Component {
     NavigationActions.usageExamples()
   }
 
-  handlePressAPI = () => {
+  handlePressMapView = () => {
     this.toggleDrawer()
-    NavigationActions.apiTesting()
+    NavigationActions.mapviewExample()
   }
 
-  handlePressTheme = () => {
+  handlePressLogin = () => {
     this.toggleDrawer()
-    NavigationActions.theme()
+    NavigationActions.login()
   }
 
-  handlePressDevice = () => {
+  handlePressLogout = () => {
     this.toggleDrawer()
-    NavigationActions.deviceInfo()
+    this.props.logout()
+  }
+
+  renderLoginButton () {
+    return (
+      <DrawerButton text={I18n.t('signIn')} onPress={this.handlePressLogin} />
+    )
+  }
+
+  renderLogoutButton () {
+    return (
+      <DrawerButton text={I18n.t('logOut')} onPress={this.handlePressLogout} />
+    )
   }
 
   render () {
+    let { loggedIn } = this.props
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
         <DrawerButton text='Component Examples' onPress={this.handlePressComponents} />
-        <DrawerButton text='Usage Examples' onPress={this.handlePressUsage} />
-        <DrawerButton text='API Testing' onPress={this.handlePressAPI} />
-        <DrawerButton text='Themes' onPress={this.handlePressTheme} />
-        <DrawerButton text='Device Info' onPress={this.handlePressDevice} />
+        <DrawerButton text='Mapview' onPress={this.handlePressMapView} />
+        {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )
   }
@@ -64,7 +78,21 @@ class DrawerContent extends Component {
 }
 
 DrawerContent.contextTypes = {
-  drawer: React.PropTypes.object
+  drawer: React.PropTypes.object,
+  loggedIn: PropTypes.bool,
+  logout: PropTypes.func
 }
 
-export default DrawerContent
+const mapStateToProps = (state) => {
+  return {
+    loggedIn: isLoggedIn(state.login)
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    logout: () => dispatch(LoginActions.logout())
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DrawerContent)
