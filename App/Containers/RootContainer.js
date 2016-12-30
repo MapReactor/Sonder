@@ -10,6 +10,10 @@ import ReduxPersist from '../Config/ReduxPersist'
 // Styles
 import styles from './Styles/RootContainerStyle'
 
+// Debug Only
+import MapviewExample from './MapviewExample'
+
+
 class RootContainer extends Component {
   componentDidMount () {
     // if redux persist is not active fire startup action

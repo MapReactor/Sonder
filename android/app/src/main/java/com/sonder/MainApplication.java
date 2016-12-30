@@ -18,6 +18,8 @@ import com.facebook.soloader.SoLoader;
 import java.util.Arrays;
 import java.util.List;
 
+import com.joshblour.reactnativeheading.ReactNativeHeadingPackage;
+
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -34,7 +36,8 @@ public class MainApplication extends Application implements ReactApplication {
             new MapsPackage(),
             new ReactNativeI18n(),
             new RNDeviceInfo(),
-            new ReactNativeConfigPackage()
+            new ReactNativeConfigPackage(),
+            new ReactNativeHeadingPackage()
       );
     }
   };
