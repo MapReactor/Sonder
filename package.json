@@ -96,7 +96,7 @@
       "React$Element"
     ]
   },
-  "config": {
+  "_config": {
     "ghooks": {
       "pre-commit": "if [ -d 'ignite-base' ]; then cd ignite-base; fi; npm run lint"
     }
