@@ -10,7 +10,7 @@ import NavigationDrawer from './NavigationDrawer'
 import AllComponentsScreen from '../Containers/AllComponentsScreen'
 import LoginScreen from '../Containers/LoginScreen'
 
-// import MapviewExample from '../Containers/MapviewExample'
+import MapviewExample from '../Containers/MapviewExample'
 import CompassView from '../Containers/CompassView'
 
 /* **************************
@@ -25,6 +25,7 @@ class NavigationRouter extends Component {
           <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
             <Scene key='componentExamples' component={AllComponentsScreen} title='Components' />
             <Scene key='login' component={LoginScreen} title='Login' hideNavBar />
+            <Scene initial key='mapviewExample' component={MapviewExample} title='Mapview Example' />
             <Scene initial key='compassView' component={CompassView} title='Compass View' />
           </Scene>
         </Scene>
