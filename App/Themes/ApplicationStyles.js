@@ -12,7 +12,9 @@ const ApplicationStyles = {
     mainContainer: {
       flex: 1,
       marginTop: Metrics.navBarHeight,
-      backgroundColor: Colors.transparent
+      backgroundColor: Colors.transparent,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     backgroundImage: {
       position: 'absolute',
@@ -23,7 +25,7 @@ const ApplicationStyles = {
     },
     container: {
       flex: 1,
-      paddingTop: Metrics.baseMargin
+      paddingTop: Metrics.baseMargin,
     },
     section: {
       margin: Metrics.section,
@@ -34,13 +36,13 @@ const ApplicationStyles = {
       borderBottomWidth: 1
     },
     sectionText: {
-      color: Colors.snow,
+      color: Colors.charcoal,
       marginVertical: Metrics.smallMargin,
       textAlign: 'center',
       fontWeight: 'bold'
     },
     subtitle: {
-      color: Colors.snow,
+      color: Colors.charcoal,
       padding: Metrics.smallMargin,
       marginBottom: Metrics.smallMargin,
       marginHorizontal: Metrics.smallMargin

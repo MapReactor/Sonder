@@ -36,9 +36,14 @@ class DrawerContent extends Component {
     NavigationActions.usageExamples()
   }
 
-  handlePressMapView = () => {
+  handlePressCompassView = () => {
     this.toggleDrawer()
-    NavigationActions.mapviewExample()
+    NavigationActions.compassView()
+  }
+
+  handlePressEnRouteView = () => {
+    this.toggleDrawer()
+    NavigationActions.enRouteView()
   }
 
   handlePressLogin = () => {
@@ -68,8 +73,9 @@ class DrawerContent extends Component {
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
-        <DrawerButton text='Component Examples' onPress={this.handlePressComponents} />
-        <DrawerButton text='Mapview' onPress={this.handlePressMapView} />
+        <DrawerButton text='Compass View' onPress={this.handlePressCompassView} />
+        <DrawerButton text='enRoute View' onPress={this.handlePressEnRouteView} />
+        <DrawerButton text='*Component Examples' onPress={this.handlePressComponents} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )

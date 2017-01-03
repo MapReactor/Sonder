@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import MapView from 'react-native-maps'
 import { calculateRegion } from '../Lib/MapHelpers'
 import MapCallout from '../Components/MapCallout'
-import Styles from './Styles/MapviewExampleStyle'
+import Styles from './Styles/MapViewStyle'
 
 /* ***********************************************************
 * IMPORTANT!!! Before you get started, if you are going to support Android,
@@ -16,7 +16,7 @@ import Styles from './Styles/MapviewExampleStyle'
 * https://console.developers.google.com/apis/api/maps_android_backend/
 *************************************************************/
 
-class MapviewExample extends React.Component {
+class MapViewExample extends React.Component {
   /* ***********************************************************
   * This example is only intended to get you started with the basics.
   * There are TONS of options available from traffic to buildings to indoors to compass and more!
@@ -120,4 +120,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps)(MapviewExample)
+export default connect(mapStateToProps)(MapViewExample)
