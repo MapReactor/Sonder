@@ -3,8 +3,8 @@ const User = require('./models/user.js');
 const Users = require('./models/users.js');
 const Location = require('./models/location.js');
 const Locations = require('./models/locations.js');
-const Friend = require('./models/friend.js');
-const Friends = require('./models/friends.js');
+//const Friend = require('./models/friend.js');
+//const Friends = require('./models/friends.js');
 
 //TODO:
 // Send back userid and username but not token
@@ -15,9 +15,14 @@ exports.getUsers = function (req, res) {
 };
 
 exports.getFriends = function (req, res) {
-  console.log('getFriends');
-  res.send(db.users);
+  console.log('req.params.username:' + req.params.username);
+  new User({
+    username: req.params.username
+  }).fetch({withRelated: 'following'}).then(function(user) {
+    res.send(user);
+  });
 };
+
 exports.getHistory = function (req, res) {
   console.log('getHistory');
   res.send(db.users);
@@ -52,11 +57,15 @@ exports.addUser = function (req, res) {
 };
 
 exports.addFriend = function (req, res) {
-  Friends.create({
-    user: req.body.username,
-    friend: req.body.friendname
-  }).then(function(user) {
-    res.send(user);
+  new User({
+    username: req.body.username
+  }).fetch().then(function(user) {
+    new User({
+      username: req.body.friendname
+    }).fetch().then(function(friend) {
+      user.following().attach(friend);
+      res.send(user);
+    });
   });
 };
 exports.updateLocation = function (req, res) {
