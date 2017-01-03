@@ -25,6 +25,59 @@ import FixtureApi from '../Services/FixtureApi'
 * Also, you'll need to enable Google Maps Android API for your project:
 * https://console.developers.google.com/apis/api/maps_android_backend/
 *************************************************************/
+class Neighborhoods extends React.Component {
+  constructor (props) {
+    super(props);
+  }
+  shouldComponentUpdate() {
+    return false;
+  }
+  render() {
+    // slice to first MultiPolygon for debug purposes:
+    const features = this.props.boundaries.features;
+    const hoods = features.reduce((hoods, feature) => {
+      // Check for polyline vs. non-polyline
+      // If multiline, map each and add extra square braces
+      const shapeType = feature.geometry.type;
+      const hoodName = feature.properties.label;
+      if (shapeType === 'Polygon') {
+        const coordSet = feature.geometry.coordinates[0];
+        const latLngs = coordSet.map((coords) => ({
+          longitude: coords[0],
+          latitude: coords[1]
+        }));
+        hoods.push({ name: hoodName, coords: latLngs});
+      } else if (shapeType === 'MultiPolygon') {
+        const multiCoordSet = feature.geometry.coordinates;
+        multiCoordSet.forEach(coordSet => {
+          // MultiPolygon adds an extra layer of depth, so get rid of it
+          coordSet = coordSet[0];
+          // alert(coordSet);
+          const latLngs = coordSet.map((coords) => ({
+            longitude: coords[0],
+            latitude: coords[1]
+          }));
+          hoods.push({ name: hoodName, coords: latLngs});
+        });
+      }
+      return hoods;
+    },[]);
+    // alert(JSON.stringify(hoods));
+    return (
+      <View>
+        {hoods.map((hoodPoly, index) => (
+          <MapView.Polygon
+            key={index}
+            coordinates={hoodPoly.coords}
+            strokeColor="#F00"
+            fillColor={binduRGB(hoodPoly.name,0.5)}
+            strokeWidth={0}
+          />
+        ))}
+      </View>
+    );
+  }
+}
 
 class MapviewExample extends React.Component {
   /* ***********************************************************
@@ -66,24 +119,6 @@ class MapviewExample extends React.Component {
     this.locations = locations
   }
 
-  mapNeighborhoods() {
-    const coords = this.state.neighborhoods.features[12].geometry.coordinates[2][0].map(coords => {
-      return { 
-        longitude: coords[0],
-        latitude: coords[1]
-      }
-    });
-    return (
-      <MapView.Polygon
-        key="12312"
-        coordinates={coords}
-        strokeColor="#F00"
-        fillColor="rgba(0,0,255,0.5)"
-        strokeWidth={1}
-      />
-    );
-  }
-
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(
       (position) => { 
@@ -91,7 +126,7 @@ class MapviewExample extends React.Component {
         // alert(JSON.stringify(this.state.region));
         this.setState({initialPosition: position});
       },
-      (error) => alert(JSON.stringify(error))
+      (error) => null // alert(JSON.stringify(error))
       );
 
     this.watchID = navigator.geolocation.watchPosition((position) => {
@@ -200,6 +235,10 @@ class MapviewExample extends React.Component {
               strokeWidth={1}
             /> : 
             null }
+          { this.state.compassLine ? 
+            <Neighborhoods boundaries={this.state.neighborhoods} /> :
+            null }
+
             {/*this.mapNeighborhoods()*/}
         </MapView>
         <View style={Styles.buttonContainer}>
@@ -238,9 +277,21 @@ const getPrettyBearing = (heading) => {
  return primaryCardinality + angle + degreeChar + secondaryCardinality;
 };
 
-const renderBoundaries = (geojson) => {
+const seededRandom = (seed) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
 
-}
+const binduRGB = (text, alpha) => {
+  // sums the ascii values of each character in the stat to use as seed
+  let seed = text.split('').reduce( function(sum,item,i) { return sum + item.charCodeAt()*i+2 },0);
+  const color = {
+    r: parseInt(seededRandom(seed)*100+50),
+    g: parseInt(seededRandom(++seed)*100+50),
+    b: parseInt(seededRandom(++seed)*100+100)
+  };
+  return 'rgba('+color.r+','+color.g+','+color.b+','+alpha+')';
+};
 
 // END: function dump
 
