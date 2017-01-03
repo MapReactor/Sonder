@@ -13,6 +13,7 @@ var knex = require('knex')({
 
 
 var db = require('bookshelf')(knex);
+db.plugin('registry');
 
 db.knex.schema.hasTable('users').then( function(exists) {
   if (!exists) {
@@ -22,12 +23,12 @@ db.knex.schema.hasTable('users').then( function(exists) {
       table.string('token', 255);
       table.unique('username');
     }).then(function (table) {
-      db.knex.schema.hasTable('friendlist').then( function(exists) {
+      db.knex.schema.hasTable('users_users').then( function(exists) {
         if (!exists) {
-          db.knex.schema.createTable('friendlist', function (table) {
+          db.knex.schema.createTable('users_users', function (table) {
             table.increments('id').primary();
             table.integer('user_id').references('id').inTable('users');
-            table.integer('friend_id').references('id').inTable('users');
+            table.integer('follower_id').references('id').inTable('users');
             //table.foreign('user_id').references('id').inTable('users');
             //table.foreign('friend_id').references('id').inTable('users');
           }).then(function (table) {
