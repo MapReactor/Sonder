@@ -2,7 +2,7 @@ const db = require('./db');
 const redis = require('./redis');
 const User = require('./models/user.js');
 const Users = require('./models/users.js');
-const Location = require('./models/location.js'); 
+const Location = require('./models/location.js');
 const Locations = require('./models/locations.js');
 
 //TODO:
