@@ -18,15 +18,15 @@ class NavigationDrawer extends Component {
     return (
       <Drawer
         ref='navigation'
-        type='displace'
+        type='overlay'
         open={state.open}
         onOpen={() => NavigationActions.refresh({key: state.key, open: true})}
         onClose={() => NavigationActions.refresh({key: state.key, open: false})}
         content={<DrawerContent />}
         styles={Styles}
         tapToClose
-        openDrawerOffset={0.2}
-        panCloseMask={0.2}
+        openDrawerOffset={0.3}
+        panCloseMask={0.3}
         negotiatePan
         tweenHandler={(ratio) => ({
           main: { opacity: Math.max(0.54, 1 - ratio) }
