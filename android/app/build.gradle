@@ -87,6 +87,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
+        multiDexEnabled true
         applicationId "com.sonder"
         minSdkVersion 18
         targetSdkVersion 22
