@@ -15,7 +15,6 @@ exports.getUsers = function (req, res) {
 };
 
 exports.getFriends = function (req, res) {
-  console.log('req.params.username:' + req.params.username);
   new User({
     username: req.params.username
   }).fetch({withRelated: 'following'}).then(function(user) {
@@ -24,12 +23,20 @@ exports.getFriends = function (req, res) {
 };
 
 exports.getHistory = function (req, res) {
-  console.log('getHistory');
-  res.send(db.users);
+  new User({
+    username: req.params.username
+  }).fetch({withRelated: 'locations'}).then(function(user) {
+    res.send(user);
+  });
 };
+
+//TODO get location is not currently returning the latest location, but rather is returning all location data. 
 exports.getLocation = function (req, res) {
-  console.log('getLocation');
-  res.send(db.users);
+  new User({
+    username: req.params.username
+  }).fetch({withRelated: 'locations'}).then(function(user) {
+    res.send(user.relations.locations);
+  });
 };
 
 //TODO:
@@ -42,18 +49,6 @@ exports.addUser = function (req, res) {
   }).then(function(user) {
     res.send(user);
   });
-  // Student.findOne({username: req.body.username, classroom: req.body.classroom }, function(err, student) {
-  //   if (err) {
-  //     res.status(500);
-  //     res.send({ error: 'Error retrieving student record' });
-  //   } else if (!student || req.body.password !== student.password ) {
-  //     res.status(401);
-  //     res.send({ error: 'Invalid username or password' });
-  //   } else {
-  //     util.createSession(req, res, student);
-  //     res.send(student);
-  //   }
-  // });
 };
 
 exports.addFriend = function (req, res) {
@@ -68,7 +63,19 @@ exports.addFriend = function (req, res) {
     });
   });
 };
+
 exports.updateLocation = function (req, res) {
-  console.log('updateLocation');
-  res.send(db.users);
+  //TODO
+  new User({
+    username: req.body.username
+  }).fetch().then(function(user) {
+    Locations.create({
+      user_id: user.id,
+      longitude: req.body.longitude,
+      latitude: req.body.latitude,
+      bearing: req.body.bearing,
+    }).then( function(location) {
+      res.send(location);
+    });
+  });
 };
