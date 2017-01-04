@@ -1,7 +1,7 @@
 module.exports = {
-  db: 'sonder',
+  database: 'sonder',
   user: 'postgres',
-  password: 'postgres',
-  port: 5432,
-  host: 'localhost'
+  //password: 'postgres',
+  port: 32769,
+  host: '192.168.99.100'
 };
