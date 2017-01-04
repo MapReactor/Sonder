@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import ReactNativeHeading from 'react-native-heading'
 import MapView from 'react-native-maps'
-import { calculateRegion } from '../Lib/MapHelpers'
+import { calculateRegion, getRegionBBox, toCoords } from '../Lib/MapHelpers'
 import MapCallout from '../Components/MapCallout'
 import Styles from './Styles/MapViewStyle'
 
@@ -35,7 +35,7 @@ class Neighborhoods extends React.Component {
   render() {
     // slice to first MultiPolygon for debug purposes:
     const features = this.props.boundaries.features;
-    const hoods = features.reduce((hoods, feature) => {
+    const hoods = features.slice(0,1).reduce((hoods, feature) => {
       // Check for polyline vs. non-polyline
       // If multiline, map each and add extra square braces
       const shapeType = feature.geometry.type;
@@ -178,6 +178,7 @@ class MapviewExample extends React.Component {
   }
 
   onRegionChange (newRegion) {
+    // alert(JSON.stringify( getRegionBBox(newRegion) ));
     /* ***********************************************************
     * STEP 4
     * If you wish to fetch new locations when the user changes the
@@ -190,6 +191,7 @@ class MapviewExample extends React.Component {
     //   sw_long: newRegion.longitude - newRegion.longitudeDelta
     // }
     // Fetch new data...
+    this.setState({ region: newRegion });
   }
 
   calloutPress (location) {
@@ -238,6 +240,16 @@ class MapviewExample extends React.Component {
           { this.state.compassLine ? 
             <Neighborhoods boundaries={this.state.neighborhoods} /> :
             null }
+
+          {/* this.state.region ? 
+            <MapView.Polygon
+              key="QWEWQEQW"
+              coordinates={toCoords(getRegionBBox(this.state.region))}
+              strokeColor="#F00"
+              fillColor={binduRGB("WAKA!",0.5)}
+              strokeWidth={1}
+            /> : 
+            null */}
 
             {/*this.mapNeighborhoods()*/}
         </MapView>

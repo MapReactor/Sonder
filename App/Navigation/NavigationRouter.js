@@ -25,8 +25,8 @@ class NavigationRouter extends Component {
       <Router>
         <Scene key='drawer' component={NavigationDrawer} open={false}>
           <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
-            <Scene initial key='welcomeView' component={WelcomeView} title='Welcome!' />
-            <Scene key='compassView' component={CompassView} title='Compass View' />
+            <Scene key='welcomeView' component={WelcomeView} title='Welcome!' />
+            <Scene initial key='compassView' component={CompassView} title='Compass View' />
             <Scene key='enRouteView' component={EnRouteView} title='En Route View' />
             <Scene key='componentExamples' component={AllComponentsScreen} title='Components' />
             <Scene key='login' component={LoginScreen} title='Login' hideNavBar />
