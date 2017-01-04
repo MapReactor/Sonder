@@ -31,7 +31,10 @@ export const getRegionBBox = (region: Object) => {
 export const toCoords = (geojson: Array<Array>) => geojson.map((tuple) => ({
     longitude: tuple[0], 
     latitude: tuple[1]
-  }));
+  })
+);
+
+export const toTuples = (coords: Array<Object>) => coords.map((coords) => [coords.longitude, coords.latitude])
 
 export const calculateRegion = (locations: Array<Object>, options: Object) => {
   const latPadding = options && options.latPadding ? options.latPadding : 0.1

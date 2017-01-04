@@ -8,13 +8,16 @@ import {
 } from 'react-native'
 import ReactNativeHeading from 'react-native-heading'
 import MapView from 'react-native-maps'
-import { calculateRegion, getRegionBBox, toCoords } from '../Lib/MapHelpers'
+import { calculateRegion, getRegionBBox, toCoords, toTuples } from '../Lib/MapHelpers'
 import MapCallout from '../Components/MapCallout'
 import Styles from './Styles/MapViewStyle'
 
 // Neighborhood data is loaded from a fixture, to anticipate Ignite's API/fixtures conventions
 // Note: ignoring redux-saga structure for now, so this eventually shouldn't go in here!
 import FixtureApi from '../Services/FixtureApi'
+
+import { lineString } from '@turf/helpers'
+import intersect from '@turf/intersect'
 
 /* ***********************************************************
 * IMPORTANT!!! Before you get started, if you are going to support Android,
@@ -35,7 +38,7 @@ class Neighborhoods extends React.Component {
   render() {
     // slice to first MultiPolygon for debug purposes:
     const features = this.props.boundaries.features;
-    const hoods = features.slice(0,1).reduce((hoods, feature) => {
+    const hoods = features.filter(feature => feature.properties.label === 'Dogpatch').reduce((hoods, feature) => {
       // Check for polyline vs. non-polyline
       // If multiline, map each and add extra square braces
       const shapeType = feature.geometry.type;
@@ -218,6 +221,8 @@ class MapviewExample extends React.Component {
   }
 
   render () {
+    const dogPatchPoly = this.state.neighborhoods.features.filter(feature => feature.properties.label === 'Dogpatch')[0].geometry;
+    const compassLineGeo = this.state.compassLine ? lineString(toTuples(this.state.compassLine)).geometry : null;
     return (
       <View style={Styles.container}>
         <MapView
@@ -255,6 +260,13 @@ class MapviewExample extends React.Component {
         </MapView>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
+            <Text>{
+              (compassLineGeo && dogPatchPoly) ? 
+                JSON.stringify(intersect(dogPatchPoly, compassLineGeo)) : "Just a sec..." }</Text>
+          </View>
+        </View>
+        <View style={Styles.buttonContainer}>
+          <View style={Styles.bubble}>
             <Text>{this.state.headingIsSupported ? 
                     getPrettyBearing(this.state.heading)
                     : "Heading unsupported." }</Text>
@@ -262,7 +274,11 @@ class MapviewExample extends React.Component {
         </View>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
-            <Text>{JSON.stringify(this.state.debug)}</Text>
+            <Text>{ 
+                compassLineGeo ? 
+                  JSON.stringify(compassLineGeo) :
+                  'Waiting for compass line...'
+            }</Text>
           </View>
         </View>
       </View>
