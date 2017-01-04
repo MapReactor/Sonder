@@ -1,6 +1,5 @@
 var db = require('../db');
 var Bookshelf = require('bookshelf');
-//var Friend = require('./friend.js');
 var Location = require('./location.js');
 
 var User = db.Model.extend({
@@ -17,4 +16,4 @@ var User = db.Model.extend({
   },
 });
 
-module.exports = db.model('User', User); //Bookshelf.model('User', User);
+module.exports = db.model('User', User);
