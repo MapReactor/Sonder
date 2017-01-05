@@ -34,6 +34,8 @@ export const toCoords = (geojson: Array<Array>) => geojson.map((tuple) => ({
   })
 );
 
+export const toTuple = (coord: Object) => [coord.longitude, coord.latitude];
+
 export const toTuples = (coords: Array<Object>) => coords.map((coords) => [coords.longitude, coords.latitude])
 
 export const calculateRegion = (locations: Array<Object>, options: Object) => {

@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import ReactNativeHeading from 'react-native-heading'
 import MapView from 'react-native-maps'
-import { calculateRegion, getRegionBBox, toCoords, toTuples } from '../Lib/MapHelpers'
+import { calculateRegion, getRegionBBox, toCoords, toTuples, toTuple } from '../Lib/MapHelpers'
 import MapCallout from '../Components/MapCallout'
 import Styles from './Styles/MapViewStyle'
 
@@ -16,8 +16,9 @@ import Styles from './Styles/MapViewStyle'
 // Note: ignoring redux-saga structure for now, so this eventually shouldn't go in here!
 import FixtureApi from '../Services/FixtureApi'
 
-import { lineString } from '@turf/helpers'
+import { lineString, point, polygon } from '@turf/helpers'
 import intersect from '@turf/intersect'
+import inside from '@turf/inside'
 
 /* ***********************************************************
 * IMPORTANT!!! Before you get started, if you are going to support Android,
@@ -29,16 +30,43 @@ import intersect from '@turf/intersect'
 * https://console.developers.google.com/apis/api/maps_android_backend/
 *************************************************************/
 class Neighborhoods extends React.Component {
+  // Note: this only renders when the compass line exists
+  // lastPosition also exists
   constructor (props) {
     super(props);
+    this.features = this.props.boundaries.features;
+    // WARNING: this will *definitely* need to be done asynchronously!
+    // this.filteredFeatures = this.features.filter(feature => feature.properties.label === 'Mission District');
+    // alert(JSON.stringify(this.props.lastPosition))
+    this.filteredFeatures = this.features.filter(feature => {
+      const curPosGeo = point(toTuple(this.props.lastPosition.coords)).geometry;
+      return inside(curPosGeo, feature); 
+    });
   }
-  shouldComponentUpdate() {
-    return false;
+
+  componentWillMount() {
+    this.hoods = this.mapifyFeatures(this.filteredFeatures);
+    const kludgePoly = this.filteredFeatures[0].geometry;
+    this.props.setKludge(kludgePoly); 
   }
-  render() {
-    // slice to first MultiPolygon for debug purposes:
-    const features = this.props.boundaries.features;
-    const hoods = features.filter(feature => feature.properties.label === 'Dogpatch').reduce((hoods, feature) => {
+
+  componentDidMount() { 
+
+    // alert(JSON.stringify(this.props.lastPosition));
+
+    
+
+    // alert(JSON.stringify(this.props.kludge));
+    // const curPosGeo = point(toTuple(this.props.lastPosition.coords));
+    // alert(JSON.stringify(curPosGeo));
+    // const kludgePoly = this.filteredFeatures[0].geometry;
+    // alert(JSON.stringify(kludgePoly));
+    // const featureGeo = polygon(this.props.lastPosition);
+
+  }
+
+  mapifyFeatures(features) {
+    return features.reduce((hoods, feature) => {
       // Check for polyline vs. non-polyline
       // If multiline, map each and add extra square braces
       const shapeType = feature.geometry.type;
@@ -64,7 +92,15 @@ class Neighborhoods extends React.Component {
         });
       }
       return hoods;
-    },[]);
+    },[]); 
+  }
+
+  shouldComponentUpdate(nextProps) {
+    return (this.props.lastPosition !== nextProps.lastPosition);
+  }
+  render() {
+    const features = this.features;
+    const hoods = this.hoods;
     // alert(JSON.stringify(hoods));
     return (
       <View>
@@ -120,6 +156,12 @@ class MapviewExample extends React.Component {
     this.onRegionChange = this.onRegionChange.bind(this)
     this.watchID = null
     this.locations = locations
+  }
+
+  setKludge(kludge) {
+    this.setState({
+      kludge: kludge
+    });
   }
 
   componentDidMount() {
@@ -221,7 +263,6 @@ class MapviewExample extends React.Component {
   }
 
   render () {
-    const dogPatchPoly = this.state.neighborhoods.features.filter(feature => feature.properties.label === 'Dogpatch')[0].geometry;
     const compassLineGeo = this.state.compassLine ? lineString(toTuples(this.state.compassLine)).geometry : null;
     return (
       <View style={Styles.container}>
@@ -243,7 +284,11 @@ class MapviewExample extends React.Component {
             /> : 
             null }
           { this.state.compassLine ? 
-            <Neighborhoods boundaries={this.state.neighborhoods} /> :
+            <Neighborhoods 
+              setKludge={this.setKludge.bind(this)} 
+              boundaries={this.state.neighborhoods} 
+              lastPosition={this.state.lastPosition}
+            /> :
             null }
 
           {/* this.state.region ? 
@@ -261,8 +306,8 @@ class MapviewExample extends React.Component {
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
             <Text>{
-              (compassLineGeo && dogPatchPoly) ? 
-                JSON.stringify(intersect(dogPatchPoly, compassLineGeo)) : "Just a sec..." }</Text>
+              (compassLineGeo && this.state.kludge) ? 
+                JSON.stringify(intersect(this.state.kludge, compassLineGeo)) : "Just a sec..." }</Text>
           </View>
         </View>
         <View style={Styles.buttonContainer}>
