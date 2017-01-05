@@ -14,6 +14,7 @@ import MapViewExample from '../Containers/MapViewExample'
 import CompassView from '../Containers/CompassView'
 import EnRouteView from '../Containers/EnRouteView'
 import WelcomeView from '../Containers/WelcomeView'
+import StorageTestView from '../Containers/StorageTestView'
 
 /* **************************
 * Documentation: https://github.com/aksonov/react-native-router-flux
@@ -29,6 +30,7 @@ class NavigationRouter extends Component {
             <Scene key='compassView' component={CompassView} title='Compass View' />
             <Scene key='enRouteView' component={EnRouteView} title='En Route View' />
             <Scene key='componentExamples' component={AllComponentsScreen} title='Components' />
+            <Scene key='storageTestView' component={StorageTestView} title='Storage Test' />
             <Scene key='login' component={LoginScreen} title='Login' hideNavBar />
           </Scene>
         </Scene>
