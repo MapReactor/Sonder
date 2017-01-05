@@ -20,6 +20,10 @@ import { lineString, point, polygon } from '@turf/helpers'
 import intersect from '@turf/intersect'
 import inside from '@turf/inside'
 import Offset from 'polygon-offset'
+import turf from '@turf/turf'
+
+import { clone } from 'cloneextend'
+
 const offset = new Offset()
 
 /* ***********************************************************
@@ -40,21 +44,34 @@ class Neighborhoods extends React.Component {
     // WARNING: this will *definitely* need to be done asynchronously!
     // this.filteredFeatures = this.features.filter(feature => feature.properties.label === 'Mission District');
     // alert(JSON.stringify(this.props.lastPosition))
-    this.filteredFeatures = this.features.filter(feature => {
+    this.currentHood = this.features.filter(feature => {
       const curPosGeo = point(toTuple(this.props.lastPosition.coords)).geometry;
       return inside(curPosGeo, feature); 
     });
 
-    this.filteredFeatures.forEach(feature => {
+    // This does an in-place grow on currentHood
+    this.bloatedHood = clone(this.currentHood);
+
+    this.bloatedHood.forEach(feature => {
       const coords = feature.geometry.coordinates
       // NOTE: ONLY USE THIS IF NORMAL POINTS DON'T WORK!!!
-      feature.geometry.coordinates = offset.data(coords).margin(0.0004);
+      feature.geometry.coordinates = offset.data(coords).margin(0.0003); //offset the polygon
+      feature.geometry = turf.simplify(feature,0.00005,false).geometry;  //simplify the offset poly
     });
+
+    this.adjacentHoods = this.features.filter(feature => {
+      const curHoodFeature = this.currentHood[0];
+      return intersect(curHoodFeature,feature);
+
+    });
+
+    this.filteredFeatures = this.adjacentHoods;
   }
 
   componentWillMount() {
     this.hoods = this.mapifyFeatures(this.filteredFeatures);
     const kludgePoly = this.filteredFeatures[0].geometry;
+    // Note: kludge poly is simply the first filtered polygon, for debugging initial intersections
     this.props.setKludge(kludgePoly); 
   }
 
