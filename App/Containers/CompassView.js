@@ -19,6 +19,8 @@ import FixtureApi from '../Services/FixtureApi'
 import { lineString, point, polygon } from '@turf/helpers'
 import intersect from '@turf/intersect'
 import inside from '@turf/inside'
+import Offset from 'polygon-offset'
+const offset = new Offset()
 
 /* ***********************************************************
 * IMPORTANT!!! Before you get started, if you are going to support Android,
@@ -41,6 +43,12 @@ class Neighborhoods extends React.Component {
     this.filteredFeatures = this.features.filter(feature => {
       const curPosGeo = point(toTuple(this.props.lastPosition.coords)).geometry;
       return inside(curPosGeo, feature); 
+    });
+
+    this.filteredFeatures.forEach(feature => {
+      const coords = feature.geometry.coordinates
+      // NOTE: ONLY USE THIS IF NORMAL POINTS DON'T WORK!!!
+      feature.geometry.coordinates = offset.data(coords).margin(0.0004);
     });
   }
 
