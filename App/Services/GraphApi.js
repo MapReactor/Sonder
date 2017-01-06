@@ -18,12 +18,16 @@ const getUserInfo = (cb) => {
         id: result.id,
       }
 
-      const friendsData = result.friends.data;
-      const friendsList = friendsData.map((friend) => {
+      const friendsRes = result.friends.data;
+      const friendList = friendsRes.map((friend) => {
         return friend.id;
       });
+      const friendsData = {
+        id: result.id,
+        friendlist: friendList,
+      }
 
-      cb(userInfo, friendsList);
+      cb(userInfo, friendsData);
     }
   }
 
