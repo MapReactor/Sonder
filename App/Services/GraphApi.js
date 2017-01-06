@@ -17,7 +17,13 @@ const getUserInfo = (cb) => {
         displayname: result.name,
         id: result.id,
       }
-      cb(userInfo);
+
+      const friendsData = result.friends.data;
+      const friendsList = friendsData.map((friend) => {
+        return friend.id;
+      });
+
+      cb(userInfo, friendsList);
     }
   }
 
