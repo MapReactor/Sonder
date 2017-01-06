@@ -10,31 +10,35 @@ import {
 } from 'react-native'
 import styles from './Styles/WelcomeViewStyle'
 import { Images } from '../Themes'
+import UsersApi from '../Services/UsersApi'
 
 // create custom facebook login
 const FBSDK = require('react-native-fbsdk');
 const {
   LoginButton,
 } = FBSDK;
-      
+
 var Login = React.createClass({
   render: function() {
     return (
       <View>
         <LoginButton
-          publishPermissions={["publish_actions"]}
+          readPermissions={["public_profile","email","user_friends"]}
+          publishPermissions={[]}
           onLoginFinished={
             (error, result) => {
               if (error) {
-                alert("Login failed with error: " + result.error);
+                alert("login has error: " + result.error);
               } else if (result.isCancelled) {
-                alert("Login was cancelled");
+                alert("login is cancelled.");
               } else {
-                alert("Login was successful with permissions: " + result.grantedPermissions)
+                // posts user info to db
+                UsersApi.addUser();
               }
             }
           }
-          onLogoutFinished={() => alert("User logged out")}/>
+          // onLogoutFinished={() => alert("logout.")}
+        />
       </View>
     );
   }
