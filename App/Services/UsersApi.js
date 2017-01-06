@@ -3,6 +3,7 @@ const {
   AccessToken,
 } = FBSDK;
 import GraphApi from '../Services/GraphApi'
+import apisauce from 'apisauce'
 
 export default {
 
@@ -14,23 +15,17 @@ export default {
         GraphApi.getUserInfo(function(userInfo) {
           console.log('userInfo', userInfo);
 
-          fetch('/api/user', {
-            method: 'POST',
+          const api = apisauce.create({
+            baseURL: 'http://127.0.0.1:3000',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userInfo),
+              'Accept': 'text/plain',
+            }
           })
-          .then((res) => res.json())          
-          .then((resData) => {
-            console.log(JSON.stringify('RESPONSE DATA', resData.body));
-            alert(JSON.strigify('RESPONSE DATA', resData.body));
-          })
-          .catch((err) => {
-            console.log('error on adding user', err);
-          })
-          .done();
+          api
+            .post('/api/users', userInfo)
+            .then((res) => {
+              console.log('added user', JSON.stringify(res));
+            });         
 
         });
       }
