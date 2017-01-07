@@ -51,6 +51,16 @@ class DrawerContent extends Component {
     NavigationActions.storageTestView()
   }
 
+  handlePressWelcomeView = () => {
+    this.toggleDrawer()
+    NavigationActions.welcomeView()
+  }
+
+  handlePressFriendsView = () => {
+    this.toggleDrawer()
+    NavigationActions.friendsView()
+  }
+
   handlePressLogin = () => {
     this.toggleDrawer()
     NavigationActions.login()
@@ -82,6 +92,8 @@ class DrawerContent extends Component {
         <DrawerButton text='enRoute View' onPress={this.handlePressEnRouteView} />
         <DrawerButton text='*Component Examples' onPress={this.handlePressComponents} />
         <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
+        <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
+        <DrawerButton text='Welcome View' onPress={this.handlePressWelcomeView} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )

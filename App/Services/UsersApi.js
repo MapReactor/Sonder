@@ -47,7 +47,7 @@ export default {
     });
   },
 
-  getFriends: () => {
+  getFriends: (cb) => {
     const api = apisauce.create({
       baseURL: 'http://127.0.0.1:3000',
       headers: {
@@ -58,6 +58,7 @@ export default {
     .get('/api/friends')
     .then((res) => {
       console.log('fetched friends', JSON.strinify(res));
+      cb(res);
     })
     .catch((err) => {
       if (err) {

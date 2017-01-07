@@ -12,6 +12,10 @@ class FriendsView extends React.Component {
   constructor (props) {
     super(props)
 
+    // UsersApi.getFriends(function() {
+      
+    // })
+
     const locations = [{ 
       title: 'Paige Vogenthaler', 
       image: require('./../Images/pv.png'),
@@ -72,7 +76,7 @@ class FriendsView extends React.Component {
     * Configure what will happen (if anything) when the user
     * presses your callout.
     *************************************************************/
-    // console.tron.log(location)
+    console.tron.log(location)
   }
 
   renderMapMarkers (location) {
