@@ -1,10 +1,11 @@
-import LocationActions from '../Redux/LocationRedux'
 
-module.exports = function() {
-  console.log('configuring interval');
-  this.setInterval(()=>{
-      console.log("In Interval");
-      //LocationActions.locationRequest("ElmerFudd");
-      console.log("LocationAction Called");
-  }, 5000);
-};
+const getCurrentDeviceLocation = function () {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ 'error': null, 'position': position }) ,
+      (error) => resolve({ 'error': error, 'position': null })
+    );
+  });
+}
+
+module.exports.getCurrentDeviceLocation = getCurrentDeviceLocation;

@@ -1,6 +1,7 @@
 import { call, put } from 'redux-saga/effects'
 import { path } from 'ramda'
 import LocationActions from '../Redux/LocationRedux'
+import LocationService from '../Services/LocationService'
 import convertFromKelvin from '../Transforms/ConvertFromKelvin'
 
 const getLocation = function * (api, action) {
@@ -18,6 +19,16 @@ const getLocation = function * (api, action) {
 
 const updateLocation = function * (api, action) {
   const { location } = action
+  const currentLocation = yield call(LocationService.getCurrentDeviceLocation);
+  if (currentLocation.position.coords) {
+    //console.tron.log('currentLocation.position:'+JSON.stringify(currentLocation.position));
+    location.latitude = currentLocation.position.coords.latitude;
+    location.longitude = currentLocation.position.coords.longitude;
+    location.bearing = currentLocation.position.coords.heading;
+  }
+
+  console.tron.log('location:'+JSON.stringify(location));
+
   const response = yield call(api.updateLocation, location)
   // success?
   if (response.ok) {
