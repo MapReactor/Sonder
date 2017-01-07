@@ -47,7 +47,7 @@ export default {
     });
   },
 
-  getFriends: (friendsData) => {
+  getFriends: () => {
     const api = apisauce.create({
       baseURL: 'http://127.0.0.1:3000',
       headers: {
