@@ -32,8 +32,8 @@ var Login = React.createClass({
               } else if (result.isCancelled) {
                 alert("login is cancelled.");
               } else {
-                // posts user info to db
-                UsersApi.addUser();
+                // posts user info to db & when complete, add friends to db
+                UsersApi.addUser(UsersApi.addFriends);
               }
             }
           }
