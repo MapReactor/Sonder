@@ -11,6 +11,7 @@ class FriendsView extends React.Component {
 
   constructor (props) {
     super(props)
+<<<<<<< HEAD
 
     // get fb id from local storage
     // const fbId = 'ENTER FBID';
@@ -64,6 +65,16 @@ class FriendsView extends React.Component {
     ]
 
     // calculate what the map shows, update to draw map based on users location
+=======
+
+    const locations = [{ 
+      title: 'Paige Vogenthaler', 
+      image: require('./../Images/pv.png'),
+      latitude: 41.8781, 
+      longitude: -87.6298,
+    }];
+
+>>>>>>> Add prof picture to db
     const region = calculateRegion(locations, { latPadding: 0.05, longPadding: 0.05 })
     this.state = {
       region,
@@ -122,6 +133,13 @@ class FriendsView extends React.Component {
   }
 
   renderMapMarkers (location) {
+<<<<<<< HEAD
+=======
+    /* ***********************************************************
+    * Customize the appearance and location of the map marker.
+    * Customize the callout in ../Components/MapCallout.js
+    *************************************************************/
+>>>>>>> Add prof picture to db
 
     return (
       <MapView.Marker key={location.title} image={location.image} coordinate={{latitude: location.latitude, longitude: location.longitude}}>
