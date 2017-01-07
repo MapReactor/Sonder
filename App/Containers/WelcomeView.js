@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { 
+import {
   View,
   Text,
   StyleSheet,
