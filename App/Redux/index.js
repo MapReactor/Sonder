@@ -8,6 +8,7 @@ export default () => {
   /* ------------- Assemble The Reducers ------------- */
   const rootReducer = combineReducers({
     temperature: require('./TemperatureRedux').reducer,
+    location: require('./LocationRedux').reducer,
     login: require('./LoginRedux').reducer,
     search: require('./SearchRedux').reducer,
     storageTest: require('./StorageTestRedux').reducer,

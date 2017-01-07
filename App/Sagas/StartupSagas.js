@@ -1,5 +1,6 @@
 import { put, select } from 'redux-saga/effects'
 import TemperatureActions from '../Redux/TemperatureRedux'
+import LocationActions from '../Redux/LocationRedux'
 import { is } from 'ramda'
 
 // exported to make available for tests
@@ -37,4 +38,7 @@ export function * startup (action) {
   if (!is(Number, temp)) {
     yield put(TemperatureActions.temperatureRequest('San Francisco'))
   }
+
+  yield put(LocationActions.locationRequest('ElmerFudd'))
+  yield put(LocationActions.locationUpdate({id: 'ElmerFudd', latitude: 777, longitude: 666, bearing: 555}))
 }
