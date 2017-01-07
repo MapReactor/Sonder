@@ -12,7 +12,7 @@ export default {
         headers: {
           'Accept': 'text/plain',
         }
-      })
+      });
       api
       .post('/api/users', userInfo)
       .then((res) => {
@@ -34,7 +34,7 @@ export default {
       headers: {
         'Accept': 'text/plain',
       }
-    })
+    });
     api
     .post('/api/friends', friendsData)
     .then((res) => {
@@ -45,6 +45,25 @@ export default {
         console.log('error on adding Friends', err);
       }
     });
-  }
+  },
+
+  getFriends: (friendsData) => {
+    const api = apisauce.create({
+      baseURL: 'http://127.0.0.1:3000',
+      headers: {
+        'Accept': 'text/plain'
+      }
+    });
+    api
+    .get('/api/friends')
+    .then((res) => {
+      console.log('fetched friends', JSON.strinify(res));
+    })
+    .catch((err) => {
+      if (err) {
+        console.log('error on fetching friends', err);
+      }
+    })
+  },
 
 }
