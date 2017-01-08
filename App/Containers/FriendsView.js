@@ -12,17 +12,58 @@ class FriendsView extends React.Component {
   constructor (props) {
     super(props)
 
-    // UsersApi.getFriends(function() {
-      
-    // })
+    // get fb id from local storage
+    // const fbId = 'ENTER FBID';
+    // let locations = [];
+    // let locationsObj = {};
 
-    const locations = [{ 
-      title: 'Paige Vogenthaler', 
-      image: require('./../Images/pv.png'),
-      latitude: 41.8781, 
-      longitude: -87.6298,
-    }];
+    // get friends info & locations
+    // UsersApi.getFriends(fbId, function(friendsData) {
+    //   console.log(friendsData);
 
+    //   UsersApi.getLocations(fbId, function(friendsLocations) {
+    //     console.log(friendsLocations);
+
+        // for each friendData in frinedsData
+          // locationsObj[friendData[fb_id]] = {
+            // title: friendData[displayname]
+            // image: require('./../Images/friendmarker.png')
+            // latitude: null
+            // longitude: null
+          // };
+        // 
+
+        // for each friendLocation in friendsLocations
+          // let id = friendLocation[fb_id];
+          // locationsObj[id].latitude = friendLocation[lat]
+          // locationsObj[id].longitude = friendLocation[lon]
+        //
+
+        // for each in locationsObj
+          // push to locations
+        //
+
+    //   });
+    // });
+
+    // then... (needs to be in callback)
+
+
+      // set markers location and data of each friend
+      // const locations = [{ 
+      //   title: 'friends name', /*add */
+      //   image: require('./../Images/friendmarker.png'),
+      //   latitude: 41.8781, 
+      //   longitude: -87.6298,
+      // }];
+
+    // this is just test data
+    const locations = [
+      { title: 'Location A', /*image: require('./../Images/friendmarker.png'),*/ latitude: 37.78825, longitude: -122.4324 },
+      { title: 'Location B', image: require('./../Images/friendmarker.png'), latitude: 37.75825, longitude: -122.4624 }
+    ]
+
+    // calculate what the map shows, update to draw map based on users location
     const region = calculateRegion(locations, { latPadding: 0.05, longPadding: 0.05 })
     this.state = {
       region,
@@ -31,19 +72,20 @@ class FriendsView extends React.Component {
     }
 
     // moving marker
-    setInterval(() => {
-      this.setState({ 
-        locations: [{
-          title: this.state.locations[0].title,
-          image: this.state.locations[0].image,
-          latitude: this.state.locations[0].latitude + 0.0001,
-          longitude: this.state.locations[0].longitude,
-        }] 
-      })
-    }, 1000);
+    // setInterval(() => {
+    //   this.setState({ 
+    //     locations: [{
+    //       title: this.state.locations[0].title,
+    //       image: this.state.locations[0].image,
+    //       latitude: this.state.locations[0].latitude + 0.0001,
+    //       longitude: this.state.locations[0].longitude,
+    //     }] 
+    //   })
+    // }, 1000);
 
     this.renderMapMarkers = this.renderMapMarkers.bind(this)
     this.onRegionChange = this.onRegionChange.bind(this)
+
   }
 
   componentWillReceiveProps (newProps) {
@@ -80,10 +122,6 @@ class FriendsView extends React.Component {
   }
 
   renderMapMarkers (location) {
-    /* ***********************************************************
-    * Customize the appearance and location of the map marker.
-    * Customize the callout in ../Components/MapCallout.js
-    *************************************************************/
 
     return (
       <MapView.Marker key={location.title} image={location.image} coordinate={{latitude: location.latitude, longitude: location.longitude}}>
@@ -110,6 +148,7 @@ class FriendsView extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
+    // ...redux state to props here
   }
 }
 

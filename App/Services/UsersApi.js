@@ -5,7 +5,7 @@ import apisauce from 'apisauce'
 
 export default {
 
-  addUser: (cb) => {
+  addUser: () => {
     GraphApi.getUserInfo(function(userInfo, friendsData) {
       const api = apisauce.create({
         baseURL: 'http://127.0.0.1:3000',
@@ -13,11 +13,13 @@ export default {
           'Accept': 'text/plain',
         }
       });
-      api
+      return api
       .post('/api/users', userInfo)
       .then((res) => {
         console.log('added user', JSON.stringify(res));
-        cb(friendsData)
+        // return cb(friendsData));
+        console.log('friendsData', friendsData);
+        return friendsData
       })
       .catch((err) => {
         if (err) {
@@ -35,10 +37,11 @@ export default {
         'Accept': 'text/plain',
       }
     });
-    api
+    return api
     .post('/api/friends', friendsData)
     .then((res) => {
       console.log('added/ updated friends', JSON.stringify(res));
+      return friendsData;
     })
     .catch((err) => {
       if (err) {
@@ -47,24 +50,44 @@ export default {
     });
   },
 
-  getFriends: (cb) => {
-    const api = apisauce.create({
-      baseURL: 'http://127.0.0.1:3000',
-      headers: {
-        'Accept': 'text/plain'
-      }
-    });
-    api
-    .get('/api/friends')
-    .then((res) => {
-      console.log('fetched friends', JSON.strinify(res));
-      cb(res);
-    })
-    .catch((err) => {
-      if (err) {
-        console.log('error on fetching friends', err);
-      }
-    })
-  },
+  // getFriends: (cb) => { // todo: add param for fb_id
+  //   const api = apisauce.create({
+  //     baseURL: 'http://127.0.0.1:3000',
+  //     headers: {
+  //       'Accept': 'text/plain'
+  //     }
+  //   });
+  //   api
+  //   .get('/api/friends/:' + /*fb_id*/)
+  //   .then((res) => {
+  //     console.log('fetched friends', JSON.strinify(res));
+  //     cb(res);
+  //   })
+  //   .catch((err) => {
+  //     if (err) {
+  //       console.log('error on fetching friends', err);
+  //     }
+  //   })
+  // },
+
+  // getLocations: (cb) => { // todo: add param for fb_id
+  //   const api = apisauce.create({
+  //     baseURL: 'http://127.0.0.1:3000',
+  //     headers: {
+  //       'Accept': 'text/plain'
+  //     }
+  //   });
+  //   api
+  //   .get('/api/locations/:' + /*fb_id*/)
+  //   .then((res) => {
+  //     console.log('fetched friends', JSON.strinify(res));
+  //     cb(res);
+  //   })
+  //   .catch((err) => {
+  //     if (err) {
+  //       console.log('error on fetching friends', err);
+  //     }
+  //   })
+  // },
 
 }
