@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import styles from './Styles/WelcomeViewStyle'
 import UserActions from '../Redux/UserRedux'
+import LocationActions from '../Redux/LocationRedux'
 import { Images } from '../Themes'
 import UsersApi from '../Services/UsersApi'
 
@@ -21,6 +22,7 @@ const {
 
 type LoginProps = {
   setUser: () => void,
+  setLocation: (Object) => void,
   user: Object
 }
 
@@ -52,10 +54,15 @@ class FBLoginView extends Component {
               } else if (result.isCancelled) {
                 alert("login is cancelled.");
               } else {
+
                 // posts user info to db & when complete, add friends to db
-                UsersApi.addUser(UsersApi.addFriends);
-                this.props.setUser({id:'1234', friends:['9','8','7','6','5']});
-                console.tron.log('ID:'+this.state.id);
+                const setUserCB = function(friendsData) {
+                  //{id:'1234', friendlist:['9','8','7','6','5']}
+                  this.props.setUser(friendsData);
+                  this.props.setLocation({id: friendsData.id});
+                }.bind(this);
+
+                UsersApi.addUser(UsersApi.addFriends, setUserCB)
               }
             }
           }
@@ -68,14 +75,14 @@ class FBLoginView extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    user_id: state.user_id,
-    friends: state.friends
+    user: state.user
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUser: (user) => dispatch(UserActions.setUser(user))
+    setUser: (user) => dispatch(UserActions.setUser(user)),
+    setLocation: (location) => dispatch(LocationActions.locationUpdate(location))
   }
 }
 

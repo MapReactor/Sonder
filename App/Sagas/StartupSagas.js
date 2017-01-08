@@ -39,6 +39,6 @@ export function * startup (action) {
     yield put(TemperatureActions.temperatureRequest('San Francisco'))
   }
 
-  yield put(LocationActions.locationRequest('ElmerFudd'))
-  yield put(LocationActions.locationUpdate({id: 'ElmerFudd', latitude: 777, longitude: 666, bearing: 555}))
+  //yield put(LocationActions.locationRequest('ElmerFudd'))
+  //yield put(LocationActions.locationUpdate({id: 'ElmerFudd', latitude: 777, longitude: 666, bearing: 555}))
 }

@@ -11,45 +11,7 @@ import {
 import styles from './Styles/WelcomeViewStyle'
 import { Images } from '../Themes'
 import UsersApi from '../Services/UsersApi'
-import GraphApi from '../Services/GraphApi'
-
-// create custom facebook login
-const FBSDK = require('react-native-fbsdk');
-const Promise = require('bluebird');
-const {
-  LoginButton,
-} = FBSDK;
-
-var Login = React.createClass({
-  render: function() {
-    return (
-      <View>
-        <LoginButton
-          readPermissions={["public_profile","email","user_friends"]}
-          publishPermissions={[]}
-          onLoginFinished={
-            (error, result) => {
-              if (error) {
-                alert("login has error: " + result.error);
-              } else if (result.isCancelled) {
-                alert("login is cancelled.");
-              } else {
-
-                const testCb = function(friendsData) {
-                  console.log('you made it to the final cb', friendsData);
-                }
-
-                // posts user info to db & when complete, add friends to db
-                UsersApi.addUser(UsersApi.addFriends, testCb)
-              }
-            }
-          }
-          // onLogoutFinished={() => alert("logout.")}
-        />
-      </View>
-    );
-  }
-});
+import Login from './FBLoginView'
 
 class WelcomeView extends Component {
   render () {

@@ -27,8 +27,6 @@ const updateLocation = function * (api, action) {
     location.bearing = currentLocation.position.coords.heading;
   }
 
-  console.tron.log('location:'+JSON.stringify(location));
-
   const response = yield call(api.updateLocation, location)
   // success?
   if (response.ok) {

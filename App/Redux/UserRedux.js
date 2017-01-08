@@ -22,7 +22,6 @@ export const INITIAL_STATE = Immutable({
 // we've had a problem logging in
 export const setUser = (state: Object, action: Object) => {
   const { user } = action
-  console.tron.log('USER:' + JSON.stringify(user));
   return state.merge({ set: true, user: user })
 }
 /* ------------- Hookup Reducers To Types ------------- */
