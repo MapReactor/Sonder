@@ -23,6 +23,7 @@ import Offset from 'polygon-offset'
 import turf from '@turf/turf'
 
 import { clone } from 'cloneextend'
+import vis from 'code42day-vis-why'
 
 const offset = new Offset()
 
@@ -72,15 +73,30 @@ class Neighborhoods extends React.Component {
       const curHoodFeature = this.bloatedHood;
       return intersect(curHoodFeature,feature);
     });
+
+    // Simplifies with the D3-derived Visvalingam algorithm
+    this.adjacentHoods = clone(this.adjacentHoods);
+    this.adjacentHoods.forEach(feature => {
+      // No multipoly check... Just want to see if this works
+      let pointCount = flatten(feature.geometry.coordinates).length/2;
+      feature.geometry.coordinates[0] = vis(feature.geometry.coordinates[0],pointCount*0.5);
+    });
+
+    // Alternate implementation using the Douglas-Peucker algorithm, which kind of sucks
+    // this.adjacentHoods = clone(this.adjacentHoods).map(feature => {
+    //   return turf.simplify(feature,0.0002,false);      
+    // });
+
     this.filteredFeatures = this.adjacentHoods;
 
     this.props.setAdjacents(this.adjacentHoods);
 
-    this.hoods = this.mapifyFeatures(this.filteredFeatures);
+    this.hoods = this.mapifyHoods(this.filteredFeatures);
+    this.streets = this.mapifyStreets(this.props.streets);
 
-    const kludgePoly = this.currentHood; 
-    // Note: kludge poly is simply the first filtered polygon, for debugging initial intersections
-    this.props.setKludge(kludgePoly); 
+    const currentHoodPoly = this.currentHood; 
+    // Note: currentHood poly is simply the first filtered polygon, for debugging initial intersections
+    this.props.setCurrentHood(currentHoodPoly); 
   }
 
   componentDidMount() { 
@@ -89,16 +105,30 @@ class Neighborhoods extends React.Component {
 
     
 
-    // alert(JSON.stringify(this.props.kludge));
+    // alert(JSON.stringify(this.props.currentHood));
     // const curPosGeo = point(toTuple(this.props.lastPosition.coords));
     // alert(JSON.stringify(curPosGeo));
-    // const kludgePoly = this.filteredFeatures[0].geometry;
-    // alert(JSON.stringify(kludgePoly));
+    // const currentHoodPoly = this.filteredFeatures[0].geometry;
+    // alert(JSON.stringify(currentHoodPoly));
     // const featureGeo = polygon(this.props.lastPosition);
 
   }
 
-  mapifyFeatures(features) {
+  mapifyStreets(features) {
+    return features.map((feature) => {
+      const coordSet = feature.geometry.coordinates;
+      const latLngs = coordSet.map((coords) => ({
+        longitude: coords[0],
+        latitude: coords[1]
+      }));
+      return { 
+        name: feature.properties.name,
+        coords: latLngs 
+      };
+    });
+  }
+
+  mapifyHoods(features) {
     return features.reduce((hoods, feature) => {
       // Check for polyline vs. non-polyline
       // If multiline, map each and add extra square braces
@@ -116,7 +146,6 @@ class Neighborhoods extends React.Component {
         multiCoordSet.forEach(coordSet => {
           // MultiPolygon adds an extra layer of depth, so get rid of it
           coordSet = coordSet[0];
-          // alert(coordSet);
           const latLngs = coordSet.map((coords) => ({
             longitude: coords[0],
             latitude: coords[1]
@@ -134,9 +163,18 @@ class Neighborhoods extends React.Component {
   render() {
     const features = this.features;
     const hoods = this.hoods;
+    const streets = this.streets;
     // alert(JSON.stringify(hoods));
     return (
       <View>
+        {streets.map((streetLine, index) => (
+          <MapView.Polyline
+            key={index}
+            coordinates={streetLine.coords}
+            strokeColor="rgb(255,215,0)"
+            strokeWidth={2}
+          />
+        ))}
         {hoods.map((hoodPoly, index) => (
           <MapView.Polygon
             key={index}
@@ -184,6 +222,7 @@ class MapviewExample extends React.Component {
       lastPosition: 'unknown',
       compassLine: null,
       neighborhoods: FixtureApi.getNeighborhoodBoundaries('San Francisco').data,
+      streets: FixtureApi.getStreets('Tenderloin').data,
       adjacentHoods: null
     }
     this.renderMapMarkers = this.renderMapMarkers.bind(this)
@@ -192,9 +231,9 @@ class MapviewExample extends React.Component {
     this.locations = locations
   }
 
-  setKludge(kludge) {
+  setCurrentHood(currentHood) {
     this.setState({
-      kludge: kludge
+      currentHood: currentHood
     });
   }
 
@@ -202,13 +241,43 @@ class MapviewExample extends React.Component {
     this.setState({ adjacentHoods });
   }
 
+  getStreetCollisions(compassLineFeature, streetFeatures) {
+    streetsAhead = [];
+    streetFeatures.forEach(feature => {
+      const collision = intersect(compassLineFeature, feature);
+      if (!collision) return null;
+      const originFeature = point(compassLineFeature.geometry.coordinates[0]);
+      const collisionDistance = turf.distance(originFeature,collision);
+      const street = {
+        name: feature.properties.name,
+        distance: collisionDistance.toFixed(2) + 'miles'  
+      };
+      const relations = feature.properties['@relations'];
+      if (relations) {
+        let routes = {};
+        relations.forEach(relation => {
+          if (relation.reltags.type === "route") {
+            routes[relation.reltags.ref] = true;
+          }
+        });
+        if (routes) street.routes = Object.keys(routes);
+      }
+
+      streetsAhead.push(street);
+    });
+    return streetsAhead;
+  }
+
   getHoodCollisions(compassLineFeature, hoodFeatures, currentHoodFeature) {
     // return currentHoodFeature;
-    var results = [];
+    var adjacents = [];
     // return compassLatLngs;
     // return compassLineFeature;
+    var pointCount = 0;
     hoodFeatures.forEach(feature => {
       const collisions = intersect(compassLineFeature, feature);
+      // pointCount is for debugging only; only here for easy output, very bad
+      // pointCount += flatten(feature.geometry.coordinates).length/2;
       if (!collisions ||
         currentHoodFeature.properties.label === feature.properties.label) return null;
 
@@ -221,13 +290,13 @@ class MapviewExample extends React.Component {
       const collisionDistance = turf.distance(originFeature, nearestFeature, 'miles');
       // results.push({type, nearestCoord})
       // return;
-      results.push({
+      adjacents.push({
         name: feature.properties.label,
         distance: collisionDistance.toFixed(2) + ' miles'
         // point: nearestCoord
       });
     });
-    return results;
+    return {adjacents, current: currentHoodFeature.properties.label };
   } 
 
   componentDidMount() {
@@ -246,7 +315,7 @@ class MapviewExample extends React.Component {
       });
     });
 
-    ReactNativeHeading.start(5)
+    ReactNativeHeading.start(3)
     .then(didStart => {
       this.setState({
         headingIsSupported: didStart,
@@ -256,6 +325,7 @@ class MapviewExample extends React.Component {
 
     DeviceEventEmitter.addListener('headingUpdated', data => {
       console.log('New heading is: ', data.heading);
+      // Note: buggy, needs changing
       const curPos = this.state.lastPosition || this.state.initialPosition;
       if (curPos !== 'unknown') {
         const curCoords = curPos.coords;
@@ -352,9 +422,10 @@ class MapviewExample extends React.Component {
           { this.state.compassLine ? 
             <Neighborhoods 
               compassLine={this.state.compassLine}
-              setKludge={this.setKludge.bind(this)} 
+              setCurrentHood={this.setCurrentHood.bind(this)} 
               setAdjacents={this.setAdjacents.bind(this)}
               boundaries={this.state.neighborhoods} 
+              streets={this.state.streets}
               lastPosition={this.state.lastPosition}
             /> :
             null }
@@ -375,7 +446,7 @@ class MapviewExample extends React.Component {
           <View style={Styles.bubble}>
             <Text>{
               (compassLineFeature && this.state.adjacentHoods) ? 
-                JSON.stringify( this.getHoodCollisions(compassLineFeature, this.state.adjacentHoods, this.state.kludge) ) : "Just a sec..." }</Text>
+                JSON.stringify( this.getHoodCollisions(compassLineFeature, this.state.adjacentHoods, this.state.currentHood) ) : "Just a sec..." }</Text>
           </View>
         </View>
         <View style={Styles.buttonContainer}>
@@ -388,9 +459,11 @@ class MapviewExample extends React.Component {
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
             <Text>{ 
-                compassLineFeature ? 
-                  JSON.stringify(compassLineFeature.geometry) :
-                  'Waiting for compass line...'
+                // compassLineFeature ? 
+                //   JSON.stringify(compassLineFeature.geometry) :
+                //   'Waiting for compass line...'
+                (compassLineFeature && this.state.streets) ? 
+                  JSON.stringify( this.getStreetCollisions(compassLineFeature, this.state.streets) ) : "Normalizing reticulating splines..." 
             }</Text>
           </View>
         </View>
@@ -433,6 +506,10 @@ const binduRGB = (text, alpha) => {
   };
   return 'rgba('+color.r+','+color.g+','+color.b+','+alpha+')';
 };
+
+const flatten = list => list.reduce(
+    (a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []
+);
 
 // END: function dump
 
