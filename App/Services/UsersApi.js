@@ -50,7 +50,6 @@ export default {
     });
   },
 
-<<<<<<< HEAD
   // getFriends: (cb) => { // todo: add param for fb_id
   //   const api = apisauce.create({
   //     baseURL: 'http://127.0.0.1:3000',
@@ -90,26 +89,5 @@ export default {
   //     }
   //   })
   // },
-=======
-  getFriends: (cb) => {
-    const api = apisauce.create({
-      baseURL: 'http://127.0.0.1:3000',
-      headers: {
-        'Accept': 'text/plain'
-      }
-    });
-    api
-    .get('/api/friends')
-    .then((res) => {
-      console.log('fetched friends', JSON.strinify(res));
-      cb(res);
-    })
-    .catch((err) => {
-      if (err) {
-        console.log('error on fetching friends', err);
-      }
-    })
-  },
->>>>>>> Add welcome view and friends view to navigation router and drawer content
 
 }
