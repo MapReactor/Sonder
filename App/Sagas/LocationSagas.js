@@ -27,14 +27,12 @@ const updateLocation = function * (api, action) {
     location.bearing = currentLocation.position.coords.heading;
   }
 
-  console.tron.log('location:'+JSON.stringify(location));
-
   const response = yield call(api.updateLocation, location)
   // success?
   if (response.ok) {
     //const kelvin = path(['data', 'main', 'temp_max'], response)
     //const temperature = convertFromKelvin(kelvin)
-    yield put(LocationActions.locationSuccess(response.data, 'bonus'))
+    yield put(LocationActions.locationSuccess(response.data.id, 'bonus'))
   } else {
     yield put(LocationActions.locationFailure())
   }
