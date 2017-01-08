@@ -8,9 +8,9 @@ const {
 const getUserInfo = (cb) => {
   const resCallback = (error, result) => {
     if (error) {
-      alert('Error fetching data: ' + error.toString());
+      alert('error fetching data: ' + error.toString());
     } else {
-      console.log('Success fetching data: ', JSON.stringify(result));
+      console.log('success fetching data: ', JSON.stringify(result));
       const userInfo = {
         token: token,
         email: result.email,

@@ -1,11 +1,10 @@
 const FBSDK = require('react-native-fbsdk');
-
 import GraphApi from '../Services/GraphApi'
 import apisauce from 'apisauce'
 
 export default {
 
-  addUser: () => {
+  addUser: (cbOne, cbTwo) => {
     GraphApi.getUserInfo(function(userInfo, friendsData) {
       const api = apisauce.create({
         baseURL: 'http://127.0.0.1:3000',
@@ -13,23 +12,22 @@ export default {
           'Accept': 'text/plain',
         }
       });
-      return api
+      api
       .post('/api/users', userInfo)
       .then((res) => {
-        console.log('added user', JSON.stringify(res));
-        // return cb(friendsData));
+        console.log('success adding user', JSON.stringify(res));
         console.log('friendsData', friendsData);
-        return friendsData
+        cbOne(friendsData, cbTwo);
       })
       .catch((err) => {
         if (err) {
-          console.log('error on adding user', err.data);
+          console.log('error adding user', err.data);
         }
       });    
     });     
   },
 
-  addFriends: (friendsData) => { 
+  addFriends: (friendsData, cb) => { 
     console.log('friendsData', friendsData);
     const api = apisauce.create({
       baseURL: 'http://127.0.0.1:3000',
@@ -37,15 +35,15 @@ export default {
         'Accept': 'text/plain',
       }
     });
-    return api
+    api
     .post('/api/friends', friendsData)
     .then((res) => {
-      console.log('added/ updated friends', JSON.stringify(res));
-      return friendsData;
+      console.log('success adding/ updating friends', JSON.stringify(res));
+      cb(friendsData);
     })
     .catch((err) => {
       if (err) {
-        console.log('error on adding Friends', err);
+        console.log('error adding friends', err);
       }
     });
   },

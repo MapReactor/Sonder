@@ -34,20 +34,13 @@ var Login = React.createClass({
               } else if (result.isCancelled) {
                 alert("login is cancelled.");
               } else {
+
+                const testCb = function(friendsData) {
+                  console.log('you made it to the final cb', friendsData);
+                }
+
                 // posts user info to db & when complete, add friends to db
-                // UsersApi.addUser(UsersApi.addFriends, cb);
-
-                const addUser = Promise.promisify(UsersApi.addUser);
-                const addFriends = Promise.promisify(UsersApi.addFriends);
-                
-                addUser()
-                .then(function(friendsData) {
-                  return addFriends(friendsData)
-                }).then(function(result) {
-                  console.log(result);
-                  // do something with friends data (aka result)
-                });
-
+                UsersApi.addUser(UsersApi.addFriends, testCb)
               }
             }
           }
