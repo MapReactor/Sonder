@@ -34,7 +34,7 @@ const updateLocation = function * (api, action) {
   if (response.ok) {
     //const kelvin = path(['data', 'main', 'temp_max'], response)
     //const temperature = convertFromKelvin(kelvin)
-    yield put(LocationActions.locationSuccess(response.data, 'bonus'))
+    yield put(LocationActions.locationSuccess(response.data.id, 'bonus'))
   } else {
     yield put(LocationActions.locationFailure())
   }
