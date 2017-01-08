@@ -15,6 +15,7 @@ const getUserInfo = (cb) => {
         token: token,
         email: result.email,
         displayname: result.name,
+        picture: result.picture.data.url,
         id: result.id,
       }
 
@@ -41,7 +42,7 @@ const getUserInfo = (cb) => {
   const reqConfig = {
     httpMethod: 'GET',
     version: 'v2.5',
-    parameters: { fields: { string: 'id, name, email, friends' } },
+    parameters: { fields: { string: 'id, name, email, picture, friends' } },
     accessToken: token,
   }
 

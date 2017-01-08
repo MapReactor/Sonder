@@ -11,9 +11,11 @@ import {
 import styles from './Styles/WelcomeViewStyle'
 import { Images } from '../Themes'
 import UsersApi from '../Services/UsersApi'
+import GraphApi from '../Services/GraphApi'
 
 // create custom facebook login
 const FBSDK = require('react-native-fbsdk');
+const Promise = require('bluebird');
 const {
   LoginButton,
 } = FBSDK;
@@ -33,7 +35,19 @@ var Login = React.createClass({
                 alert("login is cancelled.");
               } else {
                 // posts user info to db & when complete, add friends to db
-                UsersApi.addUser(UsersApi.addFriends);
+                // UsersApi.addUser(UsersApi.addFriends, cb);
+
+                const addUser = Promise.promisify(UsersApi.addUser);
+                const addFriends = Promise.promisify(UsersApi.addFriends);
+                
+                addUser()
+                .then(function(friendsData) {
+                  return addFriends(friendsData)
+                }).then(function(result) {
+                  console.log(result);
+                  // do something with friends data (aka result)
+                });
+
               }
             }
           }
