@@ -39,8 +39,6 @@ export default {
     .post('/api/friends', friendsData)
     .then((res) => {
       console.log('success adding/ updating friends', JSON.stringify(res));
-
-      console.log('friendsData', friendsData);
       cb(friendsData);
     })
     .catch((err) => {
