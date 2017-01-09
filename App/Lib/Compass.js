@@ -24,6 +24,7 @@ import { clone } from 'cloneextend';
 import vis from 'code42day-vis-why';
 const offset = new Offset();
 
+const toRadians = (heading) => heading * (Math.PI / 180);
 const flatten = list => list.reduce(
     (a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []
 );
@@ -35,7 +36,8 @@ class Compass {
                     'onPositionChange', 
                     'onHeadingChange',
                     'onHeadingSupported',
-                    'onInitialHoods'];
+                    'onInitialHoods',
+                    'onEntitiesDetected'];
     this.EVENTS.forEach(event => {
       this['_'+event] = () => {};
       this[event] = (func) => { 
@@ -43,6 +45,8 @@ class Compass {
           func : () => {};
       }
     });
+    this.entities = {};
+    this._currentPosition = null;
   }
   getDebugHoods() {
     return FixtureApi.getNeighborhoodBoundaries('San Francisco').data;
@@ -61,21 +65,17 @@ class Compass {
 
   start(opts) {
     this._setEvents(opts);
-    // alert(this._onInitialPosition.toString());
-    // Pointless Promise, but anticipating further refactor
-    // (Probably start() should be thenable and onInitialPosition 
+    // Note: Probably start() should be thenable and onInitialPosition 
     // and onHeadingSupported deprecated.)
     const getPosition = new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          resolve(position);
-          // resolve first, so all setup done on first onInitialPosition
           this._onInitialPosition(position);
+          resolve(position);
         },
         (error) => reject('Location timed out')
       );
     });
-    // Make processNeighborhoods asynchronous
     getPosition
       .then(position => {
         return this._processNeighborhoods(position)
@@ -88,14 +88,37 @@ class Compass {
       this._onPositionChange(position)
     );
 
-    console.tron.log(ReactNativeHeading.toString())
-
     ReactNativeHeading.start(1)
     .then(didStart => this._onHeadingSupported(didStart));
 
-    DeviceEventEmitter.addListener('headingUpdated', data => 
-      this._onHeadingChange(data.heading)
-    );
+    DeviceEventEmitter.addListener('headingUpdated', data => {
+      this._heading = data.heading;
+      this._onHeadingChange(data.heading);
+      // this._detectEntities(data.heading).then(entities => {
+      //   this._onEntitiesDetected(entities);
+      // });
+    });
+  }
+
+  getCompassLine(radius) {
+    // ToDo: use this.getHeading() rather than this._heading
+    const headingInRadians = toRadians(this._heading);
+    const origin = this._currentPosition;
+    return origin ? 
+      [origin, {
+        longitude: origin.longitude + radius * Math.sin(headingInRadians),
+        latitude: origin.latitude + radius * Math.cos(headingInRadians)
+      }]
+      : null;
+  }
+
+  _detectEntities(heading) {
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        // getHoodCollisions(compassLineFeature, hoodFeatures, currentHoodFeature),
+        // getStreetCollisions(compassLineFeature, streetFeatures)
+      },0);
+    });
   }
 
   _processNeighborhoods(position) {
@@ -273,6 +296,9 @@ class Compass {
 }
 
 const compass = new Compass();
+
+// Can't freeze this because the object overwrites its own methods
+// at runtime; probably won't matter:
 // Object.freeze(compass);
 
 export default compass;

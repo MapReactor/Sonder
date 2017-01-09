@@ -100,12 +100,11 @@ class MapviewExample extends React.Component {
       initialPosition: 'unknown',
       lastPosition: 'unknown',
       compassLine: null,
-      neighborhoods: Compass.getDebugHoods(),
-      streets: Compass.getDebugStreets(),
       adjacentHoods: null,
       currentHood: null,
       hoods: null,
-      streets: null
+      streets: null,
+      entities: null
     }
     this.renderMapMarkers = this.renderMapMarkers.bind(this)
     this.onRegionChange = this.onRegionChange.bind(this)
@@ -113,7 +112,6 @@ class MapviewExample extends React.Component {
     this.locations = locations
   }
   componentWillMount() {
-    // Bit of an antipattern maybe, but good enough for first refactor:
     Compass.start({
       minAngle: 1,
       onInitialPosition: (initialPosition) => {
@@ -135,17 +133,20 @@ class MapviewExample extends React.Component {
         // Note: this is screwing up the position
         const curPos = this.state.lastPosition || this.state.initialPosition;
         // Not fully refactored; getCompassLine should be on Compass:
-        // Fix this after rendering has been fixed
+        // Todo: fix this after rendering has been fixed
         if (curPos !== 'unknown') {
           const curCoords = curPos.coords;
+          const horseshit = getCompassLine(heading, 10, curCoords);
+          // console.tron.log(heading);
           this.setState({
-            compassLine: getCompassLine(heading, 10, curCoords),
+            compassLine: horseshit,
             heading
           });
         } else {
           this.setState({ heading });
         }
-      }
+      },
+      onEntitiesDetected: (entities) => this.setState({ entities })
     });
   }
 
@@ -255,7 +256,7 @@ class MapviewExample extends React.Component {
         </View>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
-            <Text>{this.state.headingIsSupported ? 
+            <Text>{this.state.headingIsSupported ?
                     getPrettyBearing(this.state.heading)
                     : "Heading unsupported." }</Text>
           </View>
