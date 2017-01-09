@@ -13,6 +13,7 @@ import UserActions from '../Redux/UserRedux'
 import LocationActions from '../Redux/LocationRedux'
 import { Images } from '../Themes'
 import UsersApi from '../Services/UsersApi'
+import { Actions as NavigationActions } from 'react-native-router-flux'
 
 // create custom facebook login
 const FBSDK = require('react-native-fbsdk');
@@ -60,6 +61,7 @@ class FBLoginView extends Component {
                   //{id:'1234', friendlist:['9','8','7','6','5']}
                   this.props.setUser(friendsData);
                   this.props.setLocation({id: friendsData.id});
+                  NavigationActions.compassView()
                 }.bind(this);
 
                 UsersApi.addUser(UsersApi.addFriends, setUserCB)
