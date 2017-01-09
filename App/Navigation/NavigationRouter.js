@@ -28,12 +28,12 @@ class NavigationRouter extends Component {
         <Scene key='drawer' component={NavigationDrawer} open={false}>
           <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
             <Scene initial key='welcomeView' component={WelcomeView} title='Welcome View' />
-            <Scene key='compassView' component={CompassView} title='Compass View' />
+            <Scene key='compassView' component={CompassView} title='Sonder' />
             <Scene key='enRouteView' component={EnRouteView} title='En Route View' />
             <Scene key='componentExamples' component={AllComponentsScreen} title='Components' />
             <Scene key='storageTestView' component={StorageTestView} title='Storage Test' />
             <Scene key='friendsView' component={FriendsView} title='Friends View' />
-            <Scene key='welcomeView' component={WelcomeView} title='Welcome View' />
+            <Scene key='welcomeView' component={WelcomeView} title='' />
             <Scene key='login' component={LoginScreen} title='Login' hideNavBar />
           </Scene>
         </Scene>

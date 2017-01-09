@@ -1,8 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { 
+import {
   AppRegistry,
-  View, 
+  View,
   Text,
   DeviceEventEmitter
 } from 'react-native'
@@ -47,7 +47,7 @@ class Neighborhoods extends React.Component {
     // alert(JSON.stringify(this.props.lastPosition))
     this.currentHood = this.features.filter(feature => {
       const curPosGeo = point(toTuple(this.props.lastPosition.coords)).geometry;
-      return inside(curPosGeo, feature); 
+      return inside(curPosGeo, feature);
     })[0]; // Just grab the first one
   }
 
@@ -84,7 +84,7 @@ class Neighborhoods extends React.Component {
 
     // Alternate implementation using the Douglas-Peucker algorithm, which kind of sucks
     // this.adjacentHoods = clone(this.adjacentHoods).map(feature => {
-    //   return turf.simplify(feature,0.0002,false);      
+    //   return turf.simplify(feature,0.0002,false);
     // });
 
     this.filteredFeatures = this.adjacentHoods;
@@ -94,16 +94,16 @@ class Neighborhoods extends React.Component {
     this.hoods = this.mapifyHoods(this.filteredFeatures);
     this.streets = this.mapifyStreets(this.props.streets);
 
-    const currentHoodPoly = this.currentHood; 
+    const currentHoodPoly = this.currentHood;
     // Note: currentHood poly is simply the first filtered polygon, for debugging initial intersections
-    this.props.setCurrentHood(currentHoodPoly); 
+    this.props.setCurrentHood(currentHoodPoly);
   }
 
-  componentDidMount() { 
+  componentDidMount() {
 
     // alert(JSON.stringify(this.props.lastPosition));
 
-    
+
 
     // alert(JSON.stringify(this.props.currentHood));
     // const curPosGeo = point(toTuple(this.props.lastPosition.coords));
@@ -121,9 +121,9 @@ class Neighborhoods extends React.Component {
         longitude: coords[0],
         latitude: coords[1]
       }));
-      return { 
+      return {
         name: feature.properties.name,
-        coords: latLngs 
+        coords: latLngs
       };
     });
   }
@@ -154,7 +154,7 @@ class Neighborhoods extends React.Component {
         });
       }
       return hoods;
-    },[]); 
+    },[]);
   }
 
   shouldComponentUpdate(nextProps) {
@@ -204,20 +204,21 @@ class MapviewExample extends React.Component {
     * a latitude and longitude as well as any additional information you wish to display.
     *************************************************************/
     const locations = [
-      { title: 'Location A', latitude: 37.78825, longitude: -122.4324 },
-      { title: 'Location B', latitude: 37.75825, longitude: -122.4624 }
+      // { title: 'Location A', latitude: 37.78825, longitude: -122.4324 },
+      // { title: 'Location B', latitude: 37.75825, longitude: -122.4624 },
+      { title: 'My Location', latitude: 37.785834, longitude: -122.406417, image: require('./../Images/friendmarker.png') }
     ]
     /* ***********************************************************
     * STEP 2
     * Set your initial region either by dynamically calculating from a list of locations (as below)
     * or as a fixed point, eg: { latitude: 123, longitude: 123, latitudeDelta: 0.1, longitudeDelta: 0.1}
     *************************************************************/
-    const region = calculateRegion(locations, { latPadding: 0.05, longPadding: 0.05 })
+    const region = calculateRegion(locations, { latPadding: 0.0075, longPadding: 0.0075 })
 
     this.state = {
       region,
       locations,
-      showUserLocation: true,
+      showUserLocation: false,
       initialPosition: 'unknown',
       lastPosition: 'unknown',
       compassLine: null,
@@ -250,7 +251,7 @@ class MapviewExample extends React.Component {
       const collisionDistance = turf.distance(originFeature,collision);
       const street = {
         name: feature.properties.name,
-        distance: collisionDistance.toFixed(2) + 'miles'  
+        distance: collisionDistance.toFixed(2) + 'miles'
       };
       const relations = feature.properties['@relations'];
       if (relations) {
@@ -297,11 +298,11 @@ class MapviewExample extends React.Component {
       });
     });
     return {adjacents, current: currentHoodFeature.properties.label };
-  } 
+  }
 
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(
-      (position) => { 
+      (position) => {
         // alert(typeof this.map.fitToSuppliedMarkers);
         // alert(JSON.stringify(this.state.region));
         this.setState({initialPosition: position});
@@ -392,7 +393,7 @@ class MapviewExample extends React.Component {
     *************************************************************/
 
     return (
-      <MapView.Marker key={location.title} coordinate={{latitude: location.latitude, longitude: location.longitude}}>
+      <MapView.Marker key={location.title} image={location.image} coordinate={{latitude: location.latitude, longitude: location.longitude}}>
         <MapCallout location={location} onPress={this.calloutPress} />
       </MapView.Marker>
     )
@@ -410,34 +411,34 @@ class MapviewExample extends React.Component {
           showsUserLocation={this.state.showUserLocation}
         >
           {this.state.locations.map((location) => this.renderMapMarkers(location))}
-          { this.state.compassLine ? 
+          { this.state.compassLine ?
             <MapView.Polyline
               key="editingPolyline"
               coordinates={this.state.compassLine}
               strokeColor="#F00"
               fillColor="rgba(255,0,0,0.5)"
               strokeWidth={1}
-            /> : 
+            /> :
             null }
-          { this.state.compassLine ? 
-            <Neighborhoods 
+          { this.state.compassLine ?
+            <Neighborhoods
               compassLine={this.state.compassLine}
-              setCurrentHood={this.setCurrentHood.bind(this)} 
+              setCurrentHood={this.setCurrentHood.bind(this)}
               setAdjacents={this.setAdjacents.bind(this)}
-              boundaries={this.state.neighborhoods} 
+              boundaries={this.state.neighborhoods}
               streets={this.state.streets}
               lastPosition={this.state.lastPosition}
             /> :
             null }
 
-          {/* this.state.region ? 
+          {/* this.state.region ?
             <MapView.Polygon
               key="QWEWQEQW"
               coordinates={toCoords(getRegionBBox(this.state.region))}
               strokeColor="#F00"
               fillColor={binduRGB("WAKA!",0.5)}
               strokeWidth={1}
-            /> : 
+            /> :
             null */}
 
             {/*this.mapNeighborhoods()*/}
@@ -445,25 +446,25 @@ class MapviewExample extends React.Component {
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
             <Text>{
-              (compassLineFeature && this.state.adjacentHoods) ? 
+              (compassLineFeature && this.state.adjacentHoods) ?
                 JSON.stringify( this.getHoodCollisions(compassLineFeature, this.state.adjacentHoods, this.state.currentHood) ) : "Just a sec..." }</Text>
           </View>
         </View>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
-            <Text>{this.state.headingIsSupported ? 
+            <Text>{this.state.headingIsSupported ?
                     getPrettyBearing(this.state.heading)
                     : "Heading unsupported." }</Text>
           </View>
         </View>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
-            <Text>{ 
-                // compassLineFeature ? 
+            <Text>{
+                // compassLineFeature ?
                 //   JSON.stringify(compassLineFeature.geometry) :
                 //   'Waiting for compass line...'
-                (compassLineFeature && this.state.streets) ? 
-                  JSON.stringify( this.getStreetCollisions(compassLineFeature, this.state.streets) ) : "Normalizing reticulating splines..." 
+                (compassLineFeature && this.state.streets) ?
+                  JSON.stringify( this.getStreetCollisions(compassLineFeature, this.state.streets) ) : "Normalizing reticulating splines..."
             }</Text>
           </View>
         </View>
@@ -476,7 +477,7 @@ class MapviewExample extends React.Component {
 // Put these elsewhere, such as in CompassHelpers.js
 
 const toRadians = (heading) => heading * (Math.PI / 180);
-const getCompassLine = (heading, radius, origin) => [origin, { 
+const getCompassLine = (heading, radius, origin) => [origin, {
   longitude: origin.longitude + radius * Math.sin(toRadians(heading)),
   latitude: origin.latitude + radius * Math.cos(toRadians(heading))
 }];
@@ -485,7 +486,7 @@ const getPrettyBearing = (heading) => {
   const degreeChar = String.fromCharCode(176);
   const primaryCardinality = (heading >= 270 || heading <= 90) ? 'N' : 'S';
   const secondaryCardinality = (heading <= 180) ? 'E' : 'W';
-  const angle = (heading <= 90) ? heading : 
+  const angle = (heading <= 90) ? heading :
                    (heading <= 180) ? 180 - heading :
                      (heading <= 270) ? heading - 180 : 360 - heading;
  return primaryCardinality + angle + degreeChar + secondaryCardinality;

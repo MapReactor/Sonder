@@ -88,13 +88,13 @@ class DrawerContent extends Component {
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
-        <DrawerButton text='Compass View' onPress={this.handlePressCompassView} />
-        <DrawerButton text='enRoute View' onPress={this.handlePressEnRouteView} />
-        <DrawerButton text='*Component Examples' onPress={this.handlePressComponents} />
-        <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
-        <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
-        <DrawerButton text='Welcome View' onPress={this.handlePressWelcomeView} />
-        {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
+        <DrawerButton text='Sonder' onPress={this.handlePressCompassView} />
+        { /* <DrawerButton text='enRoute View' onPress={this.handlePressEnRouteView} /> */ }
+        { /* <DrawerButton text='*Component Examples' onPress={this.handlePressComponents} /> */ }
+        { /* <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} /> */ }
+        { /* <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} /> */ }
+        <DrawerButton text='Logout' onPress={this.handlePressWelcomeView} />
+        { /* {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()} */ }
       </ScrollView>
     )
   }
