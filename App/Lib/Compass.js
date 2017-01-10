@@ -103,9 +103,9 @@ class Compass {
       const compassLine = this._compassLine = this.getCompassLine();
       this._onHeadingChange({ heading, compassLine });
       if (!compassLine) return;
-      // this._detectEntities(heading).then(entities => {
-      //   this._onEntitiesDetected(entities);
-      // });
+      this._detectEntities(heading).then(entities => {
+        this._onEntitiesDetected(entities);
+      });
 
     });
   }
@@ -125,8 +125,10 @@ class Compass {
   _detectEntities(heading) {
     return new Promise((resolve,reject) => {
       setTimeout(() => {
-        // getHoodCollisions(compassLineFeature, hoodFeatures, currentHoodFeature),
-        // getStreetCollisions(compassLineFeature, streetFeatures)
+        resolve({ 
+          hoods: this.getHoodCollisions(),
+          streets: this.getStreetCollisions()
+        });
       },0);
     });
   }
@@ -136,18 +138,20 @@ class Compass {
   }
 
   // Probably just wrap this in a requestAnimationFrame for now
-  getHoodCollisions(compassLineFeature, hoodFeatures, currentHoodFeature) {
-    // return currentHoodFeature;
+  getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
+                    adjacentHoods = this._hoodData.adjacentHoods, 
+                    currentHood = this._hoodData.currentHood) {
+    // return currentHood;
     var adjacents = [];
     // return compassLatLngs;
     // return compassLineFeature;
     var pointCount = 0;
-    hoodFeatures.forEach(feature => {
+    adjacentHoods.forEach(feature => {
       const collisions = intersect(compassLineFeature, feature);
       // pointCount is for debugging only; only here for easy output, very bad
       // pointCount += flatten(feature.geometry.coordinates).length/2;
       if (!collisions ||
-        currentHoodFeature.properties.label === feature.properties.label) return null;
+        currentHood.properties.label === feature.properties.label) return null;
 
       // Possible todo: just add a label property to this object to keep it consistent?
       const type = collisions.geometry.type;
@@ -164,12 +168,13 @@ class Compass {
         // point: nearestCoord
       });
     });
-    return {adjacents, current: currentHoodFeature.properties.label };
+    return {adjacents, current: currentHood.properties.label };
   } 
 
-  getStreetCollisions(compassLineFeature, streetFeatures) {
+  getStreetCollisions(compassLineFeature = this._getCompassLineFeature(), 
+                      streetsFixture = this.getDebugStreets() ) {
     streetsAhead = [];
-    streetFeatures.forEach(feature => {
+    streetsFixture.forEach(feature => {
       const collision = intersect(compassLineFeature, feature);
       if (!collision) return null;
       const originFeature = point(compassLineFeature.geometry.coordinates[0]);

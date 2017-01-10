@@ -236,9 +236,9 @@ class MapviewExample extends React.Component {
         </MapView>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
-            <Text>{/*
-              (compassLineFeature && this.state.adjacentHoods) ? 
-                JSON.stringify( this.getHoodCollisions(compassLineFeature, this.state.adjacentHoods, this.state.currentHood) ) : "Just a sec..." */}</Text>
+            <Text>{this.state.entities ? 
+              JSON.stringify(this.state.entities.hoods) : 
+              "Waiting for entities..."}</Text>
           </View>
         </View>
         <View style={Styles.buttonContainer}>
@@ -250,10 +250,9 @@ class MapviewExample extends React.Component {
         </View>
         <View style={Styles.buttonContainer}>
           <View style={Styles.bubble}>
-            <Text>{/*
-                (compassLineFeature && this.state.streets) ? 
-                  JSON.stringify( this.getStreetCollisions(compassLineFeature, this.state.streets) ) : "Normalizing reticulating splines..." 
-            */}</Text>
+            <Text>{this.state.entities ? 
+                    JSON.stringify(this.state.entities.streets) :
+                    "Normalizing reticulating splines..."}</Text>
           </View>
         </View>
       </View>
