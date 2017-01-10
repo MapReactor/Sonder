@@ -114,6 +114,7 @@ class MapviewExample extends React.Component {
   componentWillMount() {
     Compass.start({
       minAngle: 1,
+      radius: 10,
       onInitialPosition: (initialPosition) => {
         this.setState({ initialPosition })
       },
@@ -129,24 +130,10 @@ class MapviewExample extends React.Component {
         this.setState({ headingIsSupported }),
       onPositionChange: (lastPosition) => 
         this.setState({ lastPosition }),
-      onHeadingChange: (heading) => {
-        // Note: this is screwing up the position
-        const curPos = this.state.lastPosition || this.state.initialPosition;
-        // Not fully refactored; getCompassLine should be on Compass:
-        // Todo: fix this after rendering has been fixed
-        if (curPos !== 'unknown') {
-          const curCoords = curPos.coords;
-          const horseshit = getCompassLine(heading, 10, curCoords);
-          // console.tron.log(heading);
-          this.setState({
-            compassLine: horseshit,
-            heading
-          });
-        } else {
-          this.setState({ heading });
-        }
-      },
-      onEntitiesDetected: (entities) => this.setState({ entities })
+      onHeadingChange: (headingData) => 
+        this.setState(headingData),
+      onEntitiesDetected: (entities) => 
+        this.setState({ entities })
     });
   }
 
@@ -276,12 +263,6 @@ class MapviewExample extends React.Component {
 
 // BEGIN: function dump
 // Put these elsewhere, such as in CompassHelpers.js
-
-const toRadians = (heading) => heading * (Math.PI / 180);
-const getCompassLine = (heading, radius, origin) => [origin, { 
-  longitude: origin.longitude + radius * Math.sin(toRadians(heading)),
-  latitude: origin.latitude + radius * Math.cos(toRadians(heading))
-}];
 
 const getPrettyBearing = (heading) => {
   const degreeChar = String.fromCharCode(176);

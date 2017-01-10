@@ -4,8 +4,9 @@ First-pass refactor of monolithic compass
 ToDos:
 - Put promises everywhere
 - Make it work with batching optimizations,
-    such as using requestAnimationFrame
-- Refactor the neighborhood data out of here
+    or use requestAnimationFrame, or something
+- Refactor the neighborhood stuff out of here
+- Unit tests
 */
 
 import { DeviceEventEmitter } from 'react-native';
@@ -32,10 +33,11 @@ const flatten = list => list.reduce(
 class Compass {
   constructor() {
     // Set individual event hook function definitions
-    this.EVENTS = ['onInitialPosition', 
+    this.EVENTS = [ 'onInitialPosition', 
                     'onPositionChange', 
-                    'onHeadingChange',
                     'onHeadingSupported',
+                    'onHeadingChange',
+                    'onCompassReady',
                     'onInitialHoods',
                     'onEntitiesDetected'];
     this.EVENTS.forEach(event => {
@@ -47,6 +49,7 @@ class Compass {
     });
     this.entities = {};
     this._currentPosition = null;
+    this._heading = null;
   }
   getDebugHoods() {
     return FixtureApi.getNeighborhoodBoundaries('San Francisco').data;
@@ -64,52 +67,59 @@ class Compass {
   }
 
   start(opts) {
+    /* ToDos: 
+       - Probably start() should be thenable and onInitialPosition 
+          and onHeadingSupported deprecated.
+       - getCurrent and watchPosition should probably use Promise.race
+        right now, presumes that no movement is happening on init
+    */
     this._setEvents(opts);
-    // Note: Probably start() should be thenable and onInitialPosition 
-    // and onHeadingSupported deprecated.)
-    const getPosition = new Promise((resolve, reject) => {
+    this._radius = opts.radius || 10;
+
+    const getInitialPosition = new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          if (!this._currentPosition) this._currentPosition = position.coords;
           this._onInitialPosition(position);
           resolve(position);
         },
         (error) => reject('Location timed out')
       );
     });
-    getPosition
-      .then(position => {
-        return this._processNeighborhoods(position)
-      })
-      .then(hoodData => {
-        this._onInitialHoods(hoodData);
-      });
+    getInitialPosition
+      .then(position => this._processNeighborhoods(position))
+      .then(hoodData => this._onInitialHoods(hoodData));
 
-    this.watchID = navigator.geolocation.watchPosition(position => 
-      this._onPositionChange(position)
-    );
+    this.watchID = navigator.geolocation.watchPosition(position => {
+      this._currentPosition = position.coords;
+      this._onPositionChange(position);
+    });
 
-    ReactNativeHeading.start(1)
+    ReactNativeHeading.start(opts.minAngle || 1)
     .then(didStart => this._onHeadingSupported(didStart));
 
     DeviceEventEmitter.addListener('headingUpdated', data => {
-      this._heading = data.heading;
-      this._onHeadingChange(data.heading);
-      // this._detectEntities(data.heading).then(entities => {
+      const heading = this._heading = data.heading;
+      const compassLine = this._compassLine = this.getCompassLine();
+      this._onHeadingChange({ heading, compassLine });
+      if (!compassLine) return;
+      // this._detectEntities(heading).then(entities => {
       //   this._onEntitiesDetected(entities);
       // });
+
     });
   }
 
-  getCompassLine(radius) {
-    // ToDo: use this.getHeading() rather than this._heading
-    const headingInRadians = toRadians(this._heading);
-    const origin = this._currentPosition;
-    return origin ? 
-      [origin, {
+  getCompassLine(heading = this._heading, 
+                 radius = this._radius,
+                 origin = this._currentPosition) {
+    if (!origin) return null;
+    const headingInRadians = toRadians(heading);
+    // alert(JSON.stringify({ heading, radius, origin }));
+    return [origin, {
         longitude: origin.longitude + radius * Math.sin(headingInRadians),
         latitude: origin.latitude + radius * Math.cos(headingInRadians)
-      }]
-      : null;
+      }];
   }
 
   _detectEntities(heading) {
@@ -119,6 +129,68 @@ class Compass {
         // getStreetCollisions(compassLineFeature, streetFeatures)
       },0);
     });
+  }
+
+  _getCompassLineFeature() {
+    return lineString(toTuples(this._compassLine));
+  }
+
+  // Probably just wrap this in a requestAnimationFrame for now
+  getHoodCollisions(compassLineFeature, hoodFeatures, currentHoodFeature) {
+    // return currentHoodFeature;
+    var adjacents = [];
+    // return compassLatLngs;
+    // return compassLineFeature;
+    var pointCount = 0;
+    hoodFeatures.forEach(feature => {
+      const collisions = intersect(compassLineFeature, feature);
+      // pointCount is for debugging only; only here for easy output, very bad
+      // pointCount += flatten(feature.geometry.coordinates).length/2;
+      if (!collisions ||
+        currentHoodFeature.properties.label === feature.properties.label) return null;
+
+      // Possible todo: just add a label property to this object to keep it consistent?
+      const type = collisions.geometry.type;
+      const coords = collisions.geometry.coordinates;
+      const nearestCoord = (type === 'MultiLineString') ? coords[0][0] : coords[0];
+      const nearestFeature = point(nearestCoord);
+      const originFeature = point(compassLineFeature.geometry.coordinates[0]);
+      const collisionDistance = turf.distance(originFeature, nearestFeature, 'miles');
+      // results.push({type, nearestCoord})
+      // return;
+      adjacents.push({
+        name: feature.properties.label,
+        distance: collisionDistance.toFixed(2) + ' miles'
+        // point: nearestCoord
+      });
+    });
+    return {adjacents, current: currentHoodFeature.properties.label };
+  } 
+
+  getStreetCollisions(compassLineFeature, streetFeatures) {
+    streetsAhead = [];
+    streetFeatures.forEach(feature => {
+      const collision = intersect(compassLineFeature, feature);
+      if (!collision) return null;
+      const originFeature = point(compassLineFeature.geometry.coordinates[0]);
+      const collisionDistance = turf.distance(originFeature,collision);
+      const street = {
+        name: feature.properties.name,
+        distance: collisionDistance.toFixed(2) + 'miles'  
+      };
+      const relations = feature.properties['@relations'];
+      if (relations) {
+        let routes = {};
+        relations.forEach(relation => {
+          if (relation.reltags.type === "route") {
+            routes[relation.reltags.ref] = true;
+          }
+        });
+        if (routes) street.routes = Object.keys(routes);
+      }
+      streetsAhead.push(street);
+    });
+    return streetsAhead;
   }
 
   _processNeighborhoods(position) {
@@ -131,7 +203,8 @@ class Compass {
         const adjacentHoods = this._findAdjacentHoods(currentHood, rawHoods.features);
         const hoodLatLngs = this.mapifyHoods(adjacentHoods);
         const streetLatLngs = this.mapifyStreets(streets);
-        resolve({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs })
+        this._hoodData = { currentHood, adjacentHoods, hoodLatLngs, streetLatLngs };
+        resolve(this._hoodData);
       },0);
     });
 
@@ -232,67 +305,6 @@ class Compass {
       return hoods;
     },[]); 
   }
-
-  // Probably just wrap this in a requestAnimationFrame for now
-  getHoodCollisions(compassLineFeature, hoodFeatures, currentHoodFeature) {
-    // return currentHoodFeature;
-    var adjacents = [];
-    // return compassLatLngs;
-    // return compassLineFeature;
-    var pointCount = 0;
-    hoodFeatures.forEach(feature => {
-      const collisions = intersect(compassLineFeature, feature);
-      // pointCount is for debugging only; only here for easy output, very bad
-      // pointCount += flatten(feature.geometry.coordinates).length/2;
-      if (!collisions ||
-        currentHoodFeature.properties.label === feature.properties.label) return null;
-
-      // Possible todo: just add a label property to this object to keep it consistent?
-      const type = collisions.geometry.type;
-      const coords = collisions.geometry.coordinates;
-      const nearestCoord = (type === 'MultiLineString') ? coords[0][0] : coords[0];
-      const nearestFeature = point(nearestCoord);
-      const originFeature = point(compassLineFeature.geometry.coordinates[0]);
-      const collisionDistance = turf.distance(originFeature, nearestFeature, 'miles');
-      // results.push({type, nearestCoord})
-      // return;
-      adjacents.push({
-        name: feature.properties.label,
-        distance: collisionDistance.toFixed(2) + ' miles'
-        // point: nearestCoord
-      });
-    });
-    return {adjacents, current: currentHoodFeature.properties.label };
-  } 
-
-  getStreetCollisions(compassLineFeature, streetFeatures) {
-    streetsAhead = [];
-    streetFeatures.forEach(feature => {
-      const collision = intersect(compassLineFeature, feature);
-      if (!collision) return null;
-      const originFeature = point(compassLineFeature.geometry.coordinates[0]);
-      const collisionDistance = turf.distance(originFeature,collision);
-      const street = {
-        name: feature.properties.name,
-        distance: collisionDistance.toFixed(2) + 'miles'  
-      };
-      const relations = feature.properties['@relations'];
-      if (relations) {
-        let routes = {};
-        relations.forEach(relation => {
-          if (relation.reltags.type === "route") {
-            routes[relation.reltags.ref] = true;
-          }
-        });
-        if (routes) street.routes = Object.keys(routes);
-      }
-
-      streetsAhead.push(street);
-    });
-    return streetsAhead;
-  }
-
-
 }
 
 const compass = new Compass();
