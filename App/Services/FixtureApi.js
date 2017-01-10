@@ -27,7 +27,6 @@ export default {
     }
   },
   updateLocation: (id: string, latitude: string, longitude: string, bearing: string) => {
-    // This fixture only supports Boise or else returns toronto
     return {
       ok: true,
       data: {
@@ -39,7 +38,6 @@ export default {
     }
   },
   getLocation: (id: string) => {
-    // This fixture only supports Boise or else returns toronto
     const locationData = require('../Fixtures/location.json')
     return {
       ok: true,
