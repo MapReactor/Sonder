@@ -1,4 +1,5 @@
 const FBSDK = require('react-native-fbsdk');
+const { host } = require('./ApiConfig');
 import GraphApi from '../Services/GraphApi'
 import apisauce from 'apisauce'
 
@@ -7,13 +8,13 @@ export default {
   addUser: (cbOne, cbTwo) => {
     GraphApi.getUserInfo(function(userInfo, friendsData) {
       const api = apisauce.create({
-        baseURL: 'http://127.0.0.1:3000',
+        baseURL: host,
         headers: {
           'Accept': 'text/plain',
         }
       });
       api
-      .post('/api/users', userInfo)
+      .post('users', userInfo)
       .then((res) => {
         console.log('success adding user', JSON.stringify(res));
         console.log('friendsData', friendsData);
@@ -23,20 +24,20 @@ export default {
         if (err) {
           console.log('error adding user', err.data);
         }
-      });    
-    });     
+      });
+    });
   },
 
-  addFriends: (friendsData, cb) => { 
+  addFriends: (friendsData, cb) => {
     console.log('friendsData', friendsData);
     const api = apisauce.create({
-      baseURL: 'http://127.0.0.1:3000',
+      baseURL: host,
       headers: {
         'Accept': 'text/plain',
       }
     });
     api
-    .post('/api/friends', friendsData)
+    .post('friends', friendsData)
     .then((res) => {
       console.log('success adding/ updating friends', JSON.stringify(res));
       cb(friendsData);
@@ -50,13 +51,13 @@ export default {
 
   // getFriends: (cb) => { // todo: add param for fb_id
   //   const api = apisauce.create({
-  //     baseURL: 'http://127.0.0.1:3000',
+  //     baseURL: host,
   //     headers: {
   //       'Accept': 'text/plain'
   //     }
   //   });
   //   api
-  //   .get('/api/friends/:' + /*fb_id*/)
+  //   .get('friends/:' + /*fb_id*/)
   //   .then((res) => {
   //     console.log('fetched friends', JSON.strinify(res));
   //     cb(res);
@@ -70,13 +71,13 @@ export default {
 
   // getLocations: (cb) => { // todo: add param for fb_id
   //   const api = apisauce.create({
-  //     baseURL: 'http://127.0.0.1:3000',
+  //     baseURL: host,
   //     headers: {
   //       'Accept': 'text/plain'
   //     }
   //   });
   //   api
-  //   .get('/api/locations/:' + /*fb_id*/)
+  //   .get('locations/:' + /*fb_id*/)
   //   .then((res) => {
   //     console.log('fetched friends', JSON.strinify(res));
   //     cb(res);
