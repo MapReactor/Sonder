@@ -447,7 +447,7 @@ class MapviewExample extends React.Component {
           <View style={Styles.bubble}>
             <Text>{
               (compassLineFeature && this.state.adjacentHoods) ?
-                this.getHoodCollisions(compassLineFeature, this.state.adjacentHoods, this.state.currentHood).adjacents.reduce((pre, cur) => {if (0 + cur.distance.split(" ")[0] < 0 + pre.distance.split(" ")[0]) {return cur} else {return pre}}).name : "Just a sec..." }</Text>
+                JSON.stringify( this.getHoodCollisions(compassLineFeature, this.state.adjacentHoods, this.state.currentHood).adjacents.reduce((pre, cur) => {if (0 + cur.distance.split(" ")[0] < 0 + pre.distance.split(" ")[0]) {return cur} else {return pre}}).name ) : "Just a sec..." }</Text>
           </View>
         </View>
         <View style={Styles.buttonContainer}>
@@ -464,8 +464,7 @@ class MapviewExample extends React.Component {
                 //   JSON.stringify(compassLineFeature.geometry) :
                 //   'Waiting for compass line...'
                 (compassLineFeature && this.state.streets) ?
-                  this.getStreetCollisions(compassLineFeature, this.state.streets)
-                    .reduce((pre, cur) => {if (0 + cur.distance.split(" ")[0] < 0 + pre.distance.split(" ")[0]) {return cur} else {return pre}}).name : "Normalizing reticulating splines..."
+                  JSON.stringify( this.getStreetCollisions(compassLineFeature, this.state.streets) ) : "Normalizing reticulating splines..."
             }</Text>
           </View>
         </View>
@@ -490,7 +489,7 @@ const getPrettyBearing = (heading) => {
   const angle = (heading <= 90) ? heading :
                    (heading <= 180) ? 180 - heading :
                      (heading <= 270) ? heading - 180 : 360 - heading;
- return primaryCardinality + Math.round(angle) + degreeChar + secondaryCardinality;
+ return primaryCardinality + angle + degreeChar + secondaryCardinality;
 };
 
 const seededRandom = (seed) => {
