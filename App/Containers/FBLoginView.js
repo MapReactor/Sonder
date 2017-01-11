@@ -13,11 +13,12 @@ import UserActions from '../Redux/UserRedux'
 import LocationActions from '../Redux/LocationRedux'
 import { Images } from '../Themes'
 import UsersApi from '../Services/UsersApi'
+import { Actions as NavigationActions } from 'react-native-router-flux'
 
 // create custom facebook login
 const FBSDK = require('react-native-fbsdk');
 const {
-  LoginButton,
+  LoginButton, AccessToken
 } = FBSDK;
 
 type LoginProps = {
@@ -41,6 +42,24 @@ class FBLoginView extends Component {
     }
   }
 
+  componentWillMount() {
+    try {
+      let token = AccessToken.getCurrentAccessToken();
+      if (token) {
+        const setUserCB = function(friendsData) {
+          //{id:'1234', friendlist:['9','8','7','6','5']}
+          this.props.setUser(friendsData);
+          this.props.setLocation({id: friendsData.id});
+          NavigationActions.compassView(); //WE NEED TO FIX THIS
+        }.bind(this);
+
+        UsersApi.addUser(UsersApi.addFriends, setUserCB)
+      }
+    } catch (error) {
+      alert("THIS IS AN ERROR!")
+    }
+  }
+
   render() {
     return (
       <View>
@@ -60,6 +79,7 @@ class FBLoginView extends Component {
                   //{id:'1234', friendlist:['9','8','7','6','5']}
                   this.props.setUser(friendsData);
                   this.props.setLocation({id: friendsData.id});
+                  NavigationActions.compassView(); //WE NEED TO FIX THIS
                 }.bind(this);
 
                 UsersApi.addUser(UsersApi.addFriends, setUserCB)

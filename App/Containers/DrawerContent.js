@@ -26,11 +26,6 @@ class DrawerContent extends Component {
     this.context.drawer.toggle()
   }
 
-  handlePressComponents = () => {
-    this.toggleDrawer()
-    NavigationActions.componentExamples()
-  }
-
   handlePressUsage = () => {
     this.toggleDrawer()
     NavigationActions.usageExamples()
@@ -39,11 +34,6 @@ class DrawerContent extends Component {
   handlePressCompassView = () => {
     this.toggleDrawer()
     NavigationActions.compassView()
-  }
-
-  handlePressEnRouteView = () => {
-    this.toggleDrawer()
-    NavigationActions.enRouteView()
   }
 
   handlePressStorageTestView = () => {
@@ -73,13 +63,13 @@ class DrawerContent extends Component {
 
   renderLoginButton () {
     return (
-      <DrawerButton text={I18n.t('signIn')} onPress={this.handlePressLogin} />
+      <DrawerButton text='Login' onPress={this.handlePressWelcomeView} />
     )
   }
 
   renderLogoutButton () {
     return (
-      <DrawerButton text={I18n.t('logOut')} onPress={this.handlePressLogout} />
+      <DrawerButton text='Logout' onPress={this.handlePressWelcomeView} />
     )
   }
 
@@ -88,12 +78,9 @@ class DrawerContent extends Component {
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
-        <DrawerButton text='Compass View' onPress={this.handlePressCompassView} />
-        <DrawerButton text='enRoute View' onPress={this.handlePressEnRouteView} />
-        <DrawerButton text='*Component Examples' onPress={this.handlePressComponents} />
+        <DrawerButton text='Sonder' onPress={this.handlePressCompassView} />
         <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
         <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
-        <DrawerButton text='Welcome View' onPress={this.handlePressWelcomeView} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )

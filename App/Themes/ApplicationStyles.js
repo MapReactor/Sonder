@@ -48,6 +48,46 @@ const ApplicationStyles = {
       marginHorizontal: Metrics.smallMargin
     }
   },
+  login: {
+    mainContainer: {
+      flex: 1,
+      marginTop: 0,
+      backgroundColor: Colors.transparent,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    backgroundImage: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0
+    },
+    container: {
+      flex: 1,
+      paddingTop: 0,
+    },
+    section: {
+      margin: Metrics.section,
+      padding: Metrics.baseMargin,
+      borderTopColor: Colors.frost,
+      borderTopWidth: 0.5,
+      borderBottomColor: Colors.frost,
+      borderBottomWidth: 1
+    },
+    sectionText: {
+      color: Colors.charcoal,
+      marginVertical: Metrics.smallMargin,
+      textAlign: 'center',
+      fontWeight: 'bold'
+    },
+    subtitle: {
+      color: Colors.charcoal,
+      padding: Metrics.smallMargin,
+      marginBottom: Metrics.smallMargin,
+      marginHorizontal: Metrics.smallMargin
+    }
+  },
   darkLabelContainer: {
     backgroundColor: Colors.cloud,
     padding: Metrics.smallMargin

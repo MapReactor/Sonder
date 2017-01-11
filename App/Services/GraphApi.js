@@ -8,7 +8,8 @@ const {
 const getUserInfo = (cb) => {
   const resCallback = (error, result) => {
     if (error) {
-      alert('error fetching data: ' + error.toString());
+      //alert('error fetching data: ' + error.toString());
+      return error;
     } else {
       console.log('success fetching data: ', JSON.stringify(result));
       const userInfo = {
@@ -37,7 +38,9 @@ const getUserInfo = (cb) => {
     (data) => {
       token = data.accessToken.toString();
     }
-  )
+  ).catch(function(error){
+    token = null;
+  })
 
   const reqConfig = {
     httpMethod: 'GET',
@@ -60,5 +63,3 @@ const getUserInfo = (cb) => {
 export default {
   getUserInfo: getUserInfo
 }
-
-
