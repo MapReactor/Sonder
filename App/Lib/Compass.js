@@ -6,6 +6,7 @@ ToDos:
 - Make it work with batching optimizations,
     or use requestAnimationFrame, or something
 - Refactor the neighborhood stuff out of here
+- Add isReady() helper functions to go along with events
 - Unit tests
 */
 

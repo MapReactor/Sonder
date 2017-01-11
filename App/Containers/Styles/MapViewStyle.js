@@ -28,7 +28,7 @@ export default StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    marginVertical: 20,
+    marginVertical: 5,
     backgroundColor: 'transparent',
   },
 })
