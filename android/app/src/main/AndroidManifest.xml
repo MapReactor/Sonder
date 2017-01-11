@@ -7,7 +7,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-  
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-sdk
         android:minSdkVersion="18"
@@ -19,6 +21,7 @@
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:theme="@style/AppTheme">
+      <service android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService"/>
       <meta-data
           android:name="com.google.android.geo.API_KEY"
           android:value="AIzaSyA7mzTLYqNFwA61p30fBmjgonIlsyogibI" />
