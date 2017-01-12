@@ -34,6 +34,7 @@
     "code42day-vis-why": "^1.1.5",
     "format-json": "^1.0.3",
     "lodash": "^4.17.2",
+    "next-frame": "^0.2.3",
     "polygon-offset": "^0.3.1",
     "querystringify": "0.0.4",
     "ramda": "^0.22.1",
