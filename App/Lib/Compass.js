@@ -64,13 +64,14 @@ class Compass {
   }
 
   _setEvents(opts) {
+    const nullifyOnInactive = (func) => (...args) => this._active ? func(...args) : (() => {})();
+    // calling whatever(args); needs to be func(args) if active, noop() otherwise
     this.EVENTS.forEach(event => {
       if (typeof opts[event] === 'function') {
-        this['_'+event] = opts[event];
+        this['_'+event] = nullifyOnInactive(opts[event]);
       } 
     });
   }
-
   start(opts) {
     /* Backlog:
        - Move to async/await, make all the logic consistent
@@ -86,6 +87,7 @@ class Compass {
           -- This is so they can be refactored elsewhere as needed
     */
     var startTime;
+    this._active = true;
 
     this._radius = opts.radius || 10;
     this._setEvents(opts);
@@ -292,6 +294,7 @@ class Compass {
   }
 
   stop() {
+    this._active = false;
     ReactNativeHeading.stop();
     DeviceEventEmitter.removeAllListeners('headingUpdated');
     navigator.geolocation.clearWatch(this.watchID);
