@@ -36,6 +36,11 @@ class DrawerContent extends Component {
     NavigationActions.compassView()
   }
 
+  handlePressAnsibleView = () => {
+    this.toggleDrawer()
+    NavigationActions.ansibleView()
+  }
+
   handlePressStorageTestView = () => {
     this.toggleDrawer()
     NavigationActions.storageTestView()
@@ -78,9 +83,10 @@ class DrawerContent extends Component {
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
-        <DrawerButton text='Sonder' onPress={this.handlePressCompassView} />
+        <DrawerButton text='Sonder' onPress={this.handlePressAnsibleView} />
         <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
         <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
+        <DrawerButton text='Sonder Legacy' onPress={this.handlePressCompassView} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )
