@@ -24,6 +24,8 @@ import turf from '@turf/turf';
 
 import { clone } from 'cloneextend';
 import vis from 'code42day-vis-why';
+import nextFrame from 'next-frame';
+
 const offset = new Offset();
 
 const toRadians = (heading) => heading * (Math.PI / 180);
@@ -51,6 +53,8 @@ class Compass {
     this.entities = {};
     this._currentPosition = null;
     this._heading = null;
+    this._debugStreets = this.getDebugStreets();
+    this._debugHoods = this.getDebugHoods();
   }
   getDebugHoods() {
     return FixtureApi.getNeighborhoodBoundaries('San Francisco').data;
@@ -68,28 +72,39 @@ class Compass {
   }
 
   start(opts) {
-    /* ToDos: 
-       - Probably start() should be thenable and onInitialPosition 
-          and onHeadingSupported deprecated.
-       - getCurrent and watchPosition should probably use Promise.race
-        right now, presumes that no movement is happening on init
+    /* Backlog:
+       - Move to async/await, make all the logic consistent
+          -- Start with detection, then features update code
+       - Change ALL forEach's into for-of loops for speed
+       Icebox: 
+          - Perhaps start() should be thenable and onInitialPosition 
+              and onHeadingSupported deprecated.
+       Notes: 
+       - Right now, presumes that no movement is happening on init
+          -- To fix this, could use Promise.race with getCurrent and watchPosition
+       - ALL instance variable are now set here, not secretly in methods
+          -- This is so they can be refactored elsewhere as needed
     */
-    this._setEvents(opts);
-    this._radius = opts.radius || 10;
+    var startTime;
 
-    const getInitialPosition = new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (!this._currentPosition) this._currentPosition = position.coords;
-          this._onInitialPosition(position);
-          resolve(position);
-        },
-        (error) => reject('Location timed out')
-      );
-    });
-    getInitialPosition
-      .then(position => this._processNeighborhoods(position))
-      .then(hoodData => this._onInitialHoods(hoodData));
+    this._radius = opts.radius || 10;
+    this._setEvents(opts);
+
+    this.getInitialPosition()
+      .then(position => { 
+        if (!this._currentPosition) { 
+          this._currentPosition = position.coords;
+        }
+        this._onInitialPosition(position);
+        this.__frameCounter = 0;
+        startTime = Date.now();
+        return this._processNeighborhoods(position);
+      })
+      .then(hoodData => { 
+        console.tron.log('SPEED: ' + (Date.now()-startTime).toString()+'ms SPREAD: ' + this.__frameCounter.toString()+' frames');
+        this._hoodData = hoodData;
+        this._onInitialHoods(hoodData) 
+      });
 
     this.watchID = navigator.geolocation.watchPosition(position => {
       this._currentPosition = position.coords;
@@ -103,12 +118,36 @@ class Compass {
       const heading = this._heading = data.heading;
       const compassLine = this._compassLine = this.getCompassLine();
       this._onHeadingChange({ heading, compassLine });
-      if (!compassLine) return;
-      this._detectEntities(heading).then(entities => {
-        this._onEntitiesDetected(entities);
-      });
+      if (this._detectionPending) {
+        // console.tron.log("EMITTER SEES PENDING")
+      }
+      if (!compassLine || !this._hoodData || this._detectionPending) return;
 
+      // MEASURE 1: angle/timing kludge for feature detection
+      // if (this._lastHeadingChange && Date.now()-this._lastHeadingChange < 1000) return;
+      // if (this._lastHeading && Math.abs(heading-this._lastHeading) < 5) return;
+      // END 
+      const startTime = Date.now();
+      this.__frameCounter = 0;
+      this._detectionPending = true;
+      this._detectEntities(heading).then(entities => {
+        this._entities = entities;
+        this._onEntitiesDetected(entities);
+        this._detectionPending = false;
+        // console.tron.log('SPEED: ' + (Date.now()-startTime).toString()+'ms SPREAD: ' + this.__frameCounter.toString()+' frames');
+      });
+      this._lastHeadingChange = Date.now();
+      this._lastHeading = heading;
     });
+  }
+
+  getInitialPosition() {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position),
+        (error) => reject('Location timed out')
+      );
+    });  
   }
 
   getCompassLine(heading = this._heading, 
@@ -116,22 +155,24 @@ class Compass {
                  origin = this._currentPosition) {
     if (!origin) return null;
     const headingInRadians = toRadians(heading);
-    // alert(JSON.stringify({ heading, radius, origin }));
     return [origin, {
         longitude: origin.longitude + radius * Math.sin(headingInRadians),
         latitude: origin.latitude + radius * Math.cos(headingInRadians)
       }];
   }
 
-  _detectEntities(heading) {
-    return new Promise((resolve,reject) => {
-      setTimeout(() => {
-        resolve({ 
-          hoods: this.getHoodCollisions(),
-          streets: this.getStreetCollisions()
-        });
-      },0);
-    });
+  async _detectEntities(heading) {
+    // MEASURE 2: Return cached entities if any _detectEntities frame has not run to completion
+    // if (this._detectionPending) { 
+    //   console.tron.log("SENDING CACHED ENTITIES");
+    //   return this._entities;
+    // }
+    // END
+    await nextFrame(); this.__frameCounter++;
+    const hoods = await this.getHoodCollisions();
+    await nextFrame(); this.__frameCounter++;
+    const streets = await this.getStreetCollisions();
+    return { hoods, streets };
   }
 
   _getCompassLineFeature() {
@@ -139,47 +180,45 @@ class Compass {
   }
 
   // Probably just wrap this in a requestAnimationFrame for now
-  getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
+  async getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
                     adjacentHoods = this._hoodData.adjacentHoods, 
                     currentHood = this._hoodData.currentHood) {
-    // return currentHood;
     var adjacents = [];
-    // return compassLatLngs;
-    // return compassLineFeature;
-    var pointCount = 0;
-    adjacentHoods.forEach(feature => {
+    var startHeading = this._heading;
+    for (let feature of adjacentHoods) {
+      await nextFrame(); this.__frameCounter++;
       const collisions = intersect(compassLineFeature, feature);
-      // pointCount is for debugging only; only here for easy output, very bad
-      // pointCount += flatten(feature.geometry.coordinates).length/2;
       if (!collisions ||
-        currentHood.properties.label === feature.properties.label) return null;
-
-      // Possible todo: just add a label property to this object to keep it consistent?
+        currentHood.properties.label === feature.properties.label) continue;
       const type = collisions.geometry.type;
       const coords = collisions.geometry.coordinates;
       const nearestCoord = (type === 'MultiLineString') ? coords[0][0] : coords[0];
       const nearestFeature = point(nearestCoord);
       const originFeature = point(compassLineFeature.geometry.coordinates[0]);
       const collisionDistance = turf.distance(originFeature, nearestFeature, 'miles');
-      // results.push({type, nearestCoord})
-      // return;
       adjacents.push({
         name: feature.properties.label,
         distance: collisionDistance.toFixed(2) + ' miles'
-        // point: nearestCoord
       });
-    });
+    }
     return {adjacents, current: currentHood.properties.label };
   } 
 
-  getStreetCollisions(compassLineFeature = this._getCompassLineFeature(), 
-                      streetsFixture = this.getDebugStreets() ) {
-    streetsAhead = [];
-    streetsFixture.forEach(feature => {
+  async getStreetCollisions(compassLineFeature = this._getCompassLineFeature(), 
+                      streetsFixture = this._debugStreets ) {
+    // return ['Streets Stubbed'];
+    var streetsAhead = [];
+    const startHeading = this._heading;
+    var startTime, endTime, timeDiff;
+    var topStartTime = Date.now();
+    // MEASURE 3: replace forEach with let and call nextFrame several on each iteration
+    for (let feature of streetsFixture) {
+      await nextFrame; this.__frameCounter++;
       const collision = intersect(compassLineFeature, feature);
-      if (!collision) return null;
+      // console.tron.log("-STREETS- intersect: "+(Date.now()-topStartTime).toString()+'ms');
+      if (!collision) continue;
       const originFeature = point(compassLineFeature.geometry.coordinates[0]);
-      const collisionDistance = turf.distance(originFeature,collision);
+      const collisionDistance = turf.distance(originFeature,collision); 
       const street = {
         name: feature.properties.name,
         distance: collisionDistance.toFixed(2) + 'miles'  
@@ -187,67 +226,68 @@ class Compass {
       const relations = feature.properties['@relations'];
       if (relations) {
         let routes = {};
-        relations.forEach(relation => {
+        for (let relation of relations) {
+          await nextFrame(); this.__frameCounter++;
           if (relation.reltags.type === "route") {
             routes[relation.reltags.ref] = true;
           }
-        });
+        };
         if (routes) street.routes = Object.keys(routes);
       }
       streetsAhead.push(street);
-    });
+    }
     return streetsAhead;
   }
 
-  _processNeighborhoods(position) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const rawHoods = this.getDebugHoods();
-        const streets = this.getDebugStreets();
-        // The rest might end up as instance variables:
-        const currentHood = this._findCurrentHood(position, rawHoods.features);
-        const adjacentHoods = this._findAdjacentHoods(currentHood, rawHoods.features);
-        const hoodLatLngs = this.mapifyHoods(adjacentHoods);
-        const streetLatLngs = this.mapifyStreets(streets);
-        this._hoodData = { currentHood, adjacentHoods, hoodLatLngs, streetLatLngs };
-        resolve(this._hoodData);
-      },0);
-    });
-
-    // WARNING: this will *definitely* need to be done asynchronously!
-    // Just grabbing them badly for first refactor
-
+  async _processNeighborhoods(position) {
+    let startTime = Date.now();
+    const rawHoods = this._debugHoods;
+    await nextFrame(); this.__frameCounter++;
+    console.tron.log('getDebugHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString());
+    const streets = this._debugStreets; 
+    await nextFrame(); this.__frameCounter++;
+    const currentHood = await this._findCurrentHood(position, rawHoods.features);
+    await nextFrame(); this.__frameCounter++;
+    console.tron.log('findCurrentHood: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
+    const adjacentHoods = await this._findAdjacentHoods(currentHood, rawHoods.features);
+    await nextFrame(); this.__frameCounter++;
+    console.tron.log('findAdjacentHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
+    const hoodLatLngs = this.mapifyHoods(adjacentHoods);
+    await nextFrame(); this.__frameCounter++;
+    console.tron.log('mapifyHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
+    const streetLatLngs = this.mapifyStreets(streets);
+    await nextFrame(); this.__frameCounter++;
+    console.tron.log('mapifyStreets: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
+    const hoodData = { currentHood, adjacentHoods, hoodLatLngs, streetLatLngs };
+    return hoodData;
   }
 
-  _findCurrentHood(position, hoodFeatures) {
-    return hoodFeatures.filter(feature => {
+  async _findCurrentHood(position, hoodFeatures) {
+    for (let feature of hoodFeatures) {
       const curPosGeo = point(toTuple(position.coords)).geometry;
-      return inside(curPosGeo, feature);
-    })[0];
+      if (inside(curPosGeo, feature)) return feature;
+      await nextFrame(); this.__frameCounter++;
+    }
   }
 
-  _findAdjacentHoods(currentHood, hoodFeatures) {
+  async _findAdjacentHoods(currentHood, hoodFeatures) {
     // This does an in-place grow on currentHood in order to find intersections
     // Not doing this can sometimes turn up false negatives when polys
     // don't fully overlap.
     // Note: Not yet working with MultiPolys.
     const bloatedHood = this.bloatAndSimplify(currentHood);
-    let adjacentHoods = hoodFeatures.filter(feature => {
-      return intersect(bloatedHood, feature);
-    });
-    // Simplifies with the D3-derived Visvalingam algorithm
-    // Clone first to avoid changing source data
-    adjacentHoods = clone(adjacentHoods);
-    adjacentHoods.forEach(feature => {
-      // No MultiPoly check... Just want to see if this works
-      let pointCount = flatten(feature.geometry.coordinates).length/2;
-      feature.geometry.coordinates[0] = vis(feature.geometry.coordinates[0],pointCount*0.5);
-    });
-    // Alternate implementation using the Douglas-Peucker algorithm, 
-    // which doesn't work quite as well:
-    // adjacentHoods = clone(adjacentHoods).map(feature => {
-    //   return turf.simplify(feature,0.0002,false);      
-    // });
+    var adjacentHoods = [];
+    for (feature of hoodFeatures) {
+      if (intersect(bloatedHood, feature)) {
+        feature = clone(feature);
+        // Simplifies with the D3-derived Visvalingam algorithm:
+        // (Clone first to avoid changing source data)
+        let pointCount = flatten(feature.geometry.coordinates).length/2;
+        feature.geometry.coordinates[0] = vis(feature.geometry.coordinates[0],pointCount*0.5);
+        adjacentHoods.push(feature);
+        await nextFrame(); this.__frameCounter++; 
+      }
+    }
     return adjacentHoods;
   }
 
