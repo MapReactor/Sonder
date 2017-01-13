@@ -2,12 +2,13 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
 
+
 /* ------------- Types and Action Creators ------------- */
 
 const { Types, Creators } = createActions({
-  friendsLocationRequest: ['id'],
-  friendsLocationSuccess: ['friendsLocations'],
-  friendsLocationFailure: null,
+  friendsLocationsRequest: ['id'],
+  friendsLocationsSuccess: ['friendsLocations'],
+  friendsLocationsFailure: null,
 })
 
 export const FriendsTypes = Types
@@ -37,7 +38,7 @@ export const failure = (state: Object, { error }: Object) =>
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
-  [Types.FRIENDS_LOCATION_REQUEST]: request,
-  [Types.FRIENDS_LOCATION_SUCCESS]: success,
-  [Types.FRIENDS_LOCATION_FAILURE]: failure,
+  [Types.FRIENDS_LOCATIONS_REQUEST]: request,
+  [Types.FRIENDS_LOCATIONS_SUCCESS]: success,
+  [Types.FRIENDS_LOCATIONS_FAILURE]: failure,
 })
