@@ -1,12 +1,14 @@
 import { call, put, take, fork, } from 'redux-saga/effects'
 import FriendsLocationsActions from '../Redux/FriendsLocationsRedux'
+import { eventChannel } from 'redux-saga'
 
 console.log('opening friends locations saga')
 
 function websocketInitChannel() {
   return eventChannel( emitter => {
+    console.log('attempting to open ws')
     // init the connection here
-    const ws = new WebSocket('ws://sonder.herokuapp.com') // todo: enter ws url
+    const ws = new WebSocket('ws://sonder.herokuapp.com')
 
     ws.onopen = () => {
       console.log('opening ws')
@@ -17,7 +19,7 @@ function websocketInitChannel() {
       console.log('WebSocket error ' + error)
     }
 
-    ws.onmessage = e => {
+    ws.onmessage = (e) => {
       // transform data
       let payload = {};
       payload.id = e.id
@@ -26,7 +28,7 @@ function websocketInitChannel() {
       payload.type = 'publish'
 
       // dispatch an action with emitter here
-      return emitter( { type: 'FRIENDS_LOCATIONS_SUCCESS', friendLocation: payload } )
+      return emitter( { type: 'FRIENDS_LOCATIONS_UPDATE', friendLocation: payload } )
     }
     // unsubscribe function
     return () => {
@@ -35,10 +37,12 @@ function websocketInitChannel() {
     }
   })
 }
-export default function* websocketSagas() {
+ const websocketSaga = function * () {
   const channel = yield call(websocketInitChannel)
   while (true) {
     const action = yield take(channel)
     yield put(action)
   }
 }
+
+module.exports = { websocketSaga };
