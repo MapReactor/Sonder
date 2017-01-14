@@ -8,12 +8,13 @@ import NavigationDrawer from './NavigationDrawer'
 
 // screens identified by the router
 import MapViewExample from '../Containers/MapViewExample'
-import CompassView from '../Containers/CompassView'
+// import CompassView from '../Containers/CompassView'
 import WelcomeView from '../Containers/WelcomeView'
 import StorageTestView from '../Containers/StorageTestView'
 import FriendsView from '../Containers/FriendsView'
 import AnsibleView from '../Containers/AnsibleView'
 import MapBoxExample from '../Containers/MapBoxExample'
+import MapBoxExampleSf from '../Containers/MapBoxExampleSf'
 
 /* **************************
 * Documentation: https://github.com/aksonov/react-native-router-flux
@@ -27,10 +28,11 @@ class NavigationRouter extends Component {
           <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
             <Scene initial key='welcomeView' hideNavBar={false} component={WelcomeView} />
             <Scene key='ansibleView' component={AnsibleView} title='Sonder Ansible' />
+            {/* <Scene key='compassView' hideNavBar={false} component={CompassView} title='Compass (deprecated)' />*/}
             <Scene key='mapBoxExampleView' component={MapBoxExample} title='MapBox Example' />
+            <Scene key='mapBoxExampleSfView' component={MapBoxExampleSf} title='MapBox Example SF' />
             <Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />
             <Scene key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
-            <Scene key='compassView' hideNavBar={false} component={CompassView} title='Sonder Legacy' />
           </Scene>
         </Scene>
       </Router>
