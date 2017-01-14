@@ -17,6 +17,7 @@ import { startup } from './StartupSagas'
 import { login } from './LoginSagas'
 import { getLocation, updateLocation } from './LocationSagas'
 import { openScreen } from './OpenScreenSagas'
+import { watchFriendsLocations } from './FriendsLocationsSagas'
 
 /* ------------- API ------------- */
 
