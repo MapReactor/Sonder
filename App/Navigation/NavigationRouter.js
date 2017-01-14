@@ -33,7 +33,6 @@ class NavigationRouter extends Component {
             <Scene key='mapBoxExampleSfView' component={MapBoxExampleSf} title='MapBox Example SF' />
             <Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />
             <Scene key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
-            <Scene key='compassView' hideNavBar={false} component={CompassView} title='Sonder Legacy' />
           </Scene>
         </Scene>
       </Router>
