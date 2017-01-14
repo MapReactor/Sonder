@@ -1,5 +1,6 @@
 import { put, select } from 'redux-saga/effects'
 import LocationActions from '../Redux/LocationRedux'
+import FriendsLocationsActions from '../Redux/FriendsLocationsRedux'
 import { is } from 'ramda'
 
 // process STARTUP actions
