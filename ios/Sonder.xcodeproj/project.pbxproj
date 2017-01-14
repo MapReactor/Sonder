@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0019A4791E1C773300AACAC8 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0019A4781E1C773300AACAC8 /* Bolts.framework */; };
-		0019A47B1E1C773B00AACAC8 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0019A47A1E1C773B00AACAC8 /* FBSDKCoreKit.framework */; };
-		0019A47D1E1C774100AACAC8 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0019A47C1E1C774100AACAC8 /* FBSDKLoginKit.framework */; };
-		0019A47F1E1C774A00AACAC8 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0019A47E1E1C774A00AACAC8 /* FBSDKShareKit.framework */; };
+		008288C71E2A0FF00085A411 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 008288C61E2A0FF00085A411 /* FBSDKShareKit.framework */; };
+		008288C91E2A0FF60085A411 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 008288C81E2A0FF60085A411 /* FBSDKLoginKit.framework */; };
+		008288CB1E2A0FF90085A411 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 008288CA1E2A0FF90085A411 /* FBSDKCoreKit.framework */; };
+		008288CD1E2A10060085A411 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 008288CC1E2A10060085A411 /* Bolts.framework */; };
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
 		00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302C01ABCB91800DB3ED1 /* libRCTImage.a */; };
@@ -290,6 +290,10 @@
 		0019A47A1E1C773B00AACAC8 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "../../../../../FacebookSDKs-iOS-4.18.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
 		0019A47C1E1C774100AACAC8 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = "../../../../../FacebookSDKs-iOS-4.18.0/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
 		0019A47E1E1C774A00AACAC8 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKShareKit.framework; path = "../../../../../FacebookSDKs-iOS-4.18.0/FBSDKShareKit.framework"; sourceTree = "<group>"; };
+		008288C61E2A0FF00085A411 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKShareKit.framework; path = "../../../../../../Downloads/FacebookSDKs-iOS-4.18.0 (2)/FBSDKShareKit.framework"; sourceTree = "<group>"; };
+		008288C81E2A0FF60085A411 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = "../../../../../../Downloads/FacebookSDKs-iOS-4.18.0 (2)/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
+		008288CA1E2A0FF90085A411 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "../../../../../../Downloads/FacebookSDKs-iOS-4.18.0 (2)/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
+		008288CC1E2A10060085A411 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bolts.framework; path = "../../../../../../Downloads/FacebookSDKs-iOS-4.18.0 (2)/Bolts.framework"; sourceTree = "<group>"; };
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		009C49DCF22B4EFDA4986975 /* libRNDeviceInfo.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNDeviceInfo.a; sourceTree = "<group>"; };
 		00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTActionSheet.xcodeproj; path = "../node_modules/react-native/Libraries/ActionSheetIOS/RCTActionSheet.xcodeproj"; sourceTree = "<group>"; };
@@ -354,10 +358,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0019A4791E1C773300AACAC8 /* Bolts.framework in Frameworks */,
-				0019A47B1E1C773B00AACAC8 /* FBSDKCoreKit.framework in Frameworks */,
-				0019A47D1E1C774100AACAC8 /* FBSDKLoginKit.framework in Frameworks */,
-				0019A47F1E1C774A00AACAC8 /* FBSDKShareKit.framework in Frameworks */,
+				008288CD1E2A10060085A411 /* Bolts.framework in Frameworks */,
+				008288C91E2A0FF60085A411 /* FBSDKLoginKit.framework in Frameworks */,
+				008288CB1E2A0FF90085A411 /* FBSDKCoreKit.framework in Frameworks */,
+				008288C71E2A0FF00085A411 /* FBSDKShareKit.framework in Frameworks */,
 				6EBFDBDB1E1AE84600745B02 /* libReactNativeHeading.a in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
 				6E72A0171E25E40A00EBC2C4 /* Mapbox.framework in Frameworks */,
@@ -397,6 +401,10 @@
 		0019A45C1E1C773300AACAC8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				008288CC1E2A10060085A411 /* Bolts.framework */,
+				008288CA1E2A0FF90085A411 /* FBSDKCoreKit.framework */,
+				008288C81E2A0FF60085A411 /* FBSDKLoginKit.framework */,
+				008288C61E2A0FF00085A411 /* FBSDKShareKit.framework */,
 				0019A47E1E1C774A00AACAC8 /* FBSDKShareKit.framework */,
 				0019A47C1E1C774100AACAC8 /* FBSDKLoginKit.framework */,
 				0019A47A1E1C773B00AACAC8 /* FBSDKCoreKit.framework */,
@@ -712,7 +720,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = 74S95ZT622;
+						DevelopmentTeam = 26G794KVZU;
 					};
 				};
 			};
@@ -1184,10 +1192,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = 74S95ZT622;
+				DEVELOPMENT_TEAM = 26G794KVZU;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/Frameworks/",
-					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/../node_modules/react-native-mapbox-gl/ios/**",
 				);
 				INFOPLIST_FILE = Sonder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1196,7 +1204,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.SonderBARF;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.Sonder;
 				PRODUCT_NAME = Sonder;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1207,11 +1215,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 74S95ZT622;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/Frameworks/",
-					"$(PROJECT_DIR)",
-				);
+				DEVELOPMENT_TEAM = 26G794KVZU;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Frameworks/";
 				INFOPLIST_FILE = Sonder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -1219,7 +1224,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.SonderBARF;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.Sonder;
 				PRODUCT_NAME = Sonder;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
