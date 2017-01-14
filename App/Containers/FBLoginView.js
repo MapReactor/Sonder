@@ -65,7 +65,6 @@ class FBLoginView extends Component {
       <View>
         <LoginButton
           readPermissions={["public_profile","email","user_friends"]}
-          publishPermissions={[]}
           onLoginFinished={
             (error, result) => {
               if (error) {

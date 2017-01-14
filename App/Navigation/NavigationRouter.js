@@ -23,16 +23,16 @@ class NavigationRouter extends Component {
   render () {
     return (
       <Router>
-        <Scene key='drawer' component={NavigationDrawer} open={false}>
-          <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
-            <Scene key='welcomeView' hideNavBar={false} component={WelcomeView} />
-            <Scene key='compassView' hideNavBar={false} component={CompassView} title='Sonder' />
-            <Scene initial key='ansibleView' component={AnsibleView} title='Sonder Ansible' />
-            <Scene initial key='mapBoxExampleView' component={MapBoxExample} title='MapBox Example' />
-            <Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />
-            <Scene key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
-          </Scene>
+      <Scene key='drawer' component={NavigationDrawer} open={false}>
+        <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
+          <Scene initial key='welcomeView' hideNavBar={false} component={WelcomeView} />
+          <Scene key='ansibleView' component={AnsibleView} title='Sonder Ansible' />
+          <Scene key='mapBoxExampleView' component={MapBoxExample} title='MapBox Example' />
+          <Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />
+          <Scene key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
+          <Scene key='compassView' hideNavBar={false} component={CompassView} title='Sonder Legacy' />
         </Scene>
+      </Scene>
       </Router>
     )
   }
