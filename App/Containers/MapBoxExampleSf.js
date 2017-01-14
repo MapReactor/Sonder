@@ -10,6 +10,7 @@ import {
   View,
   ScrollView
 } from 'react-native';
+import PopupDialog, { DialogTitle, DialogButton, SlideAnimation } from 'react-native-popup-dialog';
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -23,7 +24,12 @@ class MapBoxExample extends Component {
       latitude: 37.78760656916262
     },
     zoom: 14,
+    annotationClicked: false,
+    rightAnnotationClicked: false,
     userTrackingMode: Mapbox.userTrackingMode.none,
+    neighborhood: 'Tenderloin',
+    wikiTitle: '',
+    wikiExtract: '',
     annotations: [{
       coordinates: [37.78477457373192, -122.40258693695068],
       type: 'point',
@@ -66,7 +72,7 @@ class MapBoxExample extends Component {
       fillAlpha: 0.3,
       strokeColor: '#ffffff',
       fillColor: '#0000ff',
-      id: 'testSquare'
+      id: 'sfSquare'
     }]
   };
 
@@ -81,9 +87,11 @@ class MapBoxExample extends Component {
     console.log('onUpdateUserLocation', location);
   };
   onOpenAnnotation = (annotation) => {
+    this.state.annotationClicked === false ? this.setState({annotationClicked: true}) : this.setState({annotationClicked: false})
     console.log('onOpenAnnotation', annotation);
   };
   onRightAnnotationTapped = (e) => {
+    this.state.rightAnnotationClicked === false ? this.setState({rightAnnotationClicked: true}) : this.setState({rightAnnotationClicked: false})
     console.log('onRightAnnotationTapped', e);
   };
   onLongPress = (location) => {
@@ -96,6 +104,21 @@ class MapBoxExample extends Component {
     this.setState({ userTrackingMode });
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
+
+  getWiki = () => {
+    fetch(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${this.state.neighborhood}, San_Francisco`)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        for ( var key in responseJson.query.pages) {
+          let page = responseJson.query.pages[key]
+          this.setState({wikiTitle: page.title});
+          this.setState({wikiExtract: page.extract.replace(/\n/g,"\n\n")});
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 
   componentWillMount() {
     this._offlineProgressSubscription = Mapbox.addOfflinePackProgressListener(progress => {
@@ -114,52 +137,6 @@ class MapBoxExample extends Component {
     this._offlineMaxTilesSubscription.remove();
     this._offlineErrorSubscription.remove();
   }
-
-  addNewMarkers = () => {
-    // Treat annotations as immutable and create a new one instead of using .push()
-    this.setState({
-      annotations: [ ...this.state.annotations, {
-        coordinates: [40.73312,-73.989],
-        type: 'point',
-        title: 'This is a new marker',
-        id: 'foo'
-      }, {
-        'coordinates': [[40.749857912194386, -73.96820068359375], [40.741924698522055,-73.9735221862793], [40.735681504432264,-73.97523880004883], [40.7315190495212,-73.97438049316406], [40.729177554196376,-73.97180557250975], [40.72345355209305,-73.97438049316406], [40.719290332250544,-73.97455215454102], [40.71369559554873,-73.97729873657227], [40.71200407096382,-73.97850036621094], [40.71031250340588,-73.98691177368163], [40.71031250340588,-73.99154663085938]],
-        'type': 'polygon',
-        'fillAlpha': 1,
-        'fillColor': '#000000',
-        'strokeAlpha': 1,
-        'id': 'new-black-polygon'
-      }]
-    });
-  };
-
-  updateMarker2 = () => {
-    // Treat annotations as immutable and use .map() instead of changing the array
-    this.setState({
-      annotations: this.state.annotations.map(annotation => {
-        if (annotation.id !== 'marker2') { return annotation; }
-        return {
-          coordinates: [40.714541341726175,-74.00579452514648],
-          'type': 'point',
-          title: 'New Title!',
-          subtitle: 'New Subtitle',
-          annotationImage: {
-            source: { uri: 'https://cldup.com/7NLZklp8zS.png' },
-            height: 25,
-            width: 25
-          },
-          id: 'marker2'
-        };
-      })
-    });
-  };
-
-  removeMarker2 = () => {
-    this.setState({
-      annotations: this.state.annotations.filter(a => a.id !== 'marker2')
-    });
-  };
 
   render() {
     StatusBar.setHidden(true);
@@ -191,6 +168,25 @@ class MapBoxExample extends Component {
       <ScrollView style={styles.scrollView}>
         {this._renderButtons()}
       </ScrollView>
+      <PopupDialog
+        ref={(popupDialog) => { this.popupDialog = popupDialog; }}
+        onOpened={() => { this.getWiki(); }}
+        width={.85}
+        height={.75}
+        dialogStyle={{padding: 10}}
+        // actions={[<DialogButton text="CLOSE", align="center" onPress={this.closeDialog}/>]}
+        dialogTitle={<DialogTitle title={this.state.wikiTitle} />}
+        // Disabling animations as dialogue disappears after state changes
+        // see: https://github.com/jacklam718/react-native-popup-dialog/issues/19
+        // dialogAnimation = { new SlideAnimation({
+        //   slideFrom: 'bottom',
+        //   animationDuration: 100,
+        // }) }
+      >
+        <View>
+          <Text>{this.state.wikiExtract}</Text>
+        </View>
+      </PopupDialog>
       </View>
     );
   }
@@ -198,20 +194,15 @@ class MapBoxExample extends Component {
   _renderButtons() {
     return (
       <View>
-        <Text onPress={() => this._map && this._map.selectAnnotation('marker1')}>
+        <Text onPress={() => this.popupDialog.openDialog()}>
           Toggle Wiki popup
         </Text>
-        <Text onPress={() => this._map && this._map.deselectAnnotation()}>
-          Deselect annotation
-        </Text>
-        <Text onPress={() => this.setState({ annotations: [] })}>
-          Remove all annotations
+        <Text onPress={() => this.getWiki()}>
+          Toggle getWiki
         </Text>
         <Text>
-          User tracking mode is {this.state.userTrackingMode}
-        </Text>
-        <Text>
-          Annotations: {this.state.annotations ? JSON.stringify( this.state.annotations ) : null}
+          Wiki Title: {this.state.wikiTitle}{"\n"}
+          Wiki Extract: {this.state.wikiExtract}
         </Text>
       </View>
     );
