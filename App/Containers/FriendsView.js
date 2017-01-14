@@ -154,4 +154,4 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps)(FriendsView)
+export default connect(mapDispatchToProps)(FriendsView)

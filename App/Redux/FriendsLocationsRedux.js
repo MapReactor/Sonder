@@ -10,7 +10,7 @@ const { Types, Creators } = createActions({
   friendsLocationsFailure: null,
 })
 
-export const FriendsTypes = Types
+export const FriendsLocationsTypes = Types
 export default Creators
 
 /* ------------- Initial State ------------- */
@@ -24,8 +24,8 @@ export const INITIAL_STATE = Immutable({
 
 // we've successfully got friends' locations
 export const success = (state: Object, { friendsLocations }: Object) =>
-  // state.merge({ error: null, friendsLocations })
   // update particular friend location
+  state.merge({ friendsLocations })
 
 // we've had a problem getting friends' locations
 export const failure = (state: Object, { error }: Object) =>

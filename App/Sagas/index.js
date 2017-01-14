@@ -10,6 +10,7 @@ import { StartupTypes } from '../Redux/StartupRedux'
 import { LocationTypes } from '../Redux/LocationRedux'
 import { LoginTypes } from '../Redux/LoginRedux'
 import { OpenScreenTypes } from '../Redux/OpenScreenRedux'
+import { FriendsLocationsTypes } from '../Redux/FriendsLocationsRedux'
 
 /* ------------- Sagas ------------- */
 
@@ -17,7 +18,7 @@ import { startup } from './StartupSagas'
 import { login } from './LoginSagas'
 import { getLocation, updateLocation } from './LocationSagas'
 import { openScreen } from './OpenScreenSagas'
-import { watchFriendsLocations } from './FriendsLocationsSagas'
+import { websocketSagas } from './FriendsLocationsSagas'
 
 /* ------------- API ------------- */
 
@@ -36,5 +37,7 @@ export default function * root () {
     takeLatest(OpenScreenTypes.OPEN_SCREEN, openScreen),
     takeLatest(LocationTypes.LOCATION_REQUEST, getLocation, locationApi),
     takeLatest(LocationTypes.LOCATION_UPDATE, updateLocation, locationApi),
+    takeLatest(FriendsLocataionsTypes.FRIENDS_LOCATIONS_SUCCESS, websocketSagas)
+    // takeLatest(FriendsLocataionsTypes.FRIENDS_LOCATIONS_FAILURE, websocketSagas)
   ]
 }
