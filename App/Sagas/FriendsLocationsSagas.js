@@ -15,9 +15,6 @@ function websocketInitChannel() {
       open = true
       console.log('opening ws')
       ws.send(JSON.stringify({"type": "subscribe", "friends": ["123"]}))
-      // ws.send("msg1")
-      // ws.send("msg2")
-      // ws.send("msg3")
     }
 
     ws.onerror = (error) => {
@@ -28,17 +25,20 @@ function websocketInitChannel() {
 
     ws.onmessage = (e) => {
       console.log('ws message: ', e.data);
-      // transform data
-      let payload = {}
-      payload.id = e.id
-      payload.longitude = e.longitude
-      payload.latitude = e.latitude
-      payload.type = 'publish'
+      let res = JSON.parse(e.data)
+      if (res.type === 'location') {
+        // transform data
+        let payload = {}
+        payload.id = res.message.id
+        payload.longitude = res.message.longitude
+        payload.latitude = res.message.latitude
+        payload.type = 'publish'
 
-      // dispatch an action with emitter
-      console.log(payload)
-      return emitter( { type: 'FRIENDS_LOCATIONS_UPDATE', friendLocation: payload } )
-      ws.close()
+        // dispatch an action with emitter
+        console.log(payload)
+        return emitter( { type: 'FRIENDS_LOCATIONS_UPDATE', friendsLocations: payload } )
+        ws.close()
+      }
     }
 
     ws.onclose = (e) => {

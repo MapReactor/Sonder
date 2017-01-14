@@ -23,7 +23,8 @@ export const INITIAL_STATE = Immutable({
 
 /* ------------- Reducers ------------- */
 
-export const update = (state: Object, { friendsLocations }: Object) => {
+export const update = (state: Object, action: Object) => {
+  const { friendsLocations } = action
   console.log('updating friend location', friendsLocations)
   return state.merge({ friendsLocations })
 }
