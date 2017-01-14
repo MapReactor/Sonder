@@ -37,6 +37,6 @@ export default function * root () {
     takeLatest(OpenScreenTypes.OPEN_SCREEN, openScreen),
     takeLatest(LocationTypes.LOCATION_REQUEST, getLocation, locationApi),
     takeLatest(LocationTypes.LOCATION_UPDATE, updateLocation, locationApi),
-    takeEvery(FriendsLocationsTypes.FRIENDS_LOCATIONS_UPDATE, websocketSaga),
+    takeLatest(FriendsLocationsTypes.FRIENDS_LOCATIONS_UPDATE, websocketSaga),
   ]
 }
