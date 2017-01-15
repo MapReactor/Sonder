@@ -14,7 +14,7 @@ function websocketInitChannel() {
     ws.onopen = () => {
       open = true
       console.log('opening ws')
-      ws.send(JSON.stringify({"type": "subscribe", "friends": ["123"]}))
+      ws.send(JSON.stringify({"type": "subscribe", "friends": ["123", "456", "789"]}))
     }
 
     ws.onerror = (error) => {
@@ -32,7 +32,6 @@ function websocketInitChannel() {
         payload.id = res.message.id
         payload.longitude = res.message.longitude
         payload.latitude = res.message.latitude
-        payload.type = 'publish'
 
         // dispatch an action with emitter
         console.log(payload)

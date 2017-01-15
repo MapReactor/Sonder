@@ -17,7 +17,10 @@ export default Creators
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
-  friendsLocations: {},  // latitude, longitude, bearing, picture
+  friendsLocations: {
+    '123': { 'longitude': '1', 'latitude': '1', },
+    '456': { 'longitude': '1', 'latitude': '2' }
+  },  // latitude, longitude, bearing, picture
   // error: null,
 })
 
@@ -25,8 +28,18 @@ export const INITIAL_STATE = Immutable({
 
 export const update = (state: Object, action: Object) => {
   const { friendsLocations } = action
-  console.log('updating friend location', friendsLocations)
-  return state.merge({ friendsLocations })
+  if (friendsLocations) {
+
+    let newLocation = {}
+    newLocation[friendsLocations.id] = {
+      'latitude': friendsLocations.latitude,
+      'longitude': friendsLocations.longitude
+    }
+    console.log('newLocation: ', newLocation)
+
+    return Object.assign({}, state, Object.assign({}, state.friendsLocations, newLocation))
+  }
+  return state
 }
 
 // we've successfully got friends' locations
