@@ -8,7 +8,9 @@ import {
   Text,
   StatusBar,
   View,
-  ScrollView
+  ScrollView,
+  Image,
+  Linking,
 } from 'react-native';
 import PopupDialog, { DialogTitle, DialogButton, SlideAnimation } from 'react-native-popup-dialog';
 
@@ -20,16 +22,20 @@ import sfSquare from '../Fixtures/sfSquare'
 class MapBoxExample extends Component {
   state = {
     center: {
-      longitude: -122.40668535232543,
-      latitude: 37.78760656916262
+      longitude: -122.40258693695068,
+      latitude: 37.78477457373192
     },
     zoom: 14,
     annotationClicked: false,
     rightAnnotationClicked: false,
-    userTrackingMode: Mapbox.userTrackingMode.none,
+    userTrackingMode: Mapbox.userTrackingMode.follow,
     neighborhood: 'Tenderloin',
     wikiTitle: '',
     wikiExtract: '',
+    wikiImageUrl: '',
+    wikiImageWidth: 0,
+    wikiImageHeight: 0,
+    wikiUrl: '',
     annotations: [{
       coordinates: [37.78477457373192, -122.40258693695068],
       type: 'point',
@@ -105,20 +111,60 @@ class MapBoxExample extends Component {
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
 
-  getWiki = () => {
-    fetch(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${this.state.neighborhood}, San_Francisco`)
+  closeDialog() {
+    this.popupDialog.closeDialog();
+  }
+  closeDialog = this.closeDialog.bind(this);
+
+  // Fetch title, extract, and url. Return a promise that resolves with the main page image name
+  fetchWikiHoodInfo = () => {
+    return fetch(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=pageprops|info|extracts&exintro=&explaintext=&inprop=url&titles=${this.state.neighborhood}, San_Francisco`)
       .then((response) => response.json())
       .then((responseJson) => {
         for ( var key in responseJson.query.pages) {
           let page = responseJson.query.pages[key]
+          console.tron.log(page.pageprops.page_image_free)
           this.setState({wikiTitle: page.title});
           this.setState({wikiExtract: page.extract.replace(/\n/g,"\n\n")});
+          this.setState({wikiUrl: page.fullurl})
+          return page.pageprops.page_image_free
         }
       })
       .catch((error) => {
         console.error(error);
       });
   }
+  fetchWikiHoodInfo = this.fetchWikiHoodInfo.bind(this)
+
+  // Fetch the image url, width and height of the main page url
+  fetchWikiHoodImageUrl = (imageName) => {
+    fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&titles=File:${imageName}&prop=imageinfo&iiprop=url|size&iiurlwidth=200`)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.tron.log(JSON.stringify(responseJson.query.pages["-1"].imageinfo))
+        for ( var key in responseJson.query.pages["-1"].imageinfo) {
+          let image = responseJson.query.pages["-1"].imageinfo[key]
+          this.setState({wikiImageUrl: image.thumburl});
+          this.setState({wikiImageWidth: image.thumbwidth});
+          this.setState({wikiImageHeight: image.thumbheight});
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+  fetchWikiHoodImageUrl = this.fetchWikiHoodImageUrl.bind(this)
+
+  getWikiHoodData = () => {
+    this.fetchWikiHoodInfo()
+      .then((imageName) => {
+        this.fetchWikiHoodImageUrl(imageName)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+  getWikiHoodData = this.getWikiHoodData.bind(this)
 
   componentWillMount() {
     this._offlineProgressSubscription = Mapbox.addOfflinePackProgressListener(progress => {
@@ -170,12 +216,12 @@ class MapBoxExample extends Component {
       </ScrollView>
       <PopupDialog
         ref={(popupDialog) => { this.popupDialog = popupDialog; }}
-        onOpened={() => { this.getWiki(); }}
+        onOpened={() => { this.getWikiHoodData(); }}
         width={.85}
         height={.75}
         dialogStyle={{padding: 10}}
-        // actions={[<DialogButton text="CLOSE", align="center" onPress={this.closeDialog}/>]}
-        dialogTitle={<DialogTitle title={this.state.wikiTitle} />}
+        actions={[<DialogButton buttonStyle={{height: 20/*, width: 20*/, justifyContent: 'center', marginTop: 10}} textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}} textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}} text="CLOSE" align="center" onPress={this.closeDialog} key="closePopup"/>]}
+        dialogTitle={<DialogTitle titleTextStyle={{fontSize: 20}} title={this.state.wikiTitle} />}
         // Disabling animations as dialogue disappears after state changes
         // see: https://github.com/jacklam718/react-native-popup-dialog/issues/19
         // dialogAnimation = { new SlideAnimation({
@@ -183,9 +229,13 @@ class MapBoxExample extends Component {
         //   animationDuration: 100,
         // }) }
       >
-        <View>
-          <Text>{this.state.wikiExtract}</Text>
-        </View>
+          <ScrollView>
+          <View  style={{alignItems: 'center', marginHorizontal: 20}}>
+            <Image style={{marginVertical: 5, resizeMode: 'contain'}} source={{uri: this.state.wikiImageUrl}} width={this.state.wikiImageWidth} height={this.state.wikiImageHeight} maintainAspectRatio={true} />
+            <Text style={{fontSize: 16, textAlign: 'justify'}}>{this.state.wikiExtract}</Text>
+            <Text onPress={() => {Linking.openURL("https://en.wikipedia.org/wiki/Union_Square,_San_Francisco").catch(err => console.error('An error occurred', err));}} style={{fontSize: 12, textAlign: 'left', padding: 10, color: 'blue'}}>{'Wikipedia'}</Text>
+            </View>
+          </ScrollView>
       </PopupDialog>
       </View>
     );
@@ -197,12 +247,16 @@ class MapBoxExample extends Component {
         <Text onPress={() => this.popupDialog.openDialog()}>
           Toggle Wiki popup
         </Text>
-        <Text onPress={() => this.getWiki()}>
-          Toggle getWiki
+        <Text onPress={() => this.getWikiHoodData()}>
+          Toggle getWiki Hood Data
         </Text>
         <Text>
           Wiki Title: {this.state.wikiTitle}{"\n"}
-          Wiki Extract: {this.state.wikiExtract}
+          Wiki Extract: {this.state.wikiExtract}{"\n"}
+          Wiki Image Url: {this.state.wikiImageUrl}{"\n"}
+          Wiki Image Width: {this.state.wikiImageWidth}{"\n"}
+          Wiki Image Height: {this.state.wikiImageHeight}{"\n"}
+          Wiki Url: {this.state.wikiUrl}
         </Text>
       </View>
     );
