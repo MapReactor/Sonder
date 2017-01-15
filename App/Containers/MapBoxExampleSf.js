@@ -8,6 +8,7 @@ import {
   Text,
   StatusBar,
   View,
+
   ScrollView,
   Image,
   Linking,
@@ -28,6 +29,7 @@ class MapBoxExample extends Component {
     zoom: 14,
     annotationClicked: false,
     rightAnnotationClicked: false,
+
     userTrackingMode: Mapbox.userTrackingMode.follow,
     neighborhood: 'Tenderloin',
     wikiTitle: '',
@@ -110,6 +112,7 @@ class MapBoxExample extends Component {
     this.setState({ userTrackingMode });
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
+
 
   closeDialog() {
     this.popupDialog.closeDialog();
