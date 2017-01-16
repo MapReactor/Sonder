@@ -1,4 +1,4 @@
-import { takeLatest } from 'redux-saga'
+import { takeLatest, takeEvery } from 'redux-saga'
 import API from '../Services/Api'
 import LocationAPI from '../Services/LocationApi'
 import FixtureAPI from '../Services/FixtureApi'
@@ -10,6 +10,7 @@ import { StartupTypes } from '../Redux/StartupRedux'
 import { LocationTypes } from '../Redux/LocationRedux'
 import { LoginTypes } from '../Redux/LoginRedux'
 import { OpenScreenTypes } from '../Redux/OpenScreenRedux'
+import { FriendsLocationsTypes } from '../Redux/FriendsLocationsRedux'
 
 /* ------------- Sagas ------------- */
 
@@ -17,6 +18,7 @@ import { startup } from './StartupSagas'
 import { login } from './LoginSagas'
 import { getLocation, updateLocation } from './LocationSagas'
 import { openScreen } from './OpenScreenSagas'
+import { websocketSaga } from './FriendsLocationsSagas'
 
 /* ------------- API ------------- */
 
@@ -35,5 +37,6 @@ export default function * root () {
     takeLatest(OpenScreenTypes.OPEN_SCREEN, openScreen),
     takeLatest(LocationTypes.LOCATION_REQUEST, getLocation, locationApi),
     takeLatest(LocationTypes.LOCATION_UPDATE, updateLocation, locationApi),
+    takeLatest(FriendsLocationsTypes.FRIENDS_LOCATIONS_UPDATE, websocketSaga),
   ]
 }
