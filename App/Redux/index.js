@@ -12,6 +12,7 @@ export default () => {
     user: require('./UserRedux').reducer,
     search: require('./SearchRedux').reducer,
     storageTest: require('./StorageTestRedux').reducer,
+    friendsLocations: require('./FriendsLocationsRedux').reducer,
   })
 
   return configureStore(rootReducer, rootSaga)

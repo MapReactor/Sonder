@@ -6,6 +6,8 @@ import { calculateRegion } from '../Lib/MapHelpers'
 import MapCallout from '../Components/MapCallout'
 import Styles from './Styles/MapViewStyle'
 import UsersApi from '../Services/UsersApi'
+import FriendsLocationsActions from '../Redux/LocationRedux'
+
 
 class FriendsView extends React.Component {
 
@@ -31,7 +33,7 @@ class FriendsView extends React.Component {
             // latitude: null
             // longitude: null
           // };
-        // 
+        //
 
         // for each friendLocation in friendsLocations
           // let id = friendLocation[fb_id];
@@ -50,10 +52,10 @@ class FriendsView extends React.Component {
 
 
       // set markers location and data of each friend
-      // const locations = [{ 
+      // const locations = [{
       //   title: 'friends name', /*add */
       //   image: require('./../Images/friendmarker.png'),
-      //   latitude: 41.8781, 
+      //   latitude: 41.8781,
       //   longitude: -87.6298,
       // }];
 
@@ -73,13 +75,13 @@ class FriendsView extends React.Component {
 
     // moving marker
     // setInterval(() => {
-    //   this.setState({ 
+    //   this.setState({
     //     locations: [{
     //       title: this.state.locations[0].title,
     //       image: this.state.locations[0].image,
     //       latitude: this.state.locations[0].latitude + 0.0001,
     //       longitude: this.state.locations[0].longitude,
-    //     }] 
+    //     }]
     //   })
     // }, 1000);
 
@@ -146,10 +148,10 @@ class FriendsView extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    // ...redux state to props here
+    setLocation: (location) => dispatch(FriendsLocationsActions.friendsLocationsSuccess(location))
   }
 }
 
-export default connect(mapStateToProps)(FriendsView)
+export default connect(mapDispatchToProps)(FriendsView)
