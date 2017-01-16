@@ -150,9 +150,11 @@ class MapBoxExample extends Component {
         for ( var key in responseJson.query.pages) {
           let page = responseJson.query.pages[key]
           console.tron.log(page.pageprops.page_image_free)
-          this.setState({wikiTitle: page.title});
-          this.setState({wikiExtract: page.extract.replace(/\n/g,"\n\n")});
-          this.setState({wikiUrl: page.fullurl})
+          this.setState({
+            wikiTitle: page.title,
+            wikiExtract: page.extract.replace(/\n/g,"\n\n"),
+            wikiUrl: page.fullurl
+          });
           return page.pageprops.page_image_free
         }
       })
@@ -180,9 +182,11 @@ class MapBoxExample extends Component {
         console.tron.log(JSON.stringify(responseJson.query.pages["-1"].imageinfo))
         for ( var key in responseJson.query.pages["-1"].imageinfo) {
           let image = responseJson.query.pages["-1"].imageinfo[key]
-          this.setState({wikiImageUrl: image.thumburl});
-          this.setState({wikiImageWidth: image.thumbwidth});
-          this.setState({wikiImageHeight: image.thumbheight});
+          this.setState({
+            wikiImageUrl: image.thumburl,
+            wikiImageWidth: image.thumbwidth,
+            wikiImageHeight: image.thumbheight
+          });
         }
       })
       .catch((error) => {
