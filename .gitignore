@@ -1,6 +1,7 @@
 # Misc
 **/*.log
 ios/Frameworks
+ios/
 
 # dotenv
 .env
