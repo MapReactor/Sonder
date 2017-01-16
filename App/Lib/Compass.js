@@ -309,7 +309,7 @@ class Compass {
   // If it doesn't, it's possible that false negatives will break LESS often
   // Than failed bloatAndSimplify operations
   bloatAndSimplify(feature) {
-    // Deep clone the input to the function pure
+    // Deep clone the input to keep the function pure
     feature =  clone(feature);
     const coords = feature.geometry.coordinates;
     feature.geometry.coordinates = offset.data(coords).margin(0.0003); //offset the polygon

@@ -15,6 +15,7 @@ import FriendsView from '../Containers/FriendsView'
 import SonderView from '../Containers/SonderView'
 import MapBoxExample from '../Containers/MapBoxExample'
 import MapBoxExampleSf from '../Containers/MapBoxExampleSf'
+import SonderDebug from '../Containers/SonderDebug'
 
 /* **************************
 * Documentation: https://github.com/aksonov/react-native-router-flux
@@ -33,6 +34,7 @@ class NavigationRouter extends Component {
             <Scene key='mapBoxExampleSfView' component={MapBoxExampleSf} title='MapBox Example SF' />
             <Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />
             <Scene initial key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
+            <Scene key='sonderDebug' component={SonderDebug} title='Sonder Data Debug' />
           </Scene>
         </Scene>
       </Router>
