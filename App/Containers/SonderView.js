@@ -18,7 +18,7 @@ import { getPrettyBearing, toTuples } from '../Lib/MapHelpers'
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
 
-class AnsibleView extends Component {
+class SonderView extends Component {
   state = {
     zoom: 12,
     userTrackingMode: Mapbox.userTrackingMode.follow,
@@ -176,4 +176,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(mapStateToProps)(AnsibleView)
+export default connect(mapStateToProps)(SonderView)

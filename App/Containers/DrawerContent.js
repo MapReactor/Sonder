@@ -31,9 +31,9 @@ class DrawerContent extends Component {
     NavigationActions.usageExamples()
   }
 
-  handlePressAnsibleView = () => {
+  handlePressSonderView = () => {
     this.toggleDrawer()
-    NavigationActions.ansibleView()
+    NavigationActions.SonderView()
   }
 
   // handlePressCompassView = () => {
@@ -51,9 +51,9 @@ class DrawerContent extends Component {
     NavigationActions.mapBoxExampleSfView()
   }
 
-  handlePressAnsibleView = () => {
+  handlePressSonderView = () => {
     this.toggleDrawer()
-    NavigationActions.ansibleView()
+    NavigationActions.sonderView()
   }
 
   handlePressStorageTestView = () => {
@@ -98,7 +98,7 @@ class DrawerContent extends Component {
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
-        <DrawerButton text='Ansible' onPress={this.handlePressAnsibleView} />
+        <DrawerButton text='Sonder' onPress={this.handlePressSonderView} />
         {/*<DrawerButton text='Compass (deprecated)' onPress={this.handlePressCompassView} />*/}
         <DrawerButton text='Mapbox Example' onPress={this.handlePressMapBoxExampleView} />
         <DrawerButton text='Mapbox Example SF' onPress={this.handlePressMapBoxExampleSfView} />
