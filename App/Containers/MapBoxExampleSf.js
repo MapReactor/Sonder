@@ -8,12 +8,16 @@ import {
   Text,
   StatusBar,
   View,
-
   ScrollView,
   Image,
   Linking,
 } from 'react-native';
-import PopupDialog, { DialogTitle, DialogButton, SlideAnimation } from 'react-native-popup-dialog';
+import PopupDialog, {
+  DialogTitle,
+  DialogButton,
+  SlideAnimation
+} from 'react-native-popup-dialog';
+import { makeUrl } from '../Lib/Utilities'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -66,7 +70,12 @@ class MapBoxExample extends Component {
       },
       id: 'marker2'
     }, {
-      coordinates: [[37.78223077274647,-122.41044044494629],[37.78569032065372,-122.40604162216185],[37.78504590733613,-122.41121292114258],[37.78696217255432,-122.41153478622437]],
+      coordinates: [
+        [37.78223077274647,-122.41044044494629],
+        [37.78569032065372,-122.40604162216185],
+        [37.78504590733613,-122.41121292114258],
+        [37.78696217255432,-122.41153478622437]
+      ],
       type: 'polyline',
       strokeColor: '#00FB00',
       strokeWidth: 4,
@@ -95,11 +104,13 @@ class MapBoxExample extends Component {
     console.log('onUpdateUserLocation', location);
   };
   onOpenAnnotation = (annotation) => {
-    this.state.annotationClicked === false ? this.setState({annotationClicked: true}) : this.setState({annotationClicked: false})
+    this.state.annotationClicked === false ?
+      this.setState({annotationClicked: true}) : this.setState({annotationClicked: false})
     console.log('onOpenAnnotation', annotation);
   };
   onRightAnnotationTapped = (e) => {
-    this.state.rightAnnotationClicked === false ? this.setState({rightAnnotationClicked: true}) : this.setState({rightAnnotationClicked: false})
+    this.state.rightAnnotationClicked === false ?
+      this.setState({rightAnnotationClicked: true}) : this.setState({rightAnnotationClicked: false})
     console.log('onRightAnnotationTapped', e);
   };
   onLongPress = (location) => {
@@ -121,7 +132,19 @@ class MapBoxExample extends Component {
 
   // Fetch title, extract, and url. Return a promise that resolves with the main page image name
   fetchWikiHoodInfo = () => {
-    return fetch(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=pageprops|info|extracts&exintro=&explaintext=&inprop=url&titles=${this.state.neighborhood}, San_Francisco`)
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      format: 'json',
+      action: 'query',
+      prop: 'pageprops|info|extracts',
+      exintro: '',
+      explaintext: '',
+      inprop: 'url',
+      titles: `${this.state.neighborhood}, San Francisco`
+    }
+    const url = makeUrl(baseUrl, params);
+
+    return fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
         for ( var key in responseJson.query.pages) {
@@ -141,7 +164,17 @@ class MapBoxExample extends Component {
 
   // Fetch the image url, width and height of the main page url
   fetchWikiHoodImageUrl = (imageName) => {
-    fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&titles=File:${imageName}&prop=imageinfo&iiprop=url|size&iiurlwidth=200`)
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      action: "query",
+      format: "json",
+      titles: `File:${imageName}`,
+      prop: "imageinfo",
+      iiprop: "url|size",
+      iiurlwidth: "200",
+    }
+    const url = makeUrl(baseUrl, params);
+    fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
         console.tron.log(JSON.stringify(responseJson.query.pages["-1"].imageinfo))
@@ -168,6 +201,19 @@ class MapBoxExample extends Component {
       });
   }
   getWikiHoodData = this.getWikiHoodData.bind(this)
+
+
+  clearWikiHoodData = () => {
+    this.setState({
+      wikiTitle: '',
+      wikiExtract: '',
+      wikiImageUrl: '',
+      wikiImageWidth: 0,
+      wikiImageHeight: 0,
+      wikiUrl: '',
+  })
+}
+  clearWikiHoodData = this.clearWikiHoodData.bind(this)
 
   componentWillMount() {
     this._offlineProgressSubscription = Mapbox.addOfflinePackProgressListener(progress => {
@@ -220,10 +266,21 @@ class MapBoxExample extends Component {
       <PopupDialog
         ref={(popupDialog) => { this.popupDialog = popupDialog; }}
         onOpened={() => { this.getWikiHoodData(); }}
+        onClosed={() => {this.clearWikiHoodData(); }}
         width={.85}
         height={.75}
         dialogStyle={{padding: 10}}
-        actions={[<DialogButton buttonStyle={{height: 20/*, width: 20*/, justifyContent: 'center', marginTop: 10}} textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}} textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}} text="CLOSE" align="center" onPress={this.closeDialog} key="closePopup"/>]}
+        actions={[
+          <DialogButton
+            buttonStyle={{height: 20/*, width: 20*/, justifyContent: 'center', marginTop: 10}}
+            textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}}
+            textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}}
+            text="CLOSE"
+            align="center"
+            onPress={this.closeDialog}
+            key="closePopup"
+          />
+        ]}
         dialogTitle={<DialogTitle titleTextStyle={{fontSize: 20}} title={this.state.wikiTitle} />}
         // Disabling animations as dialogue disappears after state changes
         // see: https://github.com/jacklam718/react-native-popup-dialog/issues/19
@@ -234,11 +291,32 @@ class MapBoxExample extends Component {
       >
           <ScrollView>
           <View  style={{alignItems: 'center', marginHorizontal: 20}}>
-            <Image style={{marginVertical: 5, resizeMode: 'contain'}} source={{uri: this.state.wikiImageUrl}} width={this.state.wikiImageWidth} height={this.state.wikiImageHeight} maintainAspectRatio={true} />
+            <Image
+              style={{marginVertical: 5, resizeMode: 'contain'}}
+              source={{uri: this.state.wikiImageUrl}}
+              width={this.state.wikiImageWidth}
+              height={this.state.wikiImageHeight}
+              maintainAspectRatio={true}
+              //onLoadStart={this.handleLoadStart}
+              //onProgress={this.handleProgress}
+              //onError={this.handleError}
+            />
             <Text style={{fontSize: 16, textAlign: 'justify'}}>{this.state.wikiExtract}</Text>
-            <Text onPress={() => {Linking.openURL("https://en.wikipedia.org/wiki/Union_Square,_San_Francisco").catch(err => console.error('An error occurred', err));}} style={{fontSize: 12, textAlign: 'left', padding: 10, color: 'blue'}}>{'Wikipedia'}</Text>
-            </View>
-          </ScrollView>
+            <Text onPress={() => {
+              Linking.openURL(this.state.wikiUrl)
+                .catch(err => console.error('An error occurred', err));}}
+                style={
+                  {
+                    fontSize: 12,
+                    textAlign: 'left',
+                    padding: 10,
+                    color: 'blue'
+                  }
+                }
+              >{this.state.wikiUrl ? "Wikipedia" : ""}
+            </Text>
+          </View>
+        </ScrollView>
       </PopupDialog>
       </View>
     );
