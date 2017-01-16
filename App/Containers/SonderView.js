@@ -13,6 +13,7 @@ import {
 
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
+import { reverseTuples } from '../Lib/MapHelpers'
 import { getPrettyBearing, toTuples } from '../Lib/MapHelpers'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
@@ -60,20 +61,21 @@ class SonderView extends Component {
         this.setState({ initialPosition })
       },
       onInitialHoods: ({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs}) => {
-        this.setState({ 
-          currentHood, 
-          adjacentHoods, 
+        this.setState({
+          currentHood,
+          adjacentHoods,
           hoods: hoodLatLngs,
-          streets: streetLatLngs
+          streets: streetLatLngs,
         });
+        this.setCurrentHoodAnnotation(currentHood);
       },
-      onHeadingSupported: (headingIsSupported) => 
+      onHeadingSupported: (headingIsSupported) =>
         this.setState({ headingIsSupported }),
-      onPositionChange: (lastPosition) => 
+      onPositionChange: (lastPosition) =>
         this.setState({ lastPosition }),
-      onHeadingChange: (headingData) => 
+      onHeadingChange: (headingData) =>
         this.setCompassAnnotation(headingData),
-      onEntitiesDetected: (entities) => 
+      onEntitiesDetected: (entities) =>
         this.setState({ entities })
     });
   }
@@ -101,14 +103,31 @@ class SonderView extends Component {
     } else {
       this.setState({
         heading: headingData.heading,
-        annotations: this.state.annotations.map(annotation => 
-          (annotation.id !== 'compassLine') ? 
+        annotations: this.state.annotations.map(annotation =>
+          (annotation.id !== 'compassLine') ?
             annotation :
             Object.assign({},annotation,{ coordinates: compassTuple })
         )
       });
     }
   }
+
+  setCurrentHoodAnnotation(currentHood) {
+    let annotations = this.state.annotations.slice();
+    annotations[1] = {
+      // coordinates: [[37.78760656916262,-122.40668535232543],[37.787420033880174,-122.40835905075073],[37.78830183288528,-122.40853071212767],[37.78850532346909,-122.4068784713745],[37.78760656916262,-122.40668535232543]],
+      coordinates: reverseTuples(this.state.currentHood.geometry.coordinates[0]),
+      type: 'polygon',
+      fillAlpha: 0.3,
+      strokeColor: '#ffffff',
+      fillColor: '#0000ff',
+      id: 'currentNeigborhood'
+    }
+    this.setState({
+      annotations: annotations
+    })
+  }
+
 
   render() {
     StatusBar.setHidden(true);

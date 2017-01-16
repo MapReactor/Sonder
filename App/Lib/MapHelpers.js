@@ -16,14 +16,14 @@ export const getRegionBBox = (region: Object) => {
   const middleLat = region.latitude;
   const longDelta = region.longitudeDelta;
   const latDelta = region.latitudeDelta;
-  
+
   const maxX = middleLong+longDelta;
   const minX = middleLong-longDelta;
-  
+
   const maxY = middleLat+latDelta;
   const minY = middleLat-latDelta;
   // return region
-  
+
   // Return rectangle ordered CCW from bottom right corner
   return [[maxX, minY], [maxX, maxY], [minX, maxY], [minX, minY]];
 }
@@ -32,14 +32,14 @@ export const getPrettyBearing = (heading) => {
   const degreeChar = String.fromCharCode(176);
   const primaryCardinality = (heading >= 270 || heading <= 90) ? 'N' : 'S';
   const secondaryCardinality = (heading <= 180) ? 'E' : 'W';
-  const angle = (heading <= 90) ? heading : 
+  const angle = (heading <= 90) ? heading :
                    (heading <= 180) ? 180 - heading :
                      (heading <= 270) ? heading - 180 : 360 - heading;
  return primaryCardinality + angle + degreeChar + secondaryCardinality;
 };
 
 export const toCoords = (geojson: Array<Array>) => geojson.map((tuple) => ({
-    longitude: tuple[0], 
+    longitude: tuple[0],
     latitude: tuple[1]
   })
 );
@@ -47,6 +47,15 @@ export const toCoords = (geojson: Array<Array>) => geojson.map((tuple) => ({
 export const toTuple = (coord: Object) => [coord.longitude, coord.latitude];
 
 export const toTuples = (coords: Array<Object>) => coords.map((coords) => [coords.longitude, coords.latitude])
+
+export const reverseTuples = (coordinates) => {
+  return coordinates.map((coordinate) => {
+    const save = coordinate[1];
+    coordinate[1] = coordinate[0];
+    coordinate[0] = save;
+    return coordinate;
+  })
+}
 
 export const calculateRegion = (locations: Array<Object>, options: Object) => {
   const latPadding = options && options.latPadding ? options.latPadding : 0.1
