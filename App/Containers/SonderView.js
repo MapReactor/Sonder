@@ -13,7 +13,12 @@ import {
 
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
-import { reverseTuples, getPrettyBearing, toTuples } from '../Lib/MapHelpers'
+import {
+  reverseTuples,
+  calculateRegionCenter,
+  getPrettyBearing,
+  toTuples
+} from '../Lib/MapHelpers';
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -123,13 +128,22 @@ class SonderView extends Component {
       return
     }
     let annotations = this.state.annotations.slice();
+    let coordinates = this.state.entities.hoods.current.coordinates[0]
+    let center = calculateRegionCenter(coordinates);
     annotations[1] = {
-      coordinates: reverseTuples(this.state.entities.hoods.current.coordinates[0]),
+      coordinates: reverseTuples(coordinates),
       type: 'polygon',
       fillAlpha: 0.3,
       strokeColor: '#ffffff',
       fillColor: '#0000ff',
       id: 'currentHood'
+    }
+    annotations[2] = {
+      coordinates: reverseTuples(center),
+      type: 'point',
+      title: 'This is a title',
+      subtitle: 'This is a subtitle',
+      id: 'currentHoodCenter'
     }
     this.setState({
       annotations: annotations
@@ -146,8 +160,9 @@ class SonderView extends Component {
         hood : closestHood
       )
       .coordinates[0]
+    let center = calculateRegionCenter(coordinates);
     let annotations = this.state.annotations.slice();
-    annotations[2] = {
+    annotations[3] = {
       // coordinates: [[37.78760656916262,-122.40668535232543],[37.787420033880174,-122.40835905075073],[37.78830183288528,-122.40853071212767],[37.78850532346909,-122.4068784713745],[37.78760656916262,-122.40668535232543]],
       coordinates: reverseTuples(coordinates),
       type: 'polygon',
@@ -155,6 +170,13 @@ class SonderView extends Component {
       strokeColor: '#00e6e6',
       fillColor: '#00e6e6',
       id: 'adjacentHood'
+    }
+    annotations[4] = {
+      coordinates: reverseTuples(center),
+      type: 'point',
+      title: 'This is a title',
+      subtitle: 'This is a subtitle',
+      id: 'adjacentHoodCenter'
     }
     this.setState({
       annotations: annotations
@@ -190,6 +212,10 @@ class SonderView extends Component {
         />
           <View style={{ maxHeight: 200 }}>
             <ScrollView>
+            <Text>{this.state.entities ?
+              '*** currentHood coordinates: ' + JSON.stringify(reverseTuples(this.state.entities.hoods.current.coordinates[0])) :
+              "Waiting for entities..."}
+            </Text>
               <Text>{this.state.entities ?
                 '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
                 "Waiting for entities..."}
