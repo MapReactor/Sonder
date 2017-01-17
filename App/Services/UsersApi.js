@@ -16,8 +16,7 @@ export default {
       api
       .post('users', userInfo)
       .then((res) => {
-        console.log('success adding user', JSON.stringify(res));
-        console.log('friendsData', friendsData);
+        console.log('success adding user');
         cbOne(friendsData, cbTwo);
       })
       .catch((err) => {
@@ -39,7 +38,7 @@ export default {
     api
     .post('friends', friendsData)
     .then((res) => {
-      console.log('success adding/ updating friends', JSON.stringify(res));
+      console.log('success adding/ updating friends');
       cb(friendsData);
     })
     .catch((err) => {
@@ -61,7 +60,7 @@ export default {
       api
       .get('friends/' + userInfo.id)
       .then((res) => {
-        console.log('fetched friends: ', JSON.stringify(res));
+        console.log('fetched friends');
         cb(res, userInfo);
       })
       .catch((err) => {
