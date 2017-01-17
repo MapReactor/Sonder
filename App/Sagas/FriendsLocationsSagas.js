@@ -1,10 +1,11 @@
 import { call, put, take, fork, } from 'redux-saga/effects'
 import FriendsLocationsActions from '../Redux/FriendsLocationsRedux'
 import { eventChannel } from 'redux-saga'
+import UsersApi from '../Services/UsersApi'
 
 let open = false
 let channel
-
+let friends
 
 function websocketInitChannel() {
   return eventChannel( emitter => {
@@ -14,7 +15,20 @@ function websocketInitChannel() {
     ws.onopen = () => {
       open = true
       console.log('opening ws')
-      ws.send(JSON.stringify({"type": "subscribe", "friends": ["123", "456", "789"]}))
+
+      // fetch friends
+      UsersApi.getFriends(function(res, userInfo) {
+        console.log('fetched friends from saga', res, userInfo)
+
+        // subscribe to friends locations
+        ws.send(JSON.stringify({
+          "type": "subscribe",
+          "friends": res.data.following.map((friend) => {
+            return friend.fb_id.toString()
+          }),
+        }))
+      })
+
     }
 
     ws.onerror = (error) => {
