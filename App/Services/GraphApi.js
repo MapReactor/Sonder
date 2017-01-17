@@ -11,7 +11,7 @@ const getUserInfo = (cb) => {
       //alert('error fetching data: ' + error.toString());
       return error;
     } else {
-      console.log('success fetching data: ', JSON.stringify(result));
+      console.log('fetched fb graph data');
       const userInfo = {
         token: token,
         email: result.email,
