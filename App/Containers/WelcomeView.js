@@ -30,4 +30,5 @@ class WelcomeView extends Component {
   }
 }
 
+
 export default WelcomeView
