@@ -1,7 +1,7 @@
 // @flow
+
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
-
 
 /* ------------- Types and Action Creators ------------- */
 
@@ -15,10 +15,9 @@ export default Creators
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
-  friendsLocations: {
-    '123': { 'longitude': '1', 'latitude': '1', },
-    '456': { 'longitude': '1', 'latitude': '2' }
-  },
+  '123': { 'longitude': '-122.4148', 'latitude': '37.7599' },
+  '456': { 'longitude': '-122.4368', 'latitude': '37.8037' },
+  '789': { 'longitude': '-122.4702', 'latitude': '37.6879' },
 })
 
 /* ------------- Reducers ------------- */

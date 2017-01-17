@@ -103,7 +103,7 @@ class DrawerContent extends Component {
         <DrawerButton text='Mapbox Example' onPress={this.handlePressMapBoxExampleView} />
         <DrawerButton text='Mapbox Example SF' onPress={this.handlePressMapBoxExampleSfView} />
         <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
-        <DrawerButton text='Friends' onPress={this.handlePressFriendsView} />
+        <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )

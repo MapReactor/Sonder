@@ -1,157 +1,172 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { View } from 'react-native'
-import MapView from 'react-native-maps'
-import { calculateRegion } from '../Lib/MapHelpers'
-import MapCallout from '../Components/MapCallout'
+'use strict';
+/* eslint no-console: 0 */
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import Mapbox, { MapView } from 'react-native-mapbox-gl';
+import {
+  StyleSheet,
+  Text,
+  StatusBar,
+  View,
+  ScrollView
+} from 'react-native';
+
 import Styles from './Styles/MapViewStyle'
-import UsersApi from '../Services/UsersApi'
-import FriendsLocationsActions from '../Redux/LocationRedux'
+import Compass from '../Lib/Compass'
+import { getPrettyBearing, toTuples } from '../Lib/MapHelpers'
+import Immutable from 'seamless-immutable'
 
 
-class FriendsView extends React.Component {
+const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
+Mapbox.setAccessToken(accessToken);
 
+class FriendsView extends Component {
   constructor (props) {
-    super(props)
+    super(props);
+  }
 
-    // get fb id from local storage
-    // const fbId = 'ENTER FBID';
-    // let locations = [];
-    // let locationsObj = {};
-
-    // get friends info & locations
-    // UsersApi.getFriends(fbId, function(friendsData) {
-    //   console.log(friendsData);
-
-    //   UsersApi.getLocations(fbId, function(friendsLocations) {
-    //     console.log(friendsLocations);
-
-        // for each friendData in frinedsData
-          // locationsObj[friendData[fb_id]] = {
-            // title: friendData[displayname]
-            // image: require('./../Images/friendmarker.png')
-            // latitude: null
-            // longitude: null
-          // };
-        //
-
-        // for each friendLocation in friendsLocations
-          // let id = friendLocation[fb_id];
-          // locationsObj[id].latitude = friendLocation[lat]
-          // locationsObj[id].longitude = friendLocation[lon]
-        //
-
-        // for each in locationsObj
-          // push to locations
-        //
-
-    //   });
-    // });
-
-    // then... (needs to be in callback)
-
-
-      // set markers location and data of each friend
-      // const locations = [{
-      //   title: 'friends name', /*add */
-      //   image: require('./../Images/friendmarker.png'),
-      //   latitude: 41.8781,
-      //   longitude: -87.6298,
-      // }];
-
-    // this is just test data
-    const locations = [
-      { title: 'Location A', /*image: require('./../Images/friendmarker.png'),*/ latitude: 37.78825, longitude: -122.4324 },
-      { title: 'Location B', image: require('./../Images/friendmarker.png'), latitude: 37.75825, longitude: -122.4624 }
-    ]
-
-    // calculate what the map shows, update to draw map based on users location
-    const region = calculateRegion(locations, { latPadding: 0.05, longPadding: 0.05 })
-    this.state = {
-      region,
-      locations,
-      showUserLocation: true,
+  state = {
+    center: {
+      latitude: 37.78477457373192,
+      longitude: -122.40258693695068
+    },
+    zoom: 11,
+    userTrackingMode: Mapbox.userTrackingMode.none,
+    annotations: [
+    {
+      coordinates: [37.78477457373192, -122.40258693695068],
+      type: 'point',
+      title: 'Original marker',
+      id: 'marker',
     }
+  ],
+  };
 
-    // moving marker
-    // setInterval(() => {
-    //   this.setState({
-    //     locations: [{
-    //       title: this.state.locations[0].title,
-    //       image: this.state.locations[0].image,
-    //       latitude: this.state.locations[0].latitude + 0.0001,
-    //       longitude: this.state.locations[0].longitude,
-    //     }]
-    //   })
-    // }, 1000);
+  onRegionDidChange = (location) => {
+    this.setState({ currentZoom: location.zoomLevel });
+    console.log('onRegionDidChange', location);
 
-    this.renderMapMarkers = this.renderMapMarkers.bind(this)
-    this.onRegionChange = this.onRegionChange.bind(this)
+  };
+  onRegionWillChange = (location) => {
+    console.log('onRegionWillChange', location);
+  };
+  onUpdateUserLocation = (location) => {
+    console.log('onUpdateUserLocation', location);
+  };
+  onOpenAnnotation = (annotation) => {
+    console.log('onOpenAnnotation', annotation);
+  };
+  onRightAnnotationTapped = (e) => {
+    console.log('onRightAnnotationTapped', e);
+  };
+  onLongPress = (location) => {
+    console.log('onLongPress', location);
+  };
+  onTap = (location) => {
+    console.log('onTap', location);
+  };
+  onChangeUserTrackingMode = (userTrackingMode) => {
+    this.setState({ userTrackingMode });
+    console.log('onChangeUserTrackingMode', userTrackingMode);
+  };
 
+  componentWillMount() {
+    Compass.start({
+      minAngle: 1,
+      radius: 10,
+      onInitialPosition: (initialPosition) => {
+        this.setState({ initialPosition })
+      },
+      onHeadingSupported: (headingIsSupported) =>
+        this.setState({ headingIsSupported }),
+      onPositionChange: (lastPosition) =>
+        this.setState({ lastPosition }),
+      onHeadingChange: (headingData) =>
+        this._map.setDirection(headingData.heading),
+      onEntitiesDetected: (entities) =>
+        this.setState({ entities })
+    });
   }
 
-  componentWillReceiveProps (newProps) {
-    /* ***********************************************************
-    * If you wish to recenter the map on new locations any time the
-    * Redux props change, do something like this:
-    *************************************************************/
-    // this.setState({
-    //   region: calculateRegion(newProps.locations, { latPadding: 0.1, longPadding: 0.1 })
-    // })
+  componentWillUnmount() {
+    Compass.stop();
   }
 
-  onRegionChange (newRegion) {
-    /* ***********************************************************
-    * If you wish to fetch new locations when the user changes the
-    * currently visible region, do something like this:
-    *************************************************************/
-    // const searchRegion = {
-    //   ne_lat: newRegion.latitude + newRegion.latitudeDelta,
-    //   ne_long: newRegion.longitude + newRegion.longitudeDelta,
-    //   sw_lat: newRegion.latitude - newRegion.latitudeDelta,
-    //   sw_long: newRegion.longitude - newRegion.longitudeDelta
-    // }
-    // Fetch new data...
+  componentWillUpdate(nextProps, nextState) {
   }
 
-  calloutPress (location) {
-    /* ***********************************************************
-    * STEP 5
-    * Configure what will happen (if anything) when the user
-    * presses your callout.
-    *************************************************************/
-    console.tron.log(location)
+  componentWillReceiveProps(nextProps) {
+
+    this.setState((prevState, props) => {
+      var arr = [ ...prevState.annotations ]
+
+      for (let newPoint in nextProps.friendsLocations) {
+        let friendLocation = nextProps.friendsLocations
+
+        console.log( friendLocation[newPoint].longitude, friendLocation[newPoint].latitude )
+
+        if (friendLocation[newPoint].longitude) {
+          arr.push ({
+              coordinates: [ friendLocation[newPoint].longitude, friendLocation[newPoint].latitude ],
+              type: 'point',
+              title: newPoint,
+              id: newPoint,
+          })
+        }
+
+      }
+      return { annotations: arr }
+    })
+
+    console.log('NEW STATE', this.state.annotations)
   }
 
-  renderMapMarkers (location) {
-
+  render() {
+    StatusBar.setHidden(true);
     return (
-      <MapView.Marker key={location.title} image={location.image} coordinate={{latitude: location.latitude, longitude: location.longitude}}>
-        <MapCallout location={location} onPress={this.calloutPress} />
-      </MapView.Marker>
-    )
-  }
-
-  render () {
-    return (
-      <View style={Styles.container}>
+      <View style={styles.container}>
         <MapView
-          style={Styles.map}
-          initialRegion={this.state.region}
-          onRegionChangeComplete={this.onRegionChange}
-          showsUserLocation={this.state.showUserLocation}
-        >
-          {this.state.locations.map((location) => this.renderMapMarkers(location))}
-        </MapView>
+          ref={map => { this._map = map; }}
+          style={styles.map}
+          initialCenterCoordinate={this.state.center}
+          initialZoomLevel={this.state.zoom}
+          initialDirection={0}
+          rotateEnabled={true}
+          scrollEnabled={true}
+          zoomEnabled={true}
+          showsUserLocation={true}
+          styleURL={Mapbox.mapStyles.streets}
+          userTrackingMode={this.state.userTrackingMode}
+          annotations={this.state.annotations}
+          annotationsAreImmutable
+          onChangeUserTrackingMode={this.onChangeUserTrackingMode}
+          onRegionDidChange={this.onRegionDidChange}
+          onRegionWillChange={this.onRegionWillChange}
+          onOpenAnnotation={this.onOpenAnnotation}
+          onRightAnnotationTapped={this.onRightAnnotationTapped}
+          onUpdateUserLocation={this.onUpdateUserLocation}
+          onLongPress={this.onLongPress}
+          onTap={this.onTap}
+        />
       </View>
-    )
+    );
   }
 }
 
-const mapDispatchToProps = (dispatch) => {
+const mapStateToProps = (state) => {
   return {
-    setLocation: (location) => dispatch(FriendsLocationsActions.friendsLocationsSuccess(location))
+    friendsLocations: state.friendsLocations
   }
 }
 
-export default connect(mapDispatchToProps)(FriendsView)
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'stretch'
+  },
+  map: {
+    flex: 1
+  },
+});
+
+export default connect(mapStateToProps)(FriendsView)
