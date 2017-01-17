@@ -31,14 +31,29 @@ class DrawerContent extends Component {
     NavigationActions.usageExamples()
   }
 
-  handlePressCompassView = () => {
+  handlePressSonderView = () => {
     this.toggleDrawer()
-    NavigationActions.compassView()
+    NavigationActions.SonderView()
   }
 
-  handlePressAnsibleView = () => {
+  // handlePressCompassView = () => {
+  //   this.toggleDrawer()
+  //   NavigationActions.compassView()
+  // }
+
+  handlePressMapBoxExampleView = () => {
     this.toggleDrawer()
-    NavigationActions.ansibleView()
+    NavigationActions.mapBoxExampleView()
+  }
+
+  handlePressMapBoxExampleSfView = () => {
+    this.toggleDrawer()
+    NavigationActions.mapBoxExampleSfView()
+  }
+
+  handlePressSonderView = () => {
+    this.toggleDrawer()
+    NavigationActions.sonderView()
   }
 
   handlePressStorageTestView = () => {
@@ -83,10 +98,12 @@ class DrawerContent extends Component {
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
-        <DrawerButton text='Sonder Ansible' onPress={this.handlePressAnsibleView} />
+        <DrawerButton text='Sonder' onPress={this.handlePressSonderView} />
+        {/*<DrawerButton text='Compass (deprecated)' onPress={this.handlePressCompassView} />*/}
+        <DrawerButton text='Mapbox Example' onPress={this.handlePressMapBoxExampleView} />
+        <DrawerButton text='Mapbox Example SF' onPress={this.handlePressMapBoxExampleSfView} />
         <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
         <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
-        <DrawerButton text='Sonder Legacy' onPress={this.handlePressCompassView} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
     )

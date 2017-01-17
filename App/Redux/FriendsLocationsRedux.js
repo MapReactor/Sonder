@@ -1,43 +1,42 @@
 // @flow
+
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
 
 /* ------------- Types and Action Creators ------------- */
 
 const { Types, Creators } = createActions({
-  friendsLocationRequest: ['id'],
-  friendsLocationSuccess: ['friendsLocations'],
-  friendsLocationFailure: null,
+  friendsLocationsUpdate: ['friendsLocations'],
 })
 
-export const FriendsTypes = Types
+export const FriendsLocationsTypes = Types
 export default Creators
 
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
-  friendsLocations: null,  // latitude, longitude, bearing, picture
-  error: null,
-  fetching: false,
+  '123': { 'longitude': '-122.4148', 'latitude': '37.7599' },
+  '456': { 'longitude': '-122.4368', 'latitude': '37.8037' },
+  '789': { 'longitude': '-122.4702', 'latitude': '37.6879' },
 })
 
 /* ------------- Reducers ------------- */
 
-// we're attempting to get friends' locations
-export const request = (state: Object) => state.merge({ fetching: true })
-
-// we've successfully got friends' locations
-export const success = (state: Object, { friendsLocations }: Object) =>
-  state.merge({ fetching: false, error: null, friendsLocations })
-
-// we've had a problem getting friends' locations
-export const failure = (state: Object, { error }: Object) =>
-  state.merge({ fetching: false, error })
+export const update = (state: Object, action: Object) => {
+  const { friendsLocations } = action
+  if (friendsLocations) {
+    let newLocation = {}
+    newLocation[friendsLocations.id] = {
+      'latitude': friendsLocations.latitude,
+      'longitude': friendsLocations.longitude
+    }
+    return Object.assign({}, state, Object.assign({}, state.friendsLocations, newLocation))
+  }
+  return state
+}
 
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
-  [Types.FRIENDS_LOCATION_REQUEST]: request,
-  [Types.FRIENDS_LOCATION_SUCCESS]: success,
-  [Types.FRIENDS_LOCATION_FAILURE]: failure,
+  [Types.FRIENDS_LOCATIONS_UPDATE]: update,
 })

@@ -28,3 +28,13 @@ export const directionsURL = (address: string) => {
 
   return url
 }
+
+export const makeUrl = (baseUrl, params) => {
+  let url = baseUrl;
+  let appendAmp = false;
+  for (let key in params) {
+    appendAmp ? url += '&' : appendAmp = true;
+    url += `${key}=${params[key]}`;
+  }
+  return url;
+}

@@ -16,8 +16,7 @@ export default {
       api
       .post('users', userInfo)
       .then((res) => {
-        console.log('success adding user', JSON.stringify(res));
-        console.log('friendsData', friendsData);
+        console.log('success adding user');
         cbOne(friendsData, cbTwo);
       })
       .catch((err) => {
@@ -39,7 +38,7 @@ export default {
     api
     .post('friends', friendsData)
     .then((res) => {
-      console.log('success adding/ updating friends', JSON.stringify(res));
+      console.log('success adding/ updating friends');
       cb(friendsData);
     })
     .catch((err) => {
@@ -49,25 +48,28 @@ export default {
     });
   },
 
-  // getFriends: (cb) => { // todo: add param for fb_id
-  //   const api = apisauce.create({
-  //     baseURL: host,
-  //     headers: {
-  //       'Accept': 'text/plain'
-  //     }
-  //   });
-  //   api
-  //   .get('friends/:' + /*fb_id*/)
-  //   .then((res) => {
-  //     console.log('fetched friends', JSON.strinify(res));
-  //     cb(res);
-  //   })
-  //   .catch((err) => {
-  //     if (err) {
-  //       console.log('error on fetching friends', err);
-  //     }
-  //   })
-  // },
+  getFriends: (cb) => {
+    GraphApi.getUserInfo(function(userInfo, friendsData) {
+      console.log('userInfo', userInfo)
+      const api = apisauce.create({
+        baseURL: host,
+        headers: {
+          'Accept': 'text/plain'
+        }
+      });
+      api
+      .get('friends/' + userInfo.id)
+      .then((res) => {
+        console.log('fetched friends');
+        cb(res, userInfo);
+      })
+      .catch((err) => {
+        if (err) {
+          console.log('error on fetching friends: ', err);
+        }
+      })
+    })
+  },
 
   // getLocations: (cb) => { // todo: add param for fb_id
   //   const api = apisauce.create({
@@ -79,7 +81,7 @@ export default {
   //   api
   //   .get('locations/:' + /*fb_id*/)
   //   .then((res) => {
-  //     console.log('fetched friends', JSON.strinify(res));
+  //     console.log('fetched friends', JSON.stringify(res));
   //     cb(res);
   //   })
   //   .catch((err) => {
