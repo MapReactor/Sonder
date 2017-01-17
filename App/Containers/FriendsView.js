@@ -45,7 +45,6 @@ class FriendsView extends Component {
   onRegionDidChange = (location) => {
     this.setState({ currentZoom: location.zoomLevel });
     console.log('onRegionDidChange', location);
-
   };
   onRegionWillChange = (location) => {
     console.log('onRegionWillChange', location);
@@ -92,19 +91,12 @@ class FriendsView extends Component {
     Compass.stop();
   }
 
-  componentWillUpdate(nextProps, nextState) {
-  }
-
   componentWillReceiveProps(nextProps) {
-
+    // annotations change dynamically based on changes in friendsLocations
     this.setState((prevState, props) => {
       var arr = [ ...prevState.annotations ]
-
       for (let newPoint in nextProps.friendsLocations) {
         let friendLocation = nextProps.friendsLocations
-
-        console.log( friendLocation[newPoint].longitude, friendLocation[newPoint].latitude )
-
         if (friendLocation[newPoint].longitude) {
           arr.push ({
               coordinates: [ friendLocation[newPoint].longitude, friendLocation[newPoint].latitude ],
@@ -113,12 +105,9 @@ class FriendsView extends Component {
               id: newPoint,
           })
         }
-
       }
       return { annotations: arr }
     })
-
-    console.log('NEW STATE', this.state.annotations)
   }
 
   render() {
