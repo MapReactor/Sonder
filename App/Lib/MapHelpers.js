@@ -50,10 +50,7 @@ export const toTuples = (coords: Array<Object>) => coords.map((coords) => [coord
 
 export const reverseTuples = (coordinates) => {
   return coordinates.map((coordinate) => {
-    const save = coordinate[1];
-    coordinate[1] = coordinate[0];
-    coordinate[0] = save;
-    return coordinate;
+    return [coordinate[1], coordinate[0]];
   })
 }
 

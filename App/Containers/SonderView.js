@@ -23,7 +23,11 @@ class SonderView extends Component {
   state = {
     zoom: 12,
     userTrackingMode: Mapbox.userTrackingMode.follow,
-    annotations: []
+    annotations: [],
+    // center: {
+    //   longitude: -122.40258693695068,
+    //   latitude: 37.78477457373192
+    // },
   };
 
   onRegionDidChange = (location) => {
@@ -67,16 +71,20 @@ class SonderView extends Component {
           hoods: hoodLatLngs,
           streets: streetLatLngs,
         });
-        this.setCurrentHoodAnnotation(currentHood);
       },
       onHeadingSupported: (headingIsSupported) =>
         this.setState({ headingIsSupported }),
       onPositionChange: (lastPosition) =>
         this.setState({ lastPosition }),
-      onHeadingChange: (headingData) =>
-        this.setCompassAnnotation(headingData),
-      onEntitiesDetected: (entities) =>
-        this.setState({ entities })
+      onHeadingChange: (headingData) => {
+        this.setCompassAnnotation(headingData)
+        this.setAdjacentHoodAnnotation()
+      },
+      onEntitiesDetected: (entities) => {
+        this.setState({ entities });
+        this.setCurrentHoodAnnotation();
+        this.setAdjacentHoodAnnotation();
+      }
     });
   }
 
@@ -87,7 +95,7 @@ class SonderView extends Component {
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
     compassTuple = [compassTuple[0].reverse(), compassTuple[1].reverse()]
-    if (!this.state.annotations.length) {
+    if (!this.state.annotations[0]) {
       this.setState({
         heading: headingData.heading,
         annotations: [{
@@ -99,7 +107,6 @@ class SonderView extends Component {
           strokeAlpha: .5
         }]
       });
-      // alert(JSON.stringify(this.state.annotations))
     } else {
       this.setState({
         heading: headingData.heading,
@@ -112,22 +119,48 @@ class SonderView extends Component {
     }
   }
 
-  setCurrentHoodAnnotation(currentHood) {
+  setCurrentHoodAnnotation() {
+    if (!this.state.entities) {
+      return
+    }
     let annotations = this.state.annotations.slice();
     annotations[1] = {
-      // coordinates: [[37.78760656916262,-122.40668535232543],[37.787420033880174,-122.40835905075073],[37.78830183288528,-122.40853071212767],[37.78850532346909,-122.4068784713745],[37.78760656916262,-122.40668535232543]],
-      coordinates: reverseTuples(this.state.currentHood.geometry.coordinates[0]),
+      coordinates: reverseTuples(this.state.entities.hoods.current.coordinates[0]),
       type: 'polygon',
       fillAlpha: 0.3,
       strokeColor: '#ffffff',
       fillColor: '#0000ff',
-      id: 'currentNeigborhood'
+      id: 'currentHood'
     }
     this.setState({
       annotations: annotations
     })
   }
 
+
+  setAdjacentHoodAnnotation() {
+    if (!this.state.entities) {
+      return
+    }
+    let coordinates = this.state.entities.hoods.adjacents
+      .reduce((closestHood, hood) => hood.distance < closestHood.distance ?
+        hood : closestHood
+      )
+      .coordinates[0]
+    let annotations = this.state.annotations.slice();
+    annotations[2] = {
+      // coordinates: [[37.78760656916262,-122.40668535232543],[37.787420033880174,-122.40835905075073],[37.78830183288528,-122.40853071212767],[37.78850532346909,-122.4068784713745],[37.78760656916262,-122.40668535232543]],
+      coordinates: reverseTuples(coordinates),
+      type: 'polygon',
+      fillAlpha: 0.3,
+      strokeColor: '#00e6e6',
+      fillColor: '#00e6e6',
+      id: 'adjacentHood'
+    }
+    this.setState({
+      annotations: annotations
+    })
+  }
 
   render() {
     StatusBar.setHidden(true);
@@ -156,20 +189,26 @@ class SonderView extends Component {
           onLongPress={this.onLongPress}
           onTap={this.onTap}
         />
-
-            <Text>{this.state.entities ? 
-              JSON.stringify(this.state.entities.hoods) : 
-              "Waiting for entities..."}</Text>
-            <Text>{this.state.headingIsSupported ?
-                    getPrettyBearing(this.state.heading)
-                    : "Heading unsupported." }</Text>
-            <Text>{this.state.entities ? 
-                    JSON.stringify(this.state.entities.streets) :
-                    "Normalizing reticulating splines..."}</Text>
-            <Text>{this.state.annotations ? 
-                    JSON.stringify( this.state.annotations ) :
-                    null
-                  }</Text>
+          <View style={{ maxHeight: 200 }}>
+            <ScrollView>
+              <Text>{this.state.entities ?
+                '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
+                "Waiting for entities..."}
+              </Text>
+              <Text>{this.state.headingIsSupported ?
+                '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
+                "Heading unsupported." }
+              </Text>
+              <Text>{this.state.entities ?
+                '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
+                "Normalizing reticulating splines..."}
+              </Text>
+              <Text>{this.state.annotations ?
+                '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
+                null}
+              </Text>
+            </ScrollView>
+          </View>
       </View>
     );
   }

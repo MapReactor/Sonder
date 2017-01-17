@@ -1,4 +1,4 @@
-/* 
+/*
 First-pass refactor of monolithic compass
 ------------------------------------------
 ToDos:
@@ -36,8 +36,8 @@ const flatten = list => list.reduce(
 class Compass {
   constructor() {
     // Set individual event hook function definitions
-    this.EVENTS = [ 'onInitialPosition', 
-                    'onPositionChange', 
+    this.EVENTS = [ 'onInitialPosition',
+                    'onPositionChange',
                     'onHeadingSupported',
                     'onHeadingChange',
                     'onCompassReady',
@@ -45,7 +45,7 @@ class Compass {
                     'onEntitiesDetected'];
     this.EVENTS.forEach(event => {
       this['_'+event] = () => {};
-      this[event] = (func) => { 
+      this[event] = (func) => {
         this['_'+event] = (typeof func === 'function') ?
           func : () => {};
       }
@@ -69,7 +69,7 @@ class Compass {
     this.EVENTS.forEach(event => {
       if (typeof opts[event] === 'function') {
         this['_'+event] = nullifyOnInactive(opts[event]);
-      } 
+      }
     });
   }
   start(opts) {
@@ -77,10 +77,10 @@ class Compass {
        - Move to async/await, make all the logic consistent
           -- Start with detection, then features update code
        - Change ALL forEach's into for-of loops for speed
-       Icebox: 
-          - Perhaps start() should be thenable and onInitialPosition 
+       Icebox:
+          - Perhaps start() should be thenable and onInitialPosition
               and onHeadingSupported deprecated.
-       Notes: 
+       Notes:
        - Right now, presumes that no movement is happening on init
           -- To fix this, could use Promise.race with getCurrent and watchPosition
        - ALL instance variable are now set here, not secretly in methods
@@ -93,8 +93,8 @@ class Compass {
     this._setEvents(opts);
 
     this.getInitialPosition()
-      .then(position => { 
-        if (!this._currentPosition) { 
+      .then(position => {
+        if (!this._currentPosition) {
           this._currentPosition = position.coords;
         }
         this._onInitialPosition(position);
@@ -102,10 +102,10 @@ class Compass {
         startTime = Date.now();
         return this._processNeighborhoods(position);
       })
-      .then(hoodData => { 
+      .then(hoodData => {
         console.tron.log('SPEED: ' + (Date.now()-startTime).toString()+'ms SPREAD: ' + this.__frameCounter.toString()+' frames');
         this._hoodData = hoodData;
-        this._onInitialHoods(hoodData) 
+        this._onInitialHoods(hoodData)
       });
 
     this.watchID = navigator.geolocation.watchPosition(position => {
@@ -128,7 +128,7 @@ class Compass {
       // MEASURE 1: angle/timing kludge for feature detection
       // if (this._lastHeadingChange && Date.now()-this._lastHeadingChange < 1000) return;
       // if (this._lastHeading && Math.abs(heading-this._lastHeading) < 5) return;
-      // END 
+      // END
       const startTime = Date.now();
       this.__frameCounter = 0;
       this._detectionPending = true;
@@ -142,17 +142,16 @@ class Compass {
       this._lastHeading = heading;
     });
   }
-
   getInitialPosition() {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position),
         (error) => reject('Location timed out')
       );
-    });  
+    });
   }
 
-  getCompassLine(heading = this._heading, 
+  getCompassLine(heading = this._heading,
                  radius = this._radius,
                  origin = this._currentPosition) {
     if (!origin) return null;
@@ -165,7 +164,7 @@ class Compass {
 
   async _detectEntities(heading) {
     // MEASURE 2: Return cached entities if any _detectEntities frame has not run to completion
-    // if (this._detectionPending) { 
+    // if (this._detectionPending) {
     //   console.tron.log("SENDING CACHED ENTITIES");
     //   return this._entities;
     // }
@@ -183,9 +182,10 @@ class Compass {
 
   // Probably just wrap this in a requestAnimationFrame for now
   async getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
-                    adjacentHoods = this._hoodData.adjacentHoods, 
-                    currentHood = this._hoodData.currentHood) {
+    adjacentHoods = this._hoodData.adjacentHoods,
+    currentHood = this._hoodData.currentHood) {
     var adjacents = [];
+    var current = {};
     var startHeading = this._heading;
     for (let feature of adjacentHoods) {
       await nextFrame(); this.__frameCounter++;
@@ -198,15 +198,20 @@ class Compass {
       const nearestFeature = point(nearestCoord);
       const originFeature = point(compassLineFeature.geometry.coordinates[0]);
       const collisionDistance = turf.distance(originFeature, nearestFeature, 'miles');
+      current = {
+        name: currentHood.properties.label,
+        coordinates: currentHood.geometry.coordinates,
+      }
       adjacents.push({
         name: feature.properties.label,
-        distance: collisionDistance.toFixed(2) + ' miles'
+        distance: collisionDistance.toFixed(2) + ' miles',
+        coordinates: feature.geometry.coordinates,
       });
     }
-    return {adjacents, current: currentHood.properties.label };
-  } 
+    return { adjacents, current };
+  }
 
-  async getStreetCollisions(compassLineFeature = this._getCompassLineFeature(), 
+  async getStreetCollisions(compassLineFeature = this._getCompassLineFeature(),
                       streetsFixture = this._debugStreets ) {
     // return ['Streets Stubbed'];
     var streetsAhead = [];
@@ -220,10 +225,10 @@ class Compass {
       // console.tron.log("-STREETS- intersect: "+(Date.now()-topStartTime).toString()+'ms');
       if (!collision) continue;
       const originFeature = point(compassLineFeature.geometry.coordinates[0]);
-      const collisionDistance = turf.distance(originFeature,collision); 
+      const collisionDistance = turf.distance(originFeature,collision);
       const street = {
         name: feature.properties.name,
-        distance: collisionDistance.toFixed(2) + 'miles'  
+        distance: collisionDistance.toFixed(2) + 'miles'
       };
       const relations = feature.properties['@relations'];
       if (relations) {
@@ -246,7 +251,7 @@ class Compass {
     const rawHoods = this._debugHoods;
     await nextFrame(); this.__frameCounter++;
     console.tron.log('getDebugHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString());
-    const streets = this._debugStreets; 
+    const streets = this._debugStreets;
     await nextFrame(); this.__frameCounter++;
     const currentHood = await this._findCurrentHood(position, rawHoods.features);
     await nextFrame(); this.__frameCounter++;
@@ -287,7 +292,7 @@ class Compass {
         let pointCount = flatten(feature.geometry.coordinates).length/2;
         feature.geometry.coordinates[0] = vis(feature.geometry.coordinates[0],pointCount*0.5);
         adjacentHoods.push(feature);
-        await nextFrame(); this.__frameCounter++; 
+        await nextFrame(); this.__frameCounter++;
       }
     }
     return adjacentHoods;
@@ -319,9 +324,9 @@ class Compass {
         longitude: coords[0],
         latitude: coords[1]
       }));
-      return { 
+      return {
         name: feature.properties.name,
-        coords: latLngs 
+        coords: latLngs
       };
     });
   }
@@ -352,7 +357,7 @@ class Compass {
         });
       }
       return hoods;
-    },[]); 
+    },[]);
   }
 }
 

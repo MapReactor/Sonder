@@ -10,7 +10,7 @@ export default () => {
     location: require('./LocationRedux').reducer,
     login: require('./LoginRedux').reducer,
     user: require('./UserRedux').reducer,
-    search: require('./SearchRedux').reducer,
+    // search: require('./SearchRedux').reducer,
     storageTest: require('./StorageTestRedux').reducer,
     friendsLocations: require('./FriendsLocationsRedux').reducer,
   })
