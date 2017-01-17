@@ -28,7 +28,6 @@ export default {
   },
 
   addFriends: (friendsData, cb) => {
-    console.log('friendsData', friendsData);
     const api = apisauce.create({
       baseURL: host,
       headers: {
@@ -49,6 +48,7 @@ export default {
   },
 
   getFriends: (cb) => {
+    console.log('getting friends!!!')
     GraphApi.getUserInfo(function(userInfo, friendsData) {
       console.log('userInfo', userInfo)
       const api = apisauce.create({
@@ -60,7 +60,7 @@ export default {
       api
       .get('friends/' + userInfo.id)
       .then((res) => {
-        console.log('fetched friends');
+        console.log('fetched friends', res);
         cb(res, userInfo);
       })
       .catch((err) => {
