@@ -95,23 +95,7 @@ class FriendsView extends Component {
   componentWillReceiveProps(nextProps) {
     // annotations change dynamically based on changes in friendsLocations
     this.setState((prevState, props) => {
-<<<<<<< HEAD
       return FriendsHelpers.updateFriendsLocations(nextProps, prevState)
-=======
-      var arr = [ ...prevState.annotations ]
-      for (let newPoint in nextProps.friendsLocations) {
-        let friendLocation = nextProps.friendsLocations
-        if (friendLocation[newPoint].longitude) {
-          arr.push ({
-              coordinates: [ friendLocation[newPoint].longitude, friendLocation[newPoint].latitude ],
-              type: 'point',
-              title: newPoint,
-              id: newPoint,
-          })
-        }
-      }
-      return { annotations: arr }
->>>>>>> Clean up friendsview
     })
   }
 
