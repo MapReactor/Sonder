@@ -13,8 +13,7 @@ import {
 
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
-import { reverseTuples } from '../Lib/MapHelpers'
-import { getPrettyBearing, toTuples } from '../Lib/MapHelpers'
+import { reverseTuples, getPrettyBearing, toTuples } from '../Lib/MapHelpers'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
