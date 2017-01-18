@@ -543,49 +543,44 @@ class SonderView extends Component {
 
         <View style={{ maxHeight: 200 }}>
           <ScrollView>
-            // Test
+
             <Text onPress={() => {
-              Linking.canOpenURL(url).then(supported => {
-                if (!supported) {
-                  console.log('Can\'t handle url: ' + url);
-                } else {
-                  return Linking.openURL(url);
-                }
-              }).catch(err => console.error('An error occurred', err));
-              Linking.openURL('yelp:///biz/the-sentinel-san-francisco')}}>
+              Linking.canOpenURL('yelp:///biz/the-sentinel-san-francisco')
+                .then(supported => {
+                  if (!supported) {
+                    Linking.openURL('https://www.yelp.com/biz/the-sentinel-san-francisco')
+                  } else {
+                    return Linking.openURL('yelp:///biz/the-sentinel-san-francisco');
+                  }
+                })
+                .catch(err => console.error('An error occurred', err))}}>
               Click me to open yelp!
             </Text>
 
-            // Test
             <Text onPress={() => {this._map.selectAnnotation('friend', animated = true);}}>
               "Click me to toggle annotation"
             </Text>
 
-            // Test
-            this._map.selectAnnotation(id, animated = true);
             <Text>{this.state.entities ?
               '*** currentHood: ' + JSON.stringify(reverseTuples(this.state.entities.hoods)) :
               "Waiting for entities..."}
             </Text>
 
-            // Test
             <Text>{this.state.entities ?
               '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
               "Waiting for entities..."}
             </Text>
-            // Test
+
             <Text>{this.state.headingIsSupported ?
               '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
               "Heading unsupported." }
             </Text>
 
-            // Test
             <Text>{this.state.entities ?
               '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
               "Normalizing reticulating splines..."}
             </Text>
 
-            // Test
             <Text>{this.state.annotations ?
               '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
               null}
