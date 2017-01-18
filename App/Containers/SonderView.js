@@ -14,6 +14,8 @@ import {
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
 import { reverseTuples, getPrettyBearing, toTuples } from '../Lib/MapHelpers'
+import FriendsHelpers from '../Lib/FriendsHelpers'
+
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -89,6 +91,13 @@ class SonderView extends Component {
 
   componentWillUnmount() {
     Compass.stop();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // annotations change dynamically based on changes in friendsLocations
+    this.setState((prevState, props) => {
+      return FriendsHelpers.updateFriendsLocations(nextProps, prevState)
+    })
   }
 
   setCompassAnnotation(headingData) {
@@ -216,7 +225,7 @@ class SonderView extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    // ...redux state to props here
+    friendsLocations: state.friendsLocations
   }
 }
 

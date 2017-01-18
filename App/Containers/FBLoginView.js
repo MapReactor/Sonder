@@ -50,7 +50,7 @@ class FBLoginView extends Component {
           //{id:'1234', friendlist:['9','8','7','6','5']}
           this.props.setUser(friendsData);
           this.props.setLocation({id: friendsData.id});
-          NavigationActions.compassView(); //WE NEED TO FIX THIS
+          NavigationActions.sonderView(); //WE NEED TO FIX THIS
         }.bind(this);
 
         UsersApi.addUser(UsersApi.addFriends, setUserCB)
@@ -78,7 +78,7 @@ class FBLoginView extends Component {
                   //{id:'1234', friendlist:['9','8','7','6','5']}
                   this.props.setUser(friendsData);
                   this.props.setLocation({id: friendsData.id});
-                  NavigationActions.compassView(); //WE NEED TO FIX THIS
+                  NavigationActions.sonderView(); //WE NEED TO FIX THIS
                 }.bind(this);
 
                 UsersApi.addUser(UsersApi.addFriends, setUserCB)

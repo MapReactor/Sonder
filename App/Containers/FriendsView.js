@@ -37,8 +37,8 @@ class FriendsView extends Component {
     {
       coordinates: [37.78477457373192, -122.40258693695068],
       type: 'point',
-      title: 'Original marker',
-      id: 'marker',
+      title: 'TESTING 123',
+      id: '123',
     }
   ],
   };
@@ -86,6 +86,8 @@ class FriendsView extends Component {
       onEntitiesDetected: (entities) =>
         this.setState({ entities })
     });
+
+    console.log('componentWillMount', this.state.annotations)
   }
 
   componentWillUnmount() {
@@ -93,6 +95,7 @@ class FriendsView extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log('UPDATING ANNOTATIONS!!! ', 'OLD ANNOTATIONS: ', this.state.annotations, 'NEW ANNOTATIONS: ', nextProps.friendsLocations)
     // annotations change dynamically based on changes in friendsLocations
     this.setState((prevState, props) => {
       return FriendsHelpers.updateFriendsLocations(nextProps, prevState)
