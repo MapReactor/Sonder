@@ -10,6 +10,7 @@ import {
   View,
   ScrollView,
   Image,
+  Linking,
 } from 'react-native';
 import PopupDialog, {
   DialogTitle,
@@ -46,11 +47,11 @@ class SonderView extends Component {
     /*<--- Popup state --->*/
       // popupDialog: {},
       popupView: 'current', // alternatively, 'facing'
-      wikiTitle: '',
-      wikiExtract: '',
-      wikiImageUrl: '',
-      wikiImageWidth: 0,
-      wikiImageHeight: 0,
+      popupTitle: '',
+      popupExtract: '',
+      popupImageUrl: '',
+      popupImageWidth: 0,
+      popupImageHeight: 0,
     /*<--- Popup state --->*/
     // center: {
     //   longitude: -122.40258693695068,
@@ -86,10 +87,14 @@ class SonderView extends Component {
     this.popupDialog.closeDialog();
   }).bind(this)
 
-  fetchWikiHoodInfo = (() => {
-    const hoodName = this.state.popupView === 'current' ?
+  setPopupHoodName = (() => {
+    const popupTitle = this.state.popupView === 'current' ?
       this.state.entities.hoods.current.name :
       this.state.facingHood.name
+    this.setState({ popupTitle: popupTitle })
+  }).bind(this)
+
+  fetchWikiHoodInfo = (() => {
     const baseUrl = 'https://en.wikipedia.org/w/api.php?'
     const params = {
       format: 'json',
@@ -98,7 +103,7 @@ class SonderView extends Component {
       exintro: '',
       explaintext: '',
       inprop: 'url',
-      titles: `${hoodName}, San Francisco`
+      titles: `${ this.state.popupTitle }, San Francisco`
       // titles: `Civic Center, San Francisco`
     }
     const url = makeUrl(baseUrl, params);
@@ -109,8 +114,7 @@ class SonderView extends Component {
         for ( var key in responseJson.query.pages) {
           let page = responseJson.query.pages[key]
           this.setState({
-            wikiTitle: page.title,
-            wikiExtract: page.extract.replace(/\n/g,"\n\n"),
+            popupExtract: page.extract.replace(/\n/g,"\n\n"),
             wikiUrl: page.fullurl
           });
           // this.setTitle(page.title)
@@ -142,9 +146,9 @@ class SonderView extends Component {
         for ( var key in responseJson.query.pages["-1"].imageinfo) {
           let image = responseJson.query.pages["-1"].imageinfo[key]
           this.setState({
-            wikiImageUrl: image.thumburl,
-            wikiImageWidth: image.thumbwidth,
-            wikiImageHeight: image.thumbheight
+            popupImageUrl: image.thumburl,
+            popupImageWidth: image.thumbwidth,
+            popupImageHeight: image.thumbheight
           });
           // this.setImageUrl(image.thumburl)
           // this.setImageWidth(image.thumbwidth)
@@ -156,7 +160,8 @@ class SonderView extends Component {
       });
   }).bind(this)
 
-  getWikiHoodData = (() => {
+  getpopupHoodData = (() => {
+    this.setPopupHoodName();
     this.fetchWikiHoodInfo()
       .then((imageName) => {
         this.fetchWikiHoodImageUrl(imageName)
@@ -167,14 +172,14 @@ class SonderView extends Component {
   }).bind(this)
 
 
-  clearWikiHoodData = (() => {
+  clearpopupHoodData = (() => {
     // this.reset()
     this.setState({
-      wikiTitle: '',
-      wikiExtract: '',
-      wikiImageUrl: '',
-      wikiImageWidth: 0,
-      wikiImageHeight: 0,
+      popupTitle: '',
+      popupExtract: '',
+      popupImageUrl: '',
+      popupImageWidth: 0,
+      popupImageHeight: 0,
       wikiUrl: '',
     })
   }).bind(this)
@@ -382,8 +387,8 @@ class SonderView extends Component {
         <PopupDialog
           // ref={(popupDialog) => { this.setState({popupDialog: popupDialog}); }}
           ref={(popupDialog) => { this.popupDialog = popupDialog }}
-          onOpened={() => {this.getWikiHoodData(); }}
-          onClosed={() => {this.clearWikiHoodData(); }}
+          onOpened={() => {this.getpopupHoodData(); }}
+          onClosed={() => {this.clearpopupHoodData(); }}
           width={.85}
           height={.75}
           dialogStyle={{padding: 10}}
@@ -401,7 +406,7 @@ class SonderView extends Component {
           dialogTitle={
             <DialogTitle
               titleTextStyle={{fontSize: 20}}
-              title={this.state.wikiTitle}
+              title={this.state.popupTitle}
             />
           }
           // Disabling animations as dialogue disappears after state changes
@@ -416,9 +421,9 @@ class SonderView extends Component {
             <View  style={{alignItems: 'center', marginHorizontal: 20}}>
               <Image
                 style={{marginVertical: 5, resizeMode: 'contain'}}
-                source={{uri: this.state.wikiImageUrl}}
-                width={this.state.wikiImageWidth}
-                height={this.state.wikiImageHeight}
+                source={{uri: this.state.popupImageUrl}}
+                width={this.state.popupImageWidth}
+                height={this.state.popupImageHeight}
                 maintainAspectRatio={true}
                 //onLoadStart={this.handleLoadStart}
                 //onProgress={this.handleProgress}
@@ -430,7 +435,7 @@ class SonderView extends Component {
                   textAlign: 'justify'
                 }}
               >
-              {this.state.wikiExtract}
+              {this.state.popupExtract}
               </Text>
               <Text onPress={() => {
                 Linking.openURL(this.state.wikiUrl)
