@@ -372,6 +372,7 @@ class SonderView extends Component {
           onUpdateUserLocation={this.onUpdateUserLocation}
           onLongPress={this.onLongPress}
           onTap={this.onTap}
+          logoIsHidden
         />
       {/*----------------------------- / Map View ---------------------------*/}
 
