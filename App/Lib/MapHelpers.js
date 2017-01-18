@@ -1,6 +1,7 @@
 // @flow
 
 import R from 'ramda'
+import { centroid } from '@turf/turf';
 
 export const removeEmpty = (markers: Array<Object>) => {
   let filteredMarkers = R.filter((item) => {
@@ -48,10 +49,12 @@ export const toTuple = (coord: Object) => [coord.longitude, coord.latitude];
 
 export const toTuples = (coords: Array<Object>) => coords.map((coords) => [coords.longitude, coords.latitude])
 
-export const reverseTuples = (coordinates) => {
-  return coordinates.map((coordinate) => {
-    return [coordinate[1], coordinate[0]];
-  })
+export var reverseTuples = (coordinates) => {
+  return !Array.isArray(coordinates[0]) ?
+    [coordinates[1], coordinates[0]] :
+    coordinates.map((coordinate) => {
+      return [coordinate[1], coordinate[0]];
+    })
 }
 
 export const calculateRegion = (locations: Array<Object>, options: Object) => {
@@ -86,4 +89,16 @@ export const calculateRegion = (locations: Array<Object>, options: Object) => {
       longitudeDelta: longDelta
     }
   }
+}
+
+export const calculateRegionCenter = (coordinates) => {
+  const poly = {
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [coordinates]
+    }
+  };
+  return centroid(poly).geometry.coordinates;
 }

@@ -34,7 +34,6 @@ function websocketInitChannel() {
 
     ws.onerror = (error) => {
       console.log('ws error: ', error)
-      console.dir(error)
       ws.close()
     }
 
