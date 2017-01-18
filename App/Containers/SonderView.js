@@ -27,6 +27,7 @@ import {
   toTuples
 } from '../Lib/MapHelpers';
 import { makeUrl } from '../Lib/Utilities'
+import FriendsHelpers from '../Lib/FriendsHelpers'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -246,7 +247,7 @@ class SonderView extends Component {
     this.setState({ userTrackingMode });
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
-
+  
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
     compassTuple = [compassTuple[0].reverse(), compassTuple[1].reverse()]
@@ -338,40 +339,47 @@ class SonderView extends Component {
   /*<---------------------------- / Map methods ----------------------------->*/
 
   /*<---------------- Component mounting/unmounting methods ----------------->*/
-  componentWillMount() {
-    Compass.start({
-      minAngle: 1,
-      radius: 10,
-      onInitialPosition: (initialPosition) => {
-        this.setState({ initialPosition })
-      },
-      onInitialHoods: ({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs}) => {
-        this.setState({
-          currentHood,
-          adjacentHoods,
-          hoods: hoodLatLngs,
-          streets: streetLatLngs,
-        });
-      },
-      onHeadingSupported: (headingIsSupported) =>
-        this.setState({ headingIsSupported }),
-      onPositionChange: (lastPosition) =>
-        this.setState({ lastPosition }),
-      onHeadingChange: (headingData) => {
-        this.setCompassAnnotation(headingData)
-        this.setAdjacentHoodAnnotation()
-      },
-      onEntitiesDetected: (entities) => {
-        this.setState({ entities });
-        this.setCurrentHoodAnnotation();
-        this.setAdjacentHoodAnnotation();
-      }
-    });
-  }
+    componentWillMount() {
+      Compass.start({
+        minAngle: 1,
+        radius: 10,
+        onInitialPosition: (initialPosition) => {
+          this.setState({ initialPosition })
+        },
+        onInitialHoods: ({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs}) => {
+          this.setState({
+            currentHood,
+            adjacentHoods,
+            hoods: hoodLatLngs,
+            streets: streetLatLngs,
+          });
+        },
+        onHeadingSupported: (headingIsSupported) =>
+          this.setState({ headingIsSupported }),
+        onPositionChange: (lastPosition) =>
+          this.setState({ lastPosition }),
+        onHeadingChange: (headingData) => {
+          this.setCompassAnnotation(headingData)
+          this.setAdjacentHoodAnnotation()
+        },
+        onEntitiesDetected: (entities) => {
+          this.setState({ entities });
+          this.setCurrentHoodAnnotation();
+          this.setAdjacentHoodAnnotation();
+        }
+      });
+    }
 
-  componentWillUnmount() {
-    Compass.stop();
-  }
+    componentWillUnmount() {
+      Compass.stop();
+    }
+
+    componentWillReceiveProps(nextProps) {
+      // annotations change dynamically based on changes in friendsLocations
+      this.setState((prevState, props) => {
+        return FriendsHelpers.updateFriendsLocations(nextProps, prevState)
+      })
+    }
   /*<--------------- / Component mounting/unmounting methods ---------------->*/
 
   render() {
@@ -518,7 +526,7 @@ class SonderView extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    // ...redux state to props here
+    friendsLocations: state.friendsLocations
   }
 }
 

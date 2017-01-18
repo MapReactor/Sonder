@@ -8,7 +8,7 @@ export default {
       let friendLocation = nextProps.friendsLocations
       if (friendLocation[newPoint].longitude) {
         arr.push ({
-            coordinates: [ friendLocation[newPoint].longitude, friendLocation[newPoint].latitude ],
+            coordinates: [ Number( friendLocation[newPoint].longitude ), Number( friendLocation[newPoint].latitude) ],
             type: 'point',
             title: newPoint,
             id: newPoint,
