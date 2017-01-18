@@ -11,6 +11,7 @@ import {
 import styles from './Styles/WelcomeViewStyle'
 import UserActions from '../Redux/UserRedux'
 import LocationActions from '../Redux/LocationRedux'
+import FriendsLocationsActions from '../Redux/FriendsLocationsRedux'
 import { Images } from '../Themes'
 import UsersApi from '../Services/UsersApi'
 import { Actions as NavigationActions } from 'react-native-router-flux'
@@ -24,6 +25,7 @@ const {
 type LoginProps = {
   setUser: () => void,
   setLocation: (Object) => void,
+  updateFriendLocations: () => void,
   user: Object
 }
 
@@ -50,6 +52,7 @@ class FBLoginView extends Component {
           //{id:'1234', friendlist:['9','8','7','6','5']}
           this.props.setUser(friendsData);
           this.props.setLocation({id: friendsData.id});
+          this.props.updateFriendLocations();
           NavigationActions.sonderView(); //WE NEED TO FIX THIS
         }.bind(this);
 
@@ -78,6 +81,7 @@ class FBLoginView extends Component {
                   //{id:'1234', friendlist:['9','8','7','6','5']}
                   this.props.setUser(friendsData);
                   this.props.setLocation({id: friendsData.id});
+                  this.props.updateFriendLocations();
                   NavigationActions.sonderView(); //WE NEED TO FIX THIS
                 }.bind(this);
 
@@ -101,7 +105,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setUser: (user) => dispatch(UserActions.setUser(user)),
-    setLocation: (location) => dispatch(LocationActions.locationUpdate(location))
+    setLocation: (location) => dispatch(LocationActions.locationUpdate(location)),
+    updateFriendLocations: () => dispatch(FriendsLocationsActions.friendsLocationsUpdate())
   }
 }
 

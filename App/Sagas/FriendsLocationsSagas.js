@@ -10,7 +10,7 @@ let friends
 function websocketInitChannel() {
   return eventChannel( emitter => {
     // init the connection
-    const ws = new WebSocket('ws://localhost:3000')
+    const ws = new WebSocket('ws://sondersf.com')
 
     ws.onopen = () => {
       open = true
@@ -18,7 +18,7 @@ function websocketInitChannel() {
 
       // fetch friends
       // todo: use res to get & store friends' names for callout
-      UsersApi.getFriends(function(res, userInfo) { 
+      UsersApi.getFriends(function(res, userInfo) {
         console.log('fetched friends from saga', res, userInfo)
 
         // subscribe to friends locations
