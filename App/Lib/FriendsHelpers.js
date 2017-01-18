@@ -8,7 +8,7 @@ export default {
     for (let newPoint in nextProps.friendsLocations) {
       let friendLocation = nextProps.friendsLocations
       if (friendLocation[newPoint].longitude) {
-        console.log('THIS IS NAME', friendLocation[newPoint].name)
+        console.log('THIS IS PICTURE', friendLocation[newPoint].picture)
 
         if ( typeof Number( friendLocation[newPoint].longitude ) === 'number' ) {
           arr.push ({
@@ -16,6 +16,11 @@ export default {
               type: 'point',
               title: friendLocation[newPoint].name,
               id: newPoint,
+              annotationImage: {
+                source: { uri: friendLocation[newPoint].picture },
+                height: 25,
+                width: 25
+              },
           })
         }
 
