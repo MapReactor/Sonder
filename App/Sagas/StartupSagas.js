@@ -8,6 +8,9 @@ export function * startup (action) {
   if (__DEV__ && console.tron) {
   //yield put(LocationActions.locationRequest('ElmerFudd'))
   //yield put(LocationActions.locationUpdate({id: 'ElmerFudd', latitude: 777, longitude: 666, bearing: 555}))
-  yield put(FriendsLocationsActions.friendsLocationsUpdate())
+
+  //if logged in
+  //yield put(FriendsLocationsActions.friendsLocationsUpdate())
+
   }
 }
