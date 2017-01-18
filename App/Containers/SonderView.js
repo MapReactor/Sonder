@@ -165,32 +165,6 @@ class SonderView extends Component {
       });
   }).bind(this)
 
-  // fetchWikimapiaHoodInfo = (() => {
-  //   const baseUrl = 'http://api.wikimapia.org/?'
-  //   const params = {
-  //     key: '***KEY***',
-  //     format: 'json',
-  //     language='en',
-  //     function: 'place.getnearest',
-  //     id: 'pageprops|info|extracts',
-  //     lat: ,
-  //     lon: ,
-  //     categories_and: ,
-  //     distance: 1,
-  //     // titles: `Civic Center, San Francisco`
-  //   }
-  //   const url = makeUrl(baseUrl, params);
-  //
-  //   return fetch(url)
-  //     .then((response) => response.json())
-  //     .then((responseJson) => {
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // }).bind(this)
-
   getpopupHoodData = (() => {
     this.setPopupHoodName();
     this.fetchWikiHoodInfo()
@@ -199,6 +173,76 @@ class SonderView extends Component {
       })
       .catch((error) => {
         console.error(error);
+      });
+  }).bind(this)
+
+  fetchWikiHoodImageUrl = ((imageName) => {
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      action: "query",
+      format: "json",
+      titles: `File:${imageName}`,
+      prop: "imageinfo",
+      iiprop: "url|size",
+      iiurlwidth: "200",
+    }
+    const url = makeUrl(baseUrl, params);
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        for ( var key in responseJson.query.pages["-1"].imageinfo) {
+          let image = responseJson.query.pages["-1"].imageinfo[key]
+          this.setState({
+            popupImageUrl: image.thumburl,
+            popupImageWidth: image.thumbwidth,
+            popupImageHeight: image.thumbheight
+          });
+          // this.setImageUrl(image.thumburl)
+          // this.setImageWidth(image.thumbwidth)
+          // this.setImageHeight(image.thumbheight)
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }).bind(this)
+
+  // TODO
+  fetchYelpHoodInfo = (() => {
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      format: 'json',
+      action: 'query',
+      prop: 'pageprops|info|extracts',
+      exintro: '',
+      explaintext: '',
+      inprop: 'url',
+      titles: `${ this.state.popupTitle }, San Francisco`
+      // titles: `Civic Center, San Francisco`
+    }
+    const url = makeUrl(baseUrl, params);
+
+    return fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        if (responseJson.query.pages === -1) {
+          throw "Neighborhood not found in Wikipedia";
+        }
+        for ( var key in responseJson.query.pages) {
+          let page = responseJson.query.pages[key]
+          this.setState({
+            popupExtract: page.extract.replace(/\n/g,"\n\n"),
+            wikiUrl: page.fullurl
+          });
+          // this.setTitle(page.title)
+          // this.setExtract(page.extract.replace(/\n/g,"\n\n"))
+          // this.setImageUrl(page.fullurl)
+          return page.pageprops.page_image_free
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        // this.fetchWikimapiaHoodInfo();
       });
   }).bind(this)
 
@@ -250,6 +294,7 @@ class SonderView extends Component {
     this.setState({ userTrackingMode });
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
+
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
     compassTuple = [compassTuple[0].reverse(), compassTuple[1].reverse()]
@@ -495,36 +540,60 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*---------------------------- Debugger View ------------------------ */}
-        {/*
+
         <View style={{ maxHeight: 200 }}>
           <ScrollView>
-          <Text onPress={() => {this.popupDialog.openDialog()}}>{this.state.entities ?
-            '*** click to renderPopup' :
-            "Please wait..."}
-          </Text>
-          <Text>{this.state.entities ?
-            '*** currentHood: ' + JSON.stringify(reverseTuples(this.state.entities.hoods)) :
-            "Waiting for entities..."}
-          </Text>
+            // Test
+            <Text onPress={() => {
+              Linking.canOpenURL(url).then(supported => {
+                if (!supported) {
+                  console.log('Can\'t handle url: ' + url);
+                } else {
+                  return Linking.openURL(url);
+                }
+              }).catch(err => console.error('An error occurred', err));
+              Linking.openURL('yelp:///biz/the-sentinel-san-francisco')}}>
+              Click me to open yelp!
+            </Text>
+
+            // Test
+            <Text onPress={() => {this._map.selectAnnotation('friend', animated = true);}}>
+              "Click me to toggle annotation"
+            </Text>
+
+            // Test
+            this._map.selectAnnotation(id, animated = true);
+            <Text>{this.state.entities ?
+              '*** currentHood: ' + JSON.stringify(reverseTuples(this.state.entities.hoods)) :
+              "Waiting for entities..."}
+            </Text>
+
+            // Test
             <Text>{this.state.entities ?
               '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
               "Waiting for entities..."}
             </Text>
+            // Test
             <Text>{this.state.headingIsSupported ?
               '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
               "Heading unsupported." }
             </Text>
+
+            // Test
             <Text>{this.state.entities ?
               '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
               "Normalizing reticulating splines..."}
             </Text>
+
+            // Test
             <Text>{this.state.annotations ?
               '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
               null}
             </Text>
+
           </ScrollView>
         </View>
-        */}
+
       {/*--------------------------- / Debugger View ----------------------- */}
       </View>
     );
