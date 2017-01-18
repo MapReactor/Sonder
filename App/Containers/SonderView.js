@@ -202,13 +202,6 @@ class SonderView extends Component {
       'current' : 'facing'
     this.setState({popupView: popupView})
     this.popupDialog.openDialog();
-    // {
-    // id: currentHoodCenter,
-    // title: 'This is a title',
-    // latitude: 37.7...,
-    // longitude: -122.4...,
-    // subtitle: 'This is a subtitle'
-  // }
   };
   onRightAnnotationTapped = (e) => {
     console.log('onRightAnnotationTapped', e);
@@ -275,7 +268,6 @@ class SonderView extends Component {
       annotations: annotations
     })
   }
-
 
   setAdjacentHoodAnnotation() {
     if (!this.state.entities) {
@@ -371,6 +363,7 @@ class SonderView extends Component {
           userTrackingMode={this.state.userTrackingMode}
           annotations={this.state.annotations}
           annotationsAreImmutable
+          annotationsPopUpEnabled={false}
           onChangeUserTrackingMode={this.onChangeUserTrackingMode}
           onRegionDidChange={this.onRegionDidChange}
           onRegionWillChange={this.onRegionWillChange}
