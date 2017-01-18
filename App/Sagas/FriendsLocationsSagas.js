@@ -17,7 +17,8 @@ function websocketInitChannel() {
       console.log('opening ws')
 
       // fetch friends
-      UsersApi.getFriends(function(res, userInfo) {
+      // todo: use res to get & store friends' names for callout
+      UsersApi.getFriends(function(res, userInfo) { 
         console.log('fetched friends from saga', res, userInfo)
 
         // subscribe to friends locations
