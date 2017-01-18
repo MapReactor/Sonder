@@ -30,10 +30,10 @@ class NavigationRouter extends Component {
             <Scene initial key='welcomeView' hideNavBar={false} component={WelcomeView} />
             <Scene key='sonderView' component={SonderView} title='Sonder' />
             {/* <Scene key='compassView' hideNavBar={false} component={CompassView} title='Compass (deprecated)' />*/}
-            <Scene key='mapBoxExampleView' component={MapBoxExample} title='MapBox Example' />
-            <Scene key='mapBoxExampleSfView' component={MapBoxExampleSf} title='MapBox Example SF' />
-            <Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />
-            <Scene  key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
+            {/*<Scene key='mapBoxExampleView' component={MapBoxExample} title='MapBox Example' />*/}
+            {/*<Scene key='mapBoxExampleSfView' component={MapBoxExampleSf} title='MapBox Example SF' />*/}
+            {/*<Scene key='storageTestView' hideNavBar={false} component={StorageTestView} title='Storage Test' />*/}
+            <Scene key='friendsView' hideNavBar={false} component={FriendsView} title='Friends View' />
             <Scene key='sonderDebug' component={SonderDebug} title='Sonder Data Debug' />
           </Scene>
         </Scene>
