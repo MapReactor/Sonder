@@ -8,8 +8,14 @@ import {
   Text,
   StatusBar,
   View,
-  ScrollView
+  ScrollView,
+  Image,
 } from 'react-native';
+import PopupDialog, {
+  DialogTitle,
+  DialogButton,
+  SlideAnimation
+} from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
@@ -19,21 +25,162 @@ import {
   getPrettyBearing,
   toTuples
 } from '../Lib/MapHelpers';
+import { makeUrl } from '../Lib/Utilities'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
 
 class SonderView extends Component {
   state = {
-    zoom: 12,
+    initialZoomLevel: 12,
     userTrackingMode: Mapbox.userTrackingMode.follow,
+    facingHood: {},
     annotations: [],
+    /*
+    annotations array order:
+      [0] compassLine
+      [1] currentHood
+      [2] currentHoodCenter
+      [3] adjacentHood,adjacentHoodCenter
+    */
+    /*<--- Popup state --->*/
+      // popupDialog: {},
+      popupView: 'current', // alternatively, 'facing'
+      wikiTitle: '',
+      wikiExtract: '',
+      wikiImageUrl: '',
+      wikiImageWidth: 0,
+      wikiImageHeight: 0,
+    /*<--- Popup state --->*/
     // center: {
     //   longitude: -122.40258693695068,
     //   latitude: 37.78477457373192
     // },
   };
 
+  /*<----------------------------- Popup methods ---------------------------->*/
+  // this.setTitle = ((title) => {
+  //   this.props.setTitle(title);
+  // }).bind(this);
+  // this.setExtract = ((extract) => {
+  //   this.props.setExtract(extract);
+  // }).bind(this);
+  // this.setImageUrl = ((imageUrl) => {
+  //   this.props.setImageUrl(imageUrl);
+  // }).bind(this);
+  // this.setImageWidth = ((imageWidth) => {
+  //   this.props.setImageWidth(imageWidth);
+  // }).bind(this);
+  // this.setImageHeight = ((imageHeight) => {
+  //   this.props.setImageHeight(imageHeight);
+  // }).bind(this);
+  // this.reset = (() => {
+  //   this.props.reset();
+  // }).bind(this);
+
+  openDialog = (() => {
+    this.popupDialog.openDialog();
+  }).bind(this)
+
+  closeDialog = (() => {
+    this.popupDialog.closeDialog();
+  }).bind(this)
+
+  fetchWikiHoodInfo = (() => {
+    const hoodName = this.state.popupView === 'current' ?
+      this.state.entities.hoods.current.name :
+      this.state.facingHood.name
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      format: 'json',
+      action: 'query',
+      prop: 'pageprops|info|extracts',
+      exintro: '',
+      explaintext: '',
+      inprop: 'url',
+      titles: `${hoodName}, San Francisco`
+      // titles: `Civic Center, San Francisco`
+    }
+    const url = makeUrl(baseUrl, params);
+
+    return fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        for ( var key in responseJson.query.pages) {
+          let page = responseJson.query.pages[key]
+          this.setState({
+            wikiTitle: page.title,
+            wikiExtract: page.extract.replace(/\n/g,"\n\n"),
+            wikiUrl: page.fullurl
+          });
+          // this.setTitle(page.title)
+          // this.setExtract(page.extract.replace(/\n/g,"\n\n"))
+          // this.setImageUrl(page.fullurl)
+          return page.pageprops.page_image_free
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }).bind(this)
+
+  // Fetch the image url, width and height of the main page url
+  fetchWikiHoodImageUrl = ((imageName) => {
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      action: "query",
+      format: "json",
+      titles: `File:${imageName}`,
+      prop: "imageinfo",
+      iiprop: "url|size",
+      iiurlwidth: "200",
+    }
+    const url = makeUrl(baseUrl, params);
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        for ( var key in responseJson.query.pages["-1"].imageinfo) {
+          let image = responseJson.query.pages["-1"].imageinfo[key]
+          this.setState({
+            wikiImageUrl: image.thumburl,
+            wikiImageWidth: image.thumbwidth,
+            wikiImageHeight: image.thumbheight
+          });
+          // this.setImageUrl(image.thumburl)
+          // this.setImageWidth(image.thumbwidth)
+          // this.setImageHeight(image.thumbheight)
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }).bind(this)
+
+  getWikiHoodData = (() => {
+    this.fetchWikiHoodInfo()
+      .then((imageName) => {
+        this.fetchWikiHoodImageUrl(imageName)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }).bind(this)
+
+
+  clearWikiHoodData = (() => {
+    // this.reset()
+    this.setState({
+      wikiTitle: '',
+      wikiExtract: '',
+      wikiImageUrl: '',
+      wikiImageWidth: 0,
+      wikiImageHeight: 0,
+      wikiUrl: '',
+    })
+  }).bind(this)
+  /*<--------------------------- / Popup methods ---------------------------->*/
+
+  /*<----------------------------- Map methods ------------------------------>*/
   onRegionDidChange = (location) => {
     this.setState({ currentZoom: location.zoomLevel });
     console.log('onRegionDidChange', location);
@@ -46,6 +193,17 @@ class SonderView extends Component {
   };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
+    const popupView = annotation.id === 'currentHoodCenter' ?
+      'current' : 'facing'
+    this.setState({popupView: popupView})
+    this.popupDialog.openDialog();
+    // {
+    // id: currentHoodCenter,
+    // title: 'This is a title',
+    // latitude: 37.7...,
+    // longitude: -122.4...,
+    // subtitle: 'This is a subtitle'
+  // }
   };
   onRightAnnotationTapped = (e) => {
     console.log('onRightAnnotationTapped', e);
@@ -60,41 +218,6 @@ class SonderView extends Component {
     this.setState({ userTrackingMode });
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
-
-  componentWillMount() {
-    Compass.start({
-      minAngle: 1,
-      radius: 10,
-      onInitialPosition: (initialPosition) => {
-        this.setState({ initialPosition })
-      },
-      onInitialHoods: ({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs}) => {
-        this.setState({
-          currentHood,
-          adjacentHoods,
-          hoods: hoodLatLngs,
-          streets: streetLatLngs,
-        });
-      },
-      onHeadingSupported: (headingIsSupported) =>
-        this.setState({ headingIsSupported }),
-      onPositionChange: (lastPosition) =>
-        this.setState({ lastPosition }),
-      onHeadingChange: (headingData) => {
-        this.setCompassAnnotation(headingData)
-        this.setAdjacentHoodAnnotation()
-      },
-      onEntitiesDetected: (entities) => {
-        this.setState({ entities });
-        this.setCurrentHoodAnnotation();
-        this.setAdjacentHoodAnnotation();
-      }
-    });
-  }
-
-  componentWillUnmount() {
-    Compass.stop();
-  }
 
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
@@ -136,14 +259,12 @@ class SonderView extends Component {
       fillAlpha: 0.3,
       strokeColor: '#ffffff',
       fillColor: '#0000ff',
-      id: 'currentHood'
+      id: 'currentHood',
     }
     annotations[2] = {
       coordinates: reverseTuples(center),
       type: 'point',
-      title: 'This is a title',
-      subtitle: 'This is a subtitle',
-      id: 'currentHoodCenter'
+      id: 'currentHoodCenter',
     }
     this.setState({
       annotations: annotations
@@ -155,43 +276,87 @@ class SonderView extends Component {
     if (!this.state.entities) {
       return
     }
-    let coordinates = this.state.entities.hoods.adjacents
-      .reduce((closestHood, hood) => hood.distance < closestHood.distance ?
-        hood : closestHood
-      )
-      .coordinates[0]
+    this.setFacingHood();
+    let coordinates = this.state.facingHood.coordinates[0]
     let center = calculateRegionCenter(coordinates);
     let annotations = this.state.annotations.slice();
     annotations[3] = {
-      // coordinates: [[37.78760656916262,-122.40668535232543],[37.787420033880174,-122.40835905075073],[37.78830183288528,-122.40853071212767],[37.78850532346909,-122.4068784713745],[37.78760656916262,-122.40668535232543]],
       coordinates: reverseTuples(coordinates),
       type: 'polygon',
       fillAlpha: 0.3,
       strokeColor: '#00e6e6',
       fillColor: '#00e6e6',
-      id: 'adjacentHood'
+      id: 'adjacentHood',
     }
     annotations[4] = {
       coordinates: reverseTuples(center),
       type: 'point',
-      title: 'This is a title',
-      subtitle: 'This is a subtitle',
-      id: 'adjacentHoodCenter'
+      id: 'adjacentHoodCenter',
     }
     this.setState({
-      annotations: annotations
+      annotations: annotations,
     })
   }
+
+  setFacingHood() {
+    if (!this.state.entities) {
+      return
+    }
+    this.setState({facingHood: this.state.entities.hoods.adjacents
+      .reduce((closestHood, hood) => hood.distance < closestHood.distance ?
+        hood : closestHood
+      )
+    })
+  }
+  /*<---------------------------- / Map methods ----------------------------->*/
+
+  /*<---------------- Component mounting/unmounting methods ----------------->*/
+  componentWillMount() {
+    Compass.start({
+      minAngle: 1,
+      radius: 10,
+      onInitialPosition: (initialPosition) => {
+        this.setState({ initialPosition })
+      },
+      onInitialHoods: ({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs}) => {
+        this.setState({
+          currentHood,
+          adjacentHoods,
+          hoods: hoodLatLngs,
+          streets: streetLatLngs,
+        });
+      },
+      onHeadingSupported: (headingIsSupported) =>
+        this.setState({ headingIsSupported }),
+      onPositionChange: (lastPosition) =>
+        this.setState({ lastPosition }),
+      onHeadingChange: (headingData) => {
+        this.setCompassAnnotation(headingData)
+        this.setAdjacentHoodAnnotation()
+      },
+      onEntitiesDetected: (entities) => {
+        this.setState({ entities });
+        this.setCurrentHoodAnnotation();
+        this.setAdjacentHoodAnnotation();
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    Compass.stop();
+  }
+  /*<--------------- / Component mounting/unmounting methods ---------------->*/
 
   render() {
     StatusBar.setHidden(true);
     return (
+      /*------------------------------ Map View ----------------------------- */
       <View style={styles.container}>
         <MapView
           ref={map => { this._map = map; }}
           style={styles.map}
           initialCenterCoordinate={this.state.center}
-          initialZoomLevel={this.state.zoom}
+          initialZoomLevel={this.state.initialZoomLevel}
           initialDirection={0}
           rotateEnabled={true}
           scrollEnabled={true}
@@ -210,30 +375,112 @@ class SonderView extends Component {
           onLongPress={this.onLongPress}
           onTap={this.onTap}
         />
-          <View style={{ maxHeight: 200 }}>
-            <ScrollView>
+      {/*----------------------------- / Map View ---------------------------*/}
+
+
+      {/*---------------------------- Popup View --------------------------- */}
+        <PopupDialog
+          // ref={(popupDialog) => { this.setState({popupDialog: popupDialog}); }}
+          ref={(popupDialog) => { this.popupDialog = popupDialog }}
+          onOpened={() => {this.getWikiHoodData(); }}
+          onClosed={() => {this.clearWikiHoodData(); }}
+          width={.85}
+          height={.75}
+          dialogStyle={{padding: 10}}
+          actions={[
+            <DialogButton
+              buttonStyle={{height: 20, justifyContent: 'center', marginTop: 10}}
+              textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}}
+              textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}}
+              text="CLOSE"
+              align="center"
+              onPress={this.closeDialog}
+              key="closePopup"
+            />
+          ]}
+          dialogTitle={
+            <DialogTitle
+              titleTextStyle={{fontSize: 20}}
+              title={this.state.wikiTitle}
+            />
+          }
+          // Disabling animations as dialogue disappears after state changes
+          // see: https://github.com/jacklam718/react-native-popup-dialog/issues/19
+          // dialogAnimation = { new SlideAnimation({
+          //   slideFrom: 'bottom',
+          //   animationDuration: 100,
+          // }) }
+        >
+
+          <ScrollView>
+            <View  style={{alignItems: 'center', marginHorizontal: 20}}>
+              <Image
+                style={{marginVertical: 5, resizeMode: 'contain'}}
+                source={{uri: this.state.wikiImageUrl}}
+                width={this.state.wikiImageWidth}
+                height={this.state.wikiImageHeight}
+                maintainAspectRatio={true}
+                //onLoadStart={this.handleLoadStart}
+                //onProgress={this.handleProgress}
+                //onError={this.handleError}
+              />
+              <Text
+                style={{
+                  fontSize: 16,
+                  textAlign: 'justify'
+                }}
+              >
+              {this.state.wikiExtract}
+              </Text>
+              <Text onPress={() => {
+                Linking.openURL(this.state.wikiUrl)
+                  .catch(err => console.error('An error occurred', err));}}
+                  style={{
+                    fontSize: 12,
+                    textAlign: 'left',
+                    padding: 10,
+                    color: 'blue'
+                  }}
+                >{this.state.wikiUrl ? "Wikipedia" : ""}
+              </Text>
+            </View>
+          </ScrollView>
+
+        </PopupDialog>
+      {/*--------------------------- / Popup View -------------------------- */}
+
+      {/*---------------------------- Debugger View ------------------------ */}
+        {/*
+        <View style={{ maxHeight: 200 }}>
+          <ScrollView>
+          <Text onPress={() => {this.popupDialog.openDialog()}}>{this.state.entities ?
+            '*** click to renderPopup' :
+            "Please wait..."}
+          </Text>
+          <Text>{this.state.entities ?
+            '*** currentHood: ' + JSON.stringify(reverseTuples(this.state.entities.hoods)) :
+            "Waiting for entities..."}
+          </Text>
             <Text>{this.state.entities ?
-              '*** currentHood coordinates: ' + JSON.stringify(reverseTuples(this.state.entities.hoods.current.coordinates[0])) :
+              '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
               "Waiting for entities..."}
             </Text>
-              <Text>{this.state.entities ?
-                '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
-                "Waiting for entities..."}
-              </Text>
-              <Text>{this.state.headingIsSupported ?
-                '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
-                "Heading unsupported." }
-              </Text>
-              <Text>{this.state.entities ?
-                '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
-                "Normalizing reticulating splines..."}
-              </Text>
-              <Text>{this.state.annotations ?
-                '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
-                null}
-              </Text>
-            </ScrollView>
-          </View>
+            <Text>{this.state.headingIsSupported ?
+              '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
+              "Heading unsupported." }
+            </Text>
+            <Text>{this.state.entities ?
+              '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
+              "Normalizing reticulating splines..."}
+            </Text>
+            <Text>{this.state.annotations ?
+              '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
+              null}
+            </Text>
+          </ScrollView>
+        </View>
+        */}
+      {/*--------------------------- / Debugger View ----------------------- */}
       </View>
     );
   }
