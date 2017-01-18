@@ -68,10 +68,12 @@ class SonderView extends Component {
           hoods: hoodLatLngs,
           streets: streetLatLngs
         });
+        this.setHoodAnnotations(currentHood, adjacentHoods);
       },
       onHeadingSupported: (headingIsSupported) => 
         this.setState({ headingIsSupported }),
       onPositionChange: (lastPosition) => {
+        // console.tron.log("POSITION CHANGED: " + JSON.stringify(lastPosition.coords));
         const { latitude, longitude } = lastPosition.coords;
         const ops = { latitude, longitude };
         if (this._lastHeading) { ops.direction = this._lastHeading }
@@ -80,13 +82,20 @@ class SonderView extends Component {
         }
         this.setState({ lastPosition })
       },
+      onHoodChange: ({newHood, adjacentHoods}) => {
+        this.setState({ currentHood: newHood, adjacentHoods });
+        console.tron.log('HOOD CHANGED '+adjacentHoods.length.toFixed());;
+        this.setHoodAnnotations(newHood, adjacentHoods);
+      },
       onHeadingChange: (headingData) => {
+        this.setState({ heading: headingData.heading });
         this._lastHeading = headingData.heading;
         const direction = headingData.heading;    
         if (headingData.position) {
           const { latitude, longitude } = headingData.position;
           this._map.easeTo({ direction, latitude, longitude }, true, () => {});
         } else {
+          console.tron.log('Position is missing! Mario is missing! Where is Carmen San Diego?!');
           this._map.setDirection(headingData.heading);
         }
         // this.setCompassAnnotation(headingData);
@@ -103,9 +112,10 @@ class SonderView extends Component {
   setHoodAnnotations(currentHood, adjacentHoods) {
     // Draw the hood annotation, with random color, then with BinduRGB
     const currentHoodAnnotations = hoodToAnnotations(currentHood, {
-      id: 'currentHood',
+      id: currentHood.properties.label,
       // fillAlpha: 0.5,
       // alpha: 0.5,
+      class: 'hood',
       fillColor: '#AA2222',
       strokeColor: '#FFFFFF',
       strokeWidth: 10,
@@ -115,9 +125,10 @@ class SonderView extends Component {
     const adjacentHoodAnnotations = [];
     for (let adjacentHood of adjacentHoods) {
       const annotations = hoodToAnnotations(adjacentHood, {
-        id: Math.random().toString(), // Just doing this in a pinch, bleh
+        id: adjacentHood.properties.label,
         // fillAlpha: 0.5,
         // alpha: 0.5,
+        class: 'hood',
         fillColor: '#2222AA',
         strokeColor: '#FFFFFF',
         strokeWidth: 10,
@@ -128,7 +139,7 @@ class SonderView extends Component {
 
     this.setState({
       annotations: [
-        ...this.state.annotations, 
+        ...this.state.annotations.filter(annotation => annotation.class !== 'hood'), 
         ...currentHoodAnnotations,
         ...adjacentHoodAnnotations,
       ]
@@ -191,6 +202,9 @@ class SonderView extends Component {
           onLongPress={this.onLongPress}
           onTap={this.onTap}
         />
+        <Text>{this.state.headingIsSupported ?
+                getPrettyBearing(this.state.heading)
+                : "Heading unsupported." }</Text>
 
             {/*<Text>{this.state.entities ? 
               JSON.stringify(this.state.entities.hoods) : 
