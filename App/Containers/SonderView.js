@@ -111,6 +111,9 @@ class SonderView extends Component {
     return fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
+        if (responseJson.query.pages === -1) {
+          throw "Neighborhood not found in Wikipedia";
+        }
         for ( var key in responseJson.query.pages) {
           let page = responseJson.query.pages[key]
           this.setState({
@@ -124,7 +127,8 @@ class SonderView extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
+        console.log(error);
+        // this.fetchWikimapiaHoodInfo();
       });
   }).bind(this)
 
@@ -159,6 +163,32 @@ class SonderView extends Component {
         console.error(error);
       });
   }).bind(this)
+
+  // fetchWikimapiaHoodInfo = (() => {
+  //   const baseUrl = 'http://api.wikimapia.org/?'
+  //   const params = {
+  //     key: '***KEY***',
+  //     format: 'json',
+  //     language='en',
+  //     function: 'place.getnearest',
+  //     id: 'pageprops|info|extracts',
+  //     lat: ,
+  //     lon: ,
+  //     categories_and: ,
+  //     distance: 1,
+  //     // titles: `Civic Center, San Francisco`
+  //   }
+  //   const url = makeUrl(baseUrl, params);
+  //
+  //   return fetch(url)
+  //     .then((response) => response.json())
+  //     .then((responseJson) => {
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // }).bind(this)
 
   getpopupHoodData = (() => {
     this.setPopupHoodName();
