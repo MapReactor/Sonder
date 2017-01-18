@@ -5,7 +5,7 @@ import UsersApi from '../Services/UsersApi'
 
 let open = false
 let channel
-let friends
+let namesAndPictures = {}
 
 function websocketInitChannel() {
   return eventChannel( emitter => {
@@ -20,6 +20,13 @@ function websocketInitChannel() {
       // todo: use res to get & store friends' names for callout
       UsersApi.getFriends(function(res, userInfo) {
         console.log('fetched friends from saga', res, userInfo)
+
+        // store names and pictures
+        res.data.following.forEach((obj) => {
+          namesAndPictures[ obj.fb_id ] = {}
+          namesAndPictures[ obj.fb_id ].name = obj.displayname
+          namesAndPictures[ obj.fb_id ].picture = obj.picture
+        })
 
         // subscribe to friends locations
         ws.send(JSON.stringify({
@@ -43,9 +50,14 @@ function websocketInitChannel() {
       if (res.type === 'location') {
         // transform data
         let payload = {}
+        payload.name = namesAndPictures[res.message.id].name
+        payload.picture = namesAndPictures[res.message.id].picture
         payload.id = res.message.id
         payload.longitude = res.message.longitude
         payload.latitude = res.message.latitude
+
+        console.log('NAMESANDPICTURES', namesAndPictures)
+        console.log('PAYLOAD', payload)
 
         // dispatch an action with emitter
         console.log(payload)

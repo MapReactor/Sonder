@@ -229,6 +229,9 @@ class SonderView extends Component {
   };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
+    if (annotation.id !== 'currentHoodCenter' || 'adjacentHoodCenter') {
+      return;
+    }
     const popupView = annotation.id === 'currentHoodCenter' ?
       'current' : 'facing'
     this.setState({popupView: popupView})
@@ -407,7 +410,7 @@ class SonderView extends Component {
           userTrackingMode={this.state.userTrackingMode}
           annotations={this.state.annotations}
           annotationsAreImmutable
-          annotationsPopUpEnabled={false}
+          annotationsPopUpEnabled={true}
           onChangeUserTrackingMode={this.onChangeUserTrackingMode}
           onRegionDidChange={this.onRegionDidChange}
           onRegionWillChange={this.onRegionWillChange}
