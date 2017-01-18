@@ -229,6 +229,9 @@ class SonderView extends Component {
   };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
+    if (annotation.id !== 'currentHoodCenter' || 'adjacentHoodCenter') {
+      return;
+    }
     const popupView = annotation.id === 'currentHoodCenter' ?
       'current' : 'facing'
     this.setState({popupView: popupView})
@@ -247,7 +250,6 @@ class SonderView extends Component {
     this.setState({ userTrackingMode });
     console.log('onChangeUserTrackingMode', userTrackingMode);
   };
-  
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
     compassTuple = [compassTuple[0].reverse(), compassTuple[1].reverse()]
@@ -368,6 +370,12 @@ class SonderView extends Component {
           this.setAdjacentHoodAnnotation();
         }
       });
+
+      console.log('INSIDE componentWillMount. PROPS: ', this.props)
+      // set annotations for intial friendsLocations
+      this.setState((prevState, props) => {
+        return FriendsHelpers.updateFriendsLocations(prevState, props)
+      })
     }
 
     componentWillUnmount() {
@@ -376,8 +384,8 @@ class SonderView extends Component {
 
     componentWillReceiveProps(nextProps) {
       // annotations change dynamically based on changes in friendsLocations
-      this.setState((prevState, props) => {
-        return FriendsHelpers.updateFriendsLocations(nextProps, prevState)
+      this.setState((prevState, nextprops) => {
+        return FriendsHelpers.updateFriendsLocations(prevState, nextProps)
       })
     }
   /*<--------------- / Component mounting/unmounting methods ---------------->*/
@@ -401,7 +409,7 @@ class SonderView extends Component {
           userTrackingMode={this.state.userTrackingMode}
           annotations={this.state.annotations}
           annotationsAreImmutable
-          annotationsPopUpEnabled={false}
+          annotationsPopUpEnabled={true}
           onChangeUserTrackingMode={this.onChangeUserTrackingMode}
           onRegionDidChange={this.onRegionDidChange}
           onRegionWillChange={this.onRegionWillChange}
