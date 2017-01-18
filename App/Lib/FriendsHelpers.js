@@ -1,7 +1,6 @@
 
 export default {
 
-  // todo: optomize by removing old annotation before adding new one
   updateFriendsLocations: (prevState, nextProps) => {
     console.log('in updateFriendsLocations')
     var arr = [ ...prevState.annotations ]
