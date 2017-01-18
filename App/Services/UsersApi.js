@@ -28,7 +28,6 @@ export default {
   },
 
   addFriends: (friendsData, cb) => {
-    console.log('friendsData', friendsData);
     const api = apisauce.create({
       baseURL: host,
       headers: {
@@ -48,7 +47,8 @@ export default {
     });
   },
 
-  getFriends: (cb) => {
+  getFriends: (cb) => { // todo: refactor to use redux store
+    console.log('getting friends!!!')
     GraphApi.getUserInfo(function(userInfo, friendsData) {
       console.log('userInfo', userInfo)
       const api = apisauce.create({
@@ -60,7 +60,7 @@ export default {
       api
       .get('friends/' + userInfo.id)
       .then((res) => {
-        console.log('fetched friends');
+        console.log('fetched friends', res);
         cb(res, userInfo);
       })
       .catch((err) => {
@@ -70,25 +70,5 @@ export default {
       })
     })
   },
-
-  // getLocations: (cb) => { // todo: add param for fb_id
-  //   const api = apisauce.create({
-  //     baseURL: host,
-  //     headers: {
-  //       'Accept': 'text/plain'
-  //     }
-  //   });
-  //   api
-  //   .get('locations/:' + /*fb_id*/)
-  //   .then((res) => {
-  //     console.log('fetched friends', JSON.stringify(res));
-  //     cb(res);
-  //   })
-  //   .catch((err) => {
-  //     if (err) {
-  //       console.log('error on fetching friends', err);
-  //     }
-  //   })
-  // },
 
 }
