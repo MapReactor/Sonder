@@ -50,8 +50,8 @@ function websocketInitChannel() {
         // dispatch an action with emitter
         console.log(payload)
         return emitter( { type: 'FRIENDS_LOCATIONS_UPDATE', friendsLocations: payload } )
-        ws.close()
       }
+      return false
     }
 
     ws.onclose = (e) => {

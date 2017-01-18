@@ -1,7 +1,7 @@
 
 export default {
 
-  updateFriendsLocations: (nextProps, prevState) => {
+  updateFriendsLocations: (prevState, nextProps) => {
     console.log('in updateFriendsLocations')
     var arr = [ ...prevState.annotations ]
     for (let newPoint in nextProps.friendsLocations) {
@@ -17,6 +17,6 @@ export default {
     }
     console.log('arr', arr)
     return { annotations: arr }
-  }
+  },
 
 }
