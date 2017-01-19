@@ -32,12 +32,39 @@ import FriendsHelpers from '../Lib/FriendsHelpers'
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
 
+import _ from 'lodash'
+import qs from 'querystring'
+import OAuthSimple from 'oauthsimple'
+import nonce from 'nonce'
+const n = nonce();
+import { yelpConsumerSecret, yelpTokenSecret } from '../../config'
+
 class SonderView extends Component {
   state = {
     initialZoomLevel: 12,
     userTrackingMode: Mapbox.userTrackingMode.follow,
     facingHood: {},
     annotations: [],
+
+    // this.setState({
+    //   annotations: this.state.annotations.map(annotation => {
+    //     if (annotation.id !== 'marker2') { return annotation; }
+    //     return {
+    //       coordinates: [40.714541341726175,-74.00579452514648],
+    //       'type': 'point',
+    //       title: 'New Title!',
+    //       subtitle: 'New Subtitle',
+    //       annotationImage: {
+    //         source: { uri: 'https://cldup.com/7NLZklp8zS.png' },
+    //         height: 25,
+    //         width: 25
+    //       },
+    //       id: 'marker2'
+    //     };
+    //   })
+    // });
+
+
     /*
     annotations array order:
       [0] compassLine
@@ -53,11 +80,12 @@ class SonderView extends Component {
       popupImageUrl: '',
       popupImageWidth: 0,
       popupImageHeight: 0,
+      yelpData: '',
     /*<--- Popup state --->*/
-    // center: {
-    //   longitude: -122.40258693695068,
-    //   latitude: 37.78477457373192
-    // },
+      center: {
+        longitude: -122.40258693695068,
+        latitude: 37.78477457373192
+      },
   };
 
   /*<----------------------------- Popup methods ---------------------------->*/
@@ -165,32 +193,6 @@ class SonderView extends Component {
       });
   }).bind(this)
 
-  // fetchWikimapiaHoodInfo = (() => {
-  //   const baseUrl = 'http://api.wikimapia.org/?'
-  //   const params = {
-  //     key: '***KEY***',
-  //     format: 'json',
-  //     language='en',
-  //     function: 'place.getnearest',
-  //     id: 'pageprops|info|extracts',
-  //     lat: ,
-  //     lon: ,
-  //     categories_and: ,
-  //     distance: 1,
-  //     // titles: `Civic Center, San Francisco`
-  //   }
-  //   const url = makeUrl(baseUrl, params);
-  //
-  //   return fetch(url)
-  //     .then((response) => response.json())
-  //     .then((responseJson) => {
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // }).bind(this)
-
   getpopupHoodData = (() => {
     this.setPopupHoodName();
     this.fetchWikiHoodInfo()
@@ -199,6 +201,68 @@ class SonderView extends Component {
       })
       .catch((error) => {
         console.error(error);
+      });
+  }).bind(this)
+
+  fetchWikiHoodImageUrl = ((imageName) => {
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      action: "query",
+      format: "json",
+      titles: `File:${imageName}`,
+      prop: "imageinfo",
+      iiprop: "url|size",
+      iiurlwidth: "200",
+    }
+    const url = makeUrl(baseUrl, params);
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        for ( var key in responseJson.query.pages["-1"].imageinfo) {
+          let image = responseJson.query.pages["-1"].imageinfo[key]
+          this.setState({
+            popupImageUrl: image.thumburl,
+            popupImageWidth: image.thumbwidth,
+            popupImageHeight: image.thumbheight
+          });
+          // this.setImageUrl(image.thumburl)
+          // this.setImageWidth(image.thumbwidth)
+          // this.setImageHeight(image.thumbheight)
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }).bind(this)
+
+  // TODO
+  fetchYelpHoodRestaurants = (() => {
+    const lat = 37.78477457373192
+    const lng = -122.40258693695068
+    const latlng = "ll=" + String(lat) + "," + String(lng)
+
+    const oauth = new OAuthSimple('eUUiBEeoxTfKX2YGudP_6g', yelpTokenSecret)
+
+    const request = oauth.sign({
+      action: "GET",
+      path: "https://api.yelp.com/v2/search",
+      parameters: "term=coffee&" + latlng,
+      signatures: {
+        api_key: 'eUUiBEeoxTfKX2YGudP_6g',
+        shared_secret: yelpConsumerSecret,
+        access_token: 'Xc_rCgwJ7OqRAP5HiXQMIIXUw-v1QtW0',
+        access_secret: yelpTokenSecret,
+      },
+    })
+
+    return fetch(request.signed_url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.tron.log(JSON.stringify(responseJson));
+        this.setState({ yelpData: responseJson });
+      })
+      .catch((error) => {
+        console.log(error);
       });
   }).bind(this)
 
@@ -496,36 +560,59 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*---------------------------- Debugger View ------------------------ */}
-        {/*
+
         <View style={{ maxHeight: 200 }}>
           <ScrollView>
-          <Text onPress={() => {this.popupDialog.openDialog()}}>{this.state.entities ?
-            '*** click to renderPopup' :
-            "Please wait..."}
-          </Text>
-          <Text>{this.state.entities ?
-            '*** currentHood: ' + JSON.stringify(reverseTuples(this.state.entities.hoods)) :
-            "Waiting for entities..."}
-          </Text>
+
+            <Text onPress={() => {
+              Linking.canOpenURL('yelp:///biz/the-sentinel-san-francisco')
+                .then(supported => {
+                  if (!supported) {
+                    Linking.openURL('https://www.yelp.com/biz/the-sentinel-san-francisco')
+                  } else {
+                    return Linking.openURL('yelp:///biz/the-sentinel-san-francisco');
+                  }
+                })
+                .catch(err => console.error('An error occurred', err))}}>
+              Click me to open yelp!
+            </Text>
+
+            <Text onPress={() => {this._map.selectAnnotation('??friend', animated = true);}}>
+              "Click me to toggle annotation"
+            </Text>
+
+            <Text onPress={() => {this.fetchYelpHoodRestaurants()}}>
+              {'Fetch Yelp Data:'}
+            </Text>
+
+            <Text>{this.state.yelpData ?
+              '*** this.state.yelpData: ' + JSON.stringify(this.state.yelpData) :
+              "Waiting for yelp Data..."}
+            </Text>
+
             <Text>{this.state.entities ?
               '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
               "Waiting for entities..."}
             </Text>
+
             <Text>{this.state.headingIsSupported ?
               '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
               "Heading unsupported." }
             </Text>
+
             <Text>{this.state.entities ?
               '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
               "Normalizing reticulating splines..."}
             </Text>
+
             <Text>{this.state.annotations ?
               '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
               null}
             </Text>
+
           </ScrollView>
         </View>
-        */}
+
       {/*--------------------------- / Debugger View ----------------------- */}
       </View>
     );
