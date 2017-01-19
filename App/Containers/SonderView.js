@@ -33,7 +33,7 @@ import {
 } from '../Lib/MapHelpers';
 import { makeUrl } from '../Lib/Utilities'
 import FriendsHelpers from '../Lib/FriendsHelpers'
-import Login from './FBLoginView'
+import MenuLogin from './MenuView'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -610,10 +610,7 @@ class SonderView extends Component {
               {transform: [{translateY: this.state.bounceValue}]}
             ]}
           >
-            {/* <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
-              <Text style={menuStyles.textButton}>Logout</Text>
-            </TouchableHighlight> */}
-            <Login style={menuStyles.facebookButton} />
+            <MenuLogin style={menuStyles.facebookButton} onPress={()=> {this._toggleSubview()}}> </MenuLogin>
             <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
               <Text style={menuStyles.textButton}>Cancel</Text>
             </TouchableHighlight>

@@ -26,7 +26,7 @@ type LoginProps = {
   setUser: () => void,
   setLocation: (Object) => void,
   updateFriendLocations: () => void,
-  user: Object
+  user: Object,
 }
 
 class FBLoginView extends Component {
@@ -42,6 +42,7 @@ class FBLoginView extends Component {
     this.state = {
       user: null
     }
+
   }
 
   componentWillMount() {
@@ -53,7 +54,7 @@ class FBLoginView extends Component {
           this.props.setUser(friendsData);
           this.props.setLocation({id: friendsData.id});
           this.props.updateFriendLocations();
-          NavigationActions.sonderView(); //WE NEED TO FIX THIS
+          NavigationActions.sonderView();
         }.bind(this);
 
         UsersApi.addUser(UsersApi.addFriends, setUserCB)
@@ -73,7 +74,7 @@ class FBLoginView extends Component {
               if (error) {
                 alert("login has error: " + result.error);
               } else if (result.isCancelled) {
-                alert("login is cancelled.");
+                // alert("login is cancelled.");
               } else {
 
                 // posts user info to db & when complete, add friends to db
@@ -82,7 +83,7 @@ class FBLoginView extends Component {
                   this.props.setUser(friendsData);
                   this.props.setLocation({id: friendsData.id});
                   this.props.updateFriendLocations();
-                  NavigationActions.sonderView(); //WE NEED TO FIX THIS
+                  NavigationActions.sonderView();
                 }.bind(this);
 
                 UsersApi.addUser(UsersApi.addFriends, setUserCB)
