@@ -29,4 +29,4 @@ android/app/libs
 *.keystore
 
 # config
-.config.js
+config.js
