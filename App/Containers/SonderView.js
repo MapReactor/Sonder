@@ -596,7 +596,7 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*--------------------------- Menu Subview -------------------------- */}
-         <TouchableHighlight underlayColor="transparent" onPress={()=> {this._toggleSubview()}}>
+        <TouchableHighlight underlayColor="transparent" onPress={()=> {this._toggleSubview()}}>
           <Image source={require('../Images/mapreactor.png')} style={menuStyles.button}></Image>
         </TouchableHighlight>
 

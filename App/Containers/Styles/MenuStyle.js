@@ -1,26 +1,24 @@
 export default {
   container: {
-    flex: 1,
-    position: "absolute",
-    bottom: -10,
+    flex: 0,
     alignItems: "center",
+    justifyContent: 'center',
   },
   subview: {
     backgroundColor: "gray",
-    height: 120,
-    width: 100,
+    height: 100,
     position: "absolute",
     left: 0,
-    bottom: -10,
+    bottom: 0,
     right: 0,
-    flex: 0.1,
-
   },
   button: {
-    width: 40,
+    width: 30,
     height: 40,
     opacity: 0.5,
     position: "absolute",
     bottom: 0,
+    marginBottom: 5,
+    marginLeft: 5,
   }
 }
