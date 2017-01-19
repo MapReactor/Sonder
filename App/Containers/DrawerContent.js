@@ -6,7 +6,6 @@ import { connect } from 'react-redux'
 import styles from './Styles/DrawerContentStyle'
 import { Images } from '../Themes'
 import DrawerButton from '../Components/DrawerButton'
-import LoginActions, { isLoggedIn } from '../Redux/LoginRedux'
 import { Actions as NavigationActions } from 'react-native-router-flux'
 import I18n from 'react-native-i18n'
 
@@ -94,7 +93,7 @@ class DrawerContent extends Component {
   }
 
   render () {
-    let { loggedIn } = this.props
+    let { loggedIn } = true
     return (
       <ScrollView style={styles.container}>
         <Image source={Images.logo} style={styles.logo} />
@@ -113,19 +112,15 @@ class DrawerContent extends Component {
 
 DrawerContent.contextTypes = {
   drawer: React.PropTypes.object,
-  loggedIn: PropTypes.bool,
-  logout: PropTypes.func
 }
 
 const mapStateToProps = (state) => {
   return {
-    loggedIn: isLoggedIn(state.login)
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    logout: () => dispatch(LoginActions.logout())
   }
 }
 

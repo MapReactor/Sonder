@@ -2,7 +2,6 @@ import { call, put } from 'redux-saga/effects'
 import { path } from 'ramda'
 import LocationActions from '../Redux/LocationRedux'
 import LocationService from '../Services/LocationService'
-import convertFromKelvin from '../Transforms/ConvertFromKelvin'
 
 const getLocation = function * (api, action) {
   const { id } = action
@@ -30,8 +29,6 @@ const updateLocation = function * (api, action) {
   const response = yield call(api.updateLocation, location)
   // success?
   if (response.ok) {
-    //const kelvin = path(['data', 'main', 'temp_max'], response)
-    //const temperature = convertFromKelvin(kelvin)
     yield put(LocationActions.locationSuccess(response.data.id, 'bonus'))
   } else {
     yield put(LocationActions.locationFailure())

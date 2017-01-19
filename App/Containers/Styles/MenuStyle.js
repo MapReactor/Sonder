@@ -1,0 +1,47 @@
+export default {
+  container: {
+    flex: 0,
+    alignItems: "center",
+    justifyContent: 'center',
+  },
+  subview: {
+    backgroundColor: "black",
+    opacity: 0.8,
+    height: 100,
+    position: "absolute",
+    left: 0,
+    bottom: 0,
+    right: 0,
+    padding: 3,
+    alignItems: "center",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  sonderButton: {
+    width: 30,
+    height: 40,
+    opacity: 0.7,
+    position: "absolute",
+    bottom: 0,
+    marginBottom: 5,
+    marginLeft: 5,
+  },
+  textButton: {
+    color: "white",
+    marginTop: 5,
+    marginBottom: 5,
+    paddingTop: 5,
+    paddingRight: 65,
+    paddingBottom: 5,
+    paddingLeft: 65,
+    borderWidth: 0.5,
+    borderRadius: 4,
+    borderColor: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  facebookButton: {
+    marginTop: 5,
+    marginBottom: 5,
+  }
+}

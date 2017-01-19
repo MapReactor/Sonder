@@ -11,6 +11,10 @@ import {
   ScrollView,
   Image,
   Linking,
+  AppRegistry,
+  TouchableHighlight,
+  TouchableOpacity,
+  Animated,
 } from 'react-native';
 import PopupDialog, {
   DialogTitle,
@@ -19,6 +23,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
+import menuStyles from './Styles/MenuStyle'
 import Compass from '../Lib/Compass'
 import {
   reverseTuples,
@@ -28,9 +33,19 @@ import {
 } from '../Lib/MapHelpers';
 import { makeUrl } from '../Lib/Utilities'
 import FriendsHelpers from '../Lib/FriendsHelpers'
+import Login from './FBLoginView'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
+
+import _ from 'lodash'
+import qs from 'querystring'
+import OAuthSimple from 'oauthsimple'
+import nonce from 'nonce'
+const n = nonce();
+import { yelpConsumerSecret, yelpTokenSecret } from '../../config'
+
+let menuIsHidden = true;
 
 class SonderView extends Component {
   state = {
@@ -38,6 +53,28 @@ class SonderView extends Component {
     userTrackingMode: Mapbox.userTrackingMode.follow,
     facingHood: {},
     annotations: [],
+
+    // this.setState({
+    //   annotations: this.state.annotations.map(annotation => {
+    //     if (annotation.id !== 'marker2') { return annotation; }
+    //     return {
+    //       coordinates: [40.714541341726175,-74.00579452514648],
+    //       'type': 'point',
+    //       title: 'New Title!',
+    //       subtitle: 'New Subtitle',
+    //       annotationImage: {
+    //         source: { uri: 'https://cldup.com/7NLZklp8zS.png' },
+    //         height: 25,
+    //         width: 25
+    //       },
+    //       id: 'marker2'
+    //     };
+    //   })
+    // });
+
+
+    bounceValue: new Animated.Value(100),  //This is the initial position of the subview
+    // buttonText: "Show Subview",
     /*
     annotations array order:
       [0] compassLine
@@ -53,12 +90,41 @@ class SonderView extends Component {
       popupImageUrl: '',
       popupImageWidth: 0,
       popupImageHeight: 0,
+      yelpData: '',
     /*<--- Popup state --->*/
-    // center: {
-    //   longitude: -122.40258693695068,
-    //   latitude: 37.78477457373192
-    // },
+      center: {
+        longitude: -122.40258693695068,
+        latitude: 37.78477457373192
+      },
   };
+
+  /*<------------------------------ Menu Helpers ---------------------------->*/
+
+  _toggleSubview() {
+    // this.setState({
+    //   buttonText: !menuIsHidden ? "Show Subview" : "Hide Subview"
+    // });
+
+    let toValue = 100;
+
+    if(menuIsHidden) {
+      toValue = 20;
+    }
+
+    //This will animate the transalteY of the subview between 0 & 100 depending on its current state
+    //100 comes from the style below, which is the height of the subview.
+    Animated.spring(
+      this.state.bounceValue,
+      {
+        toValue: toValue,
+        velocity: 4,
+        tension: 3,
+        friction: 5,
+      }
+    ).start();
+
+    menuIsHidden = !menuIsHidden;
+  }
 
   /*<----------------------------- Popup methods ---------------------------->*/
   // this.setTitle = ((title) => {
@@ -165,32 +231,6 @@ class SonderView extends Component {
       });
   }).bind(this)
 
-  // fetchWikimapiaHoodInfo = (() => {
-  //   const baseUrl = 'http://api.wikimapia.org/?'
-  //   const params = {
-  //     key: '***KEY***',
-  //     format: 'json',
-  //     language='en',
-  //     function: 'place.getnearest',
-  //     id: 'pageprops|info|extracts',
-  //     lat: ,
-  //     lon: ,
-  //     categories_and: ,
-  //     distance: 1,
-  //     // titles: `Civic Center, San Francisco`
-  //   }
-  //   const url = makeUrl(baseUrl, params);
-  //
-  //   return fetch(url)
-  //     .then((response) => response.json())
-  //     .then((responseJson) => {
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // }).bind(this)
-
   getpopupHoodData = (() => {
     this.setPopupHoodName();
     this.fetchWikiHoodInfo()
@@ -199,6 +239,68 @@ class SonderView extends Component {
       })
       .catch((error) => {
         console.error(error);
+      });
+  }).bind(this)
+
+  fetchWikiHoodImageUrl = ((imageName) => {
+    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
+    const params = {
+      action: "query",
+      format: "json",
+      titles: `File:${imageName}`,
+      prop: "imageinfo",
+      iiprop: "url|size",
+      iiurlwidth: "200",
+    }
+    const url = makeUrl(baseUrl, params);
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        for ( var key in responseJson.query.pages["-1"].imageinfo) {
+          let image = responseJson.query.pages["-1"].imageinfo[key]
+          this.setState({
+            popupImageUrl: image.thumburl,
+            popupImageWidth: image.thumbwidth,
+            popupImageHeight: image.thumbheight
+          });
+          // this.setImageUrl(image.thumburl)
+          // this.setImageWidth(image.thumbwidth)
+          // this.setImageHeight(image.thumbheight)
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }).bind(this)
+
+  // TODO
+  fetchYelpHoodRestaurants = (() => {
+    const lat = 37.78477457373192
+    const lng = -122.40258693695068
+    const latlng = "ll=" + String(lat) + "," + String(lng)
+
+    const oauth = new OAuthSimple('eUUiBEeoxTfKX2YGudP_6g', yelpTokenSecret)
+
+    const request = oauth.sign({
+      action: "GET",
+      path: "https://api.yelp.com/v2/search",
+      parameters: "term=coffee&" + latlng,
+      signatures: {
+        api_key: 'eUUiBEeoxTfKX2YGudP_6g',
+        shared_secret: yelpConsumerSecret,
+        access_token: 'Xc_rCgwJ7OqRAP5HiXQMIIXUw-v1QtW0',
+        access_secret: yelpTokenSecret,
+      },
+    })
+
+    return fetch(request.signed_url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.tron.log(JSON.stringify(responseJson));
+        this.setState({ yelpData: responseJson });
+      })
+      .catch((error) => {
+        console.log(error);
       });
   }).bind(this)
 
@@ -374,9 +476,9 @@ class SonderView extends Component {
 
       console.log('INSIDE componentWillMount. PROPS: ', this.props)
       // set annotations for intial friendsLocations
-      this.setState((prevState, props) => {
-        return FriendsHelpers.updateFriendsLocations(prevState, props)
-      })
+      // this.setState((prevState, props) => {
+      //   return FriendsHelpers.updateFriendsLocations(prevState, props)
+      // }) //PAIGE PAIGE PAIGE PAIGE
     }
 
     componentWillUnmount() {
@@ -495,37 +597,84 @@ class SonderView extends Component {
         </PopupDialog>
       {/*--------------------------- / Popup View -------------------------- */}
 
+      {/*--------------------------- Menu Subview -------------------------- */}
+        <TouchableOpacity onPress={()=> {this._toggleSubview()}}>
+          <Image source={require('../Images/mapreactor.png')} style={menuStyles.sonderButton}></Image>
+        </TouchableOpacity>
+
+        <View style={menuStyles.container}>
+          <Animated.View
+            style={[
+              menuStyles.subview,
+              {transform: [{translateY: this.state.bounceValue}]}
+            ]}
+          >
+            {/* <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
+              <Text style={menuStyles.textButton}>Logout</Text>
+            </TouchableHighlight> */}
+            <Login style={menuStyles.facebookButton} />
+            <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
+              <Text style={menuStyles.textButton}>Cancel</Text>
+            </TouchableHighlight>
+
+          </Animated.View>
+        </View>
+      {/*-------------------------- / Menu Subview ------------------------- */}
+
       {/*---------------------------- Debugger View ------------------------ */}
-        {/*
+
         <View style={{ maxHeight: 200 }}>
           <ScrollView>
-          <Text onPress={() => {this.popupDialog.openDialog()}}>{this.state.entities ?
-            '*** click to renderPopup' :
-            "Please wait..."}
-          </Text>
-          <Text>{this.state.entities ?
-            '*** currentHood: ' + JSON.stringify(reverseTuples(this.state.entities.hoods)) :
-            "Waiting for entities..."}
-          </Text>
+
+            <Text onPress={() => {
+              Linking.canOpenURL('yelp:///biz/the-sentinel-san-francisco')
+                .then(supported => {
+                  if (!supported) {
+                    Linking.openURL('https://www.yelp.com/biz/the-sentinel-san-francisco')
+                  } else {
+                    return Linking.openURL('yelp:///biz/the-sentinel-san-francisco');
+                  }
+                })
+                .catch(err => console.error('An error occurred', err))}}>
+              Click me to open yelp!
+            </Text>
+
+            <Text onPress={() => {this._map.selectAnnotation('??friend', animated = true);}}>
+              "Click me to toggle annotation"
+            </Text>
+
+            <Text onPress={() => {this.fetchYelpHoodRestaurants()}}>
+              {'Fetch Yelp Data:'}
+            </Text>
+
+            <Text>{this.state.yelpData ?
+              '*** this.state.yelpData: ' + JSON.stringify(this.state.yelpData) :
+              "Waiting for yelp Data..."}
+            </Text>
+
             <Text>{this.state.entities ?
               '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
               "Waiting for entities..."}
             </Text>
+
             <Text>{this.state.headingIsSupported ?
               '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
               "Heading unsupported." }
             </Text>
+
             <Text>{this.state.entities ?
               '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
               "Normalizing reticulating splines..."}
             </Text>
+
             <Text>{this.state.annotations ?
               '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
               null}
             </Text>
+
           </ScrollView>
         </View>
-        */}
+
       {/*--------------------------- / Debugger View ----------------------- */}
       </View>
     );
