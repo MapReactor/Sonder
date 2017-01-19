@@ -119,7 +119,9 @@ class Compass {
     DeviceEventEmitter.addListener('headingUpdated', data => {
       const heading = this._heading = data.heading;
       const compassLine = this._compassLine = this.getCompassLine();
-      this._onHeadingChange({ heading, compassLine });
+      // Note: just as here, it might be best to eventually forward both position and heading to all Compass 
+      //lifecycle functions
+      this._onHeadingChange({ heading, compassLine, position: this._currentPosition });
       if (this._detectionPending) {
         // console.tron.log("EMITTER SEES PENDING")
       }
@@ -287,6 +289,7 @@ class Compass {
     const bloatedHood = this.bloatAndSimplify(currentHood);
     var adjacentHoods = [];
     for (feature of hoodFeatures) {
+      if (currentHood === feature) continue;
       if (intersect(bloatedHood, feature)) {
         feature = clone(feature);
         // Simplifies with the D3-derived Visvalingam algorithm:
