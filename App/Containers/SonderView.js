@@ -43,7 +43,8 @@ import qs from 'querystring'
 import OAuthSimple from 'oauthsimple'
 import nonce from 'nonce'
 const n = nonce();
-import { yelpConsumerSecret, yelpTokenSecret } from '../../config'
+import { yelpConsumerSecret, yelpTokenSecret } from '../../config.js'
+
 
 let menuIsHidden = true;
 
