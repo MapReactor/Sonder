@@ -11,10 +11,6 @@ import {
   ScrollView,
   Image,
   Linking,
-  AppRegistry,
-  TouchableHighlight,
-  TouchableOpacity,
-  Animated,
 } from 'react-native';
 import PopupDialog, {
   DialogTitle,
@@ -23,7 +19,6 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
-import menuStyles from './Styles/MenuStyle'
 import Compass from '../Lib/Compass'
 import {
   reverseTuples,
@@ -33,7 +28,7 @@ import {
 } from '../Lib/MapHelpers';
 import { makeUrl } from '../Lib/Utilities'
 import FriendsHelpers from '../Lib/FriendsHelpers'
-import MenuLogin from './MenuView'
+import Menu from './MenuView'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -46,7 +41,6 @@ const n = nonce();
 import { yelpConsumerSecret, yelpTokenSecret } from '../../config.js'
 
 
-let menuIsHidden = true;
 
 class SonderView extends Component {
   state = {
@@ -73,9 +67,6 @@ class SonderView extends Component {
     //   })
     // });
 
-
-    bounceValue: new Animated.Value(100),  //This is the initial position of the subview
-    // buttonText: "Show Subview",
     /*
     annotations array order:
       [0] compassLine
@@ -98,34 +89,6 @@ class SonderView extends Component {
         latitude: 37.78477457373192
       },
   };
-
-  /*<------------------------------ Menu Helpers ---------------------------->*/
-
-  _toggleSubview() {
-    // this.setState({
-    //   buttonText: !menuIsHidden ? "Show Subview" : "Hide Subview"
-    // });
-
-    let toValue = 100;
-
-    if(menuIsHidden) {
-      toValue = 20;
-    }
-
-    //This will animate the transalteY of the subview between 0 & 100 depending on its current state
-    //100 comes from the style below, which is the height of the subview.
-    Animated.spring(
-      this.state.bounceValue,
-      {
-        toValue: toValue,
-        velocity: 4,
-        tension: 3,
-        friction: 5,
-      }
-    ).start();
-
-    menuIsHidden = !menuIsHidden;
-  }
 
   /*<----------------------------- Popup methods ---------------------------->*/
   // this.setTitle = ((title) => {
@@ -526,7 +489,6 @@ class SonderView extends Component {
         />
       {/*----------------------------- / Map View ---------------------------*/}
 
-
       {/*---------------------------- Popup View --------------------------- */}
         <PopupDialog
           // ref={(popupDialog) => { this.setState({popupDialog: popupDialog}); }}
@@ -599,24 +561,7 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*--------------------------- Menu Subview -------------------------- */}
-        <TouchableOpacity onPress={()=> {this._toggleSubview()}}>
-          <Image source={require('../Images/mapreactor.png')} style={menuStyles.sonderButton}></Image>
-        </TouchableOpacity>
-
-        <View style={menuStyles.container}>
-          <Animated.View
-            style={[
-              menuStyles.subview,
-              {transform: [{translateY: this.state.bounceValue}]}
-            ]}
-          >
-            <MenuLogin style={menuStyles.facebookButton} onPress={()=> {this._toggleSubview()}}> </MenuLogin>
-            <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
-              <Text style={menuStyles.textButton}>Cancel</Text>
-            </TouchableHighlight>
-
-          </Animated.View>
-        </View>
+        <Menu />
       {/*-------------------------- / Menu Subview ------------------------- */}
 
       {/*---------------------------- Debugger View ------------------------ */}
