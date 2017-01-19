@@ -6,13 +6,15 @@ export default {
   },
   subview: {
     backgroundColor: "gray",
+    opacity: 0.9,
     height: 100,
     position: "absolute",
     left: 0,
     bottom: 0,
     right: 0,
+    padding: 3,
   },
-  button: {
+  sonderButton: {
     width: 30,
     height: 40,
     opacity: 0.5,
@@ -20,5 +22,17 @@ export default {
     bottom: 0,
     marginBottom: 5,
     marginLeft: 5,
-  }
+  },
+  textButton: {
+    marginTop: 3,
+    marginBottom: 3,
+    paddingTop: 5,
+    paddingRight: 5,
+    paddingBottom: 5,
+    paddingLeft: 5,
+    borderWidth: 0.5,
+    borderRadius: 4,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 }

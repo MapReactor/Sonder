@@ -13,6 +13,7 @@ import {
   Linking,
   AppRegistry,
   TouchableHighlight,
+  TouchableOpacity,
   Animated,
 } from 'react-native';
 import PopupDialog, {
@@ -72,7 +73,7 @@ class SonderView extends Component {
 
 
     bounceValue: new Animated.Value(100),  //This is the initial position of the subview
-    buttonText: "Show Subview",
+    // buttonText: "Show Subview",
     /*
     annotations array order:
       [0] compassLine
@@ -99,11 +100,11 @@ class SonderView extends Component {
   /*<------------------------------ Menu Helpers ---------------------------->*/
 
   _toggleSubview() {
-    this.setState({
-      buttonText: !menuIsHidden ? "Show Subview" : "Hide Subview"
-    });
+    // this.setState({
+    //   buttonText: !menuIsHidden ? "Show Subview" : "Hide Subview"
+    // });
 
-    var toValue = 100;
+    let toValue = 100;
 
     if(menuIsHidden) {
       toValue = 20;
@@ -117,7 +118,7 @@ class SonderView extends Component {
         toValue: toValue,
         velocity: 4,
         tension: 3,
-        friction: 8,
+        friction: 5,
       }
     ).start();
 
@@ -596,9 +597,9 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*--------------------------- Menu Subview -------------------------- */}
-        <TouchableHighlight underlayColor="transparent" onPress={()=> {this._toggleSubview()}}>
-          <Image source={require('../Images/mapreactor.png')} style={menuStyles.button}></Image>
-        </TouchableHighlight>
+        <TouchableOpacity onPress={()=> {this._toggleSubview()}}>
+          <Image source={require('../Images/mapreactor.png')} style={menuStyles.sonderButton}></Image>
+        </TouchableOpacity>
 
         <View style={menuStyles.container}>
           <Animated.View
@@ -607,8 +608,11 @@ class SonderView extends Component {
               {transform: [{translateY: this.state.bounceValue}]}
             ]}
           >
-            <TouchableHighlight underlayColor="transparent" onPress={()=> {this._toggleSubview()}}>
-              <Text style={{textAlign: "center"}}>{this.state.buttonText}</Text>
+            <TouchableHighlight underlayColor="transparent" onPress={()=> {alert('pressed out logout')}}>
+              <Text style={menuStyles.textButton}>Logout</Text>
+            </TouchableHighlight>
+            <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
+              <Text style={menuStyles.textButton}>Cancel</Text>
             </TouchableHighlight>
           </Animated.View>
         </View>
