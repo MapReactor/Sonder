@@ -438,9 +438,9 @@ class SonderView extends Component {
 
       console.log('INSIDE componentWillMount. PROPS: ', this.props)
       // set annotations for intial friendsLocations
-      this.setState((prevState, props) => {
-        return FriendsHelpers.updateFriendsLocations(prevState, props)
-      })
+      // this.setState((prevState, props) => {
+      //   return FriendsHelpers.updateFriendsLocations(prevState, props)
+      // }) //PAIGE PAIGE PAIGE PAIGE
     }
 
     componentWillUnmount() {
