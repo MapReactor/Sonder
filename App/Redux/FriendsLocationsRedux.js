@@ -28,7 +28,9 @@ export const update = (state: Object, action: Object) => {
     let newLocation = {}
     newLocation[friendsLocations.id] = {
       'latitude': friendsLocations.latitude,
-      'longitude': friendsLocations.longitude
+      'longitude': friendsLocations.longitude,
+      'name': friendsLocations.name,
+      'picture': friendsLocations.picture,
     }
     console.log('updating state.friendsLocations')
     return Object.assign({}, state, Object.assign({}, state.friendsLocations, newLocation))

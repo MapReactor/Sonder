@@ -1,6 +1,7 @@
 // @flow
 
 import R from 'ramda'
+import { centroid } from '@turf/turf';
 
 export const removeEmpty = (markers: Array<Object>) => {
   let filteredMarkers = R.filter((item) => {
@@ -48,10 +49,12 @@ export const toTuple = (coord: Object) => [coord.longitude, coord.latitude];
 
 export const toTuples = (coords: Array<Object>) => coords.map((coords) => [coords.longitude, coords.latitude])
 
-export const reverseTuples = (coordinates) => {
-  return coordinates.map((coordinate) => {
-    return [coordinate[1], coordinate[0]];
-  })
+export var reverseTuples = (coordinates) => {
+  return !Array.isArray(coordinates[0]) ?
+    [coordinates[1], coordinates[0]] :
+    coordinates.map((coordinate) => {
+      return [coordinate[1], coordinate[0]];
+    })
 }
 
 export const calculateRegion = (locations: Array<Object>, options: Object) => {
@@ -87,3 +90,53 @@ export const calculateRegion = (locations: Array<Object>, options: Object) => {
     }
   }
 }
+
+export const calculateRegionCenter = (coordinates) => {
+  const poly = {
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [coordinates]
+    }
+  };
+  return centroid(poly).geometry.coordinates;
+}
+/*
+  hoodToAnnotations() takes a geoJSON feature containing a Polygon or MultiPolygon 
+  and spits out an array of Mapbox annotations.
+    Notes:
+      1. It only uses the outer-ring of the feature (ie. no holes)
+      2. It takes the outer hood feature, not the underlying geometry
+      3. It always returns an array. This is so that it can be spread unconditionally (see example)
+  
+    Example usage:
+    --------------
+    const addHoodAnnotation = (hoodFeature) => {
+      const properties = hoodFeature.properties;
+      const settings = {
+        strokeColor: '#00FB00',
+        fillColor: generateCoolColorFromLabel(properties.label),
+        title: properties.label
+      });      
+
+      this.setState({
+        annotations: [...annotations, 
+          ...hoodToAnnotations(hoodFeature, settings)]
+        ]
+      })
+    }
+*/
+export const hoodToAnnotations = (feature, annotationSettings) => {
+  const type = feature.geometry.type;
+  const properties = feature.properties;
+  const coords = feature.geometry.coordinates;
+  const mergeSettings = (coords) => Object.assign({
+    coordinates: reverseTuples(coords[0]),
+    type: 'polygon'
+  }, annotationSettings);
+  return (type === 'MultiPolygon') ? 
+    coords.map(coords => mergeSettings(coords)) :
+    [mergeSettings(coords)];
+};
+
