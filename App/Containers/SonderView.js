@@ -11,6 +11,9 @@ import {
   ScrollView,
   Image,
   Linking,
+  AppRegistry,
+  TouchableHighlight,
+  Animated,
 } from 'react-native';
 import PopupDialog, {
   DialogTitle,
@@ -19,6 +22,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
+import menuStyles from './Styles/MenuStyle'
 import Compass from '../Lib/Compass'
 import {
   reverseTuples,
@@ -38,6 +42,8 @@ import OAuthSimple from 'oauthsimple'
 import nonce from 'nonce'
 const n = nonce();
 import { yelpConsumerSecret, yelpTokenSecret } from '../../config'
+
+let menuIsHidden = true;
 
 class SonderView extends Component {
   state = {
@@ -65,6 +71,8 @@ class SonderView extends Component {
     // });
 
 
+    bounceValue: new Animated.Value(100),  //This is the initial position of the subview
+    buttonText: "Show Subview",
     /*
     annotations array order:
       [0] compassLine
@@ -87,6 +95,34 @@ class SonderView extends Component {
         latitude: 37.78477457373192
       },
   };
+
+  /*<------------------------------ Menu Helpers ---------------------------->*/
+
+  _toggleSubview() {
+    this.setState({
+      buttonText: !menuIsHidden ? "Show Subview" : "Hide Subview"
+    });
+
+    var toValue = 100;
+
+    if(menuIsHidden) {
+      toValue = 20;
+    }
+
+    //This will animate the transalteY of the subview between 0 & 100 depending on its current state
+    //100 comes from the style below, which is the height of the subview.
+    Animated.spring(
+      this.state.bounceValue,
+      {
+        toValue: toValue,
+        velocity: 4,
+        tension: 3,
+        friction: 8,
+      }
+    ).start();
+
+    menuIsHidden = !menuIsHidden;
+  }
 
   /*<----------------------------- Popup methods ---------------------------->*/
   // this.setTitle = ((title) => {
@@ -558,6 +594,25 @@ class SonderView extends Component {
 
         </PopupDialog>
       {/*--------------------------- / Popup View -------------------------- */}
+
+      {/*--------------------------- Menu Subview -------------------------- */}
+         <TouchableHighlight underlayColor="transparent" onPress={()=> {this._toggleSubview()}}>
+          <Image source={require('../Images/mapreactor.png')} style={menuStyles.button}></Image>
+        </TouchableHighlight>
+
+        <View style={menuStyles.container}>
+          <Animated.View
+            style={[
+              menuStyles.subview,
+              {transform: [{translateY: this.state.bounceValue}]}
+            ]}
+          >
+            <TouchableHighlight underlayColor="transparent" onPress={()=> {this._toggleSubview()}}>
+              <Text style={{textAlign: "center"}}>{this.state.buttonText}</Text>
+            </TouchableHighlight>
+          </Animated.View>
+        </View>
+      {/*-------------------------- / Menu Subview ------------------------- */}
 
       {/*---------------------------- Debugger View ------------------------ */}
 
