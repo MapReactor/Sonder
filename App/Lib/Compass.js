@@ -105,7 +105,7 @@ class Compass {
       .then(hoodData => {
         console.tron.log('SPEED: ' + (Date.now()-startTime).toString()+'ms SPREAD: ' + this.__frameCounter.toString()+' frames');
         this._hoodData = hoodData;
-        this._onInitialHoods(hoodData)
+        this._onInitialHoods(hoodData);
       });
 
     this.watchID = navigator.geolocation.watchPosition(position => {
@@ -142,6 +142,7 @@ class Compass {
       this._lastHeading = heading;
     });
   }
+
   getInitialPosition() {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
@@ -182,10 +183,9 @@ class Compass {
 
   // Probably just wrap this in a requestAnimationFrame for now
   async getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
-    adjacentHoods = this._hoodData.adjacentHoods,
-    currentHood = this._hoodData.currentHood) {
+                    adjacentHoods = this._hoodData.adjacentHoods, 
+                    currentHood = this._hoodData.currentHood) {
     var adjacents = [];
-    var current = {};
     var startHeading = this._heading;
     for (let feature of adjacentHoods) {
       await nextFrame(); this.__frameCounter++;
@@ -198,17 +198,19 @@ class Compass {
       const nearestFeature = point(nearestCoord);
       const originFeature = point(compassLineFeature.geometry.coordinates[0]);
       const collisionDistance = turf.distance(originFeature, nearestFeature, 'miles');
-      current = {
-        name: currentHood.properties.label,
-        coordinates: currentHood.geometry.coordinates,
-      }
       adjacents.push({
         name: feature.properties.label,
         distance: collisionDistance.toFixed(2) + ' miles',
         coordinates: feature.geometry.coordinates,
+        feature,
       });
     }
-    return { adjacents, current };
+    const current = {
+      name: currentHood.properties.label,
+      coordinates: currentHood.geometry.coordinates,
+      feature: currentHood,
+    }
+    return {adjacents, current };
   }
 
   async getStreetCollisions(compassLineFeature = this._getCompassLineFeature(),
