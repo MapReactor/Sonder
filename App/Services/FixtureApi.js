@@ -36,12 +36,5 @@ export default {
         "bearing": bearing
       }
     }
-  },
-  getLocation: (id: string) => {
-    const locationData = require('../Fixtures/location.json')
-    return {
-      ok: true,
-      data: locationData
-    }
   }
 }

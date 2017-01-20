@@ -127,7 +127,7 @@ class Compass {
     DeviceEventEmitter.addListener('headingUpdated', data => {
       const heading = this._heading = data.heading;
       const compassLine = this._compassLine = this.getCompassLine();
-      // Note: just as here, it might be best to eventually forward both position and heading to all Compass 
+      // Note: just as here, it might be best to eventually forward both position and heading to all Compass
       //lifecycle functions
       this._onHeadingChange({ heading, compassLine, position: this._currentPosition });
       if (this._detectionPending) {
@@ -193,7 +193,7 @@ class Compass {
 
   // Probably just wrap this in a requestAnimationFrame for now
   async getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
-                    adjacentHoods = this._hoodData.adjacentHoods, 
+                    adjacentHoods = this._hoodData.adjacentHoods,
                     currentHood = this._hoodData.currentHood) {
     var adjacents = [];
     var startHeading = this._heading;

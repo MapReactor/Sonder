@@ -13,12 +13,11 @@ const create = (baseURL = host) => {
   if (__DEV__ && console.tron) {
     api.addMonitor(console.tron.apisauce)
   }
-
-  const getLocation = (id) => api.get('location', {id: id})
+  
   const updateLocation = (user) => api.post('location', user)
 
   return {
-    getLocation, updateLocation
+    updateLocation
   }
 }
 

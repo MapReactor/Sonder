@@ -75,6 +75,7 @@ function websocketInitChannel() {
     return () => {
       // interrupt the socket communication
       console.log('closing ws')
+      open = false;
       ws.close()
     }
   })
