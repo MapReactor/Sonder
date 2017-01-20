@@ -64,16 +64,19 @@ class SonderView extends Component {
       popupImageHeight: 0,
       yelpOneName: '',
       yelpOneUrl: '',
-      yelpOneReviewCount: 0,
+      yelpOneReviewCount: '',
       yelpOneCategory: '',
+      yelpOneImageUrl: '',
       yelpTwoName: '',
       yelpTwoUrl: '',
-      yelpTwoReviewCount: 0,
+      yelpTwoReviewCount: '',
       yelpTwoCategory: '',
+      yelpTwoImageUrl: '',
       yelpThreeName: '',
       yelpThreeUrl: '',
-      yelpThreeReviewCount: 0,
+      yelpThreeReviewCount: '',
       yelpThreeCategory: '',
+      yelpThreeImageUrl: '',
     /*<--- Popup state --->*/
       center: {
         longitude: -122.40258693695068,
@@ -155,7 +158,7 @@ class SonderView extends Component {
   }).bind(this)
 
   // TODO
-  fetchYelpHoodRestaurants = (() => {
+  fetchYelpHoodCoffee = (() => {
     const lat = this.state.popupLat
     const lng = this.state.popupLon
     const latlng = "ll=" + String(lat) + "," + String(lng)
@@ -165,7 +168,7 @@ class SonderView extends Component {
     const request = oauth.sign({
       action: "GET",
       path: "https://api.yelp.com/v2/search",
-      parameters: "term=coffee&" + latlng,
+      parameters: "term=coffee&radius_filter=800&" + latlng,
       signatures: {
         api_key: 'eUUiBEeoxTfKX2YGudP_6g',
         shared_secret: yelpConsumerSecret,
@@ -180,17 +183,20 @@ class SonderView extends Component {
         console.log(JSON.stringify(responseJson.businesses[0]));
         this.setState({
           yelpOneName: responseJson.businesses[0].name,
-          yelpOneUrl: responseJson.businesses[0].rating_img_url_small,
+          yelpOneUrl: responseJson.businesses[0].mobile_url,
           yelpOneReviewCount: responseJson.businesses[0].review_count,
           yelpOneCategory: responseJson.businesses[0].categories[0][0],
+          yelpOneImageUrl: responseJson.businesses[0].rating_img_url_small,
           yelpTwoName: responseJson.businesses[1].name,
-          yelpTwoUrl: responseJson.businesses[1].rating_img_url_small,
+          yelpTwoUrl: responseJson.businesses[1].mobile_url,
           yelpTwoReviewCount: responseJson.businesses[1].review_count,
           yelpTwoCategory: responseJson.businesses[1].categories[0][0],
+          yelpTwoImageUrl: responseJson.businesses[1].rating_img_url_small,
           yelpThreeName: responseJson.businesses[2].name,
-          yelpThreeUrl: responseJson.businesses[2].rating_img_url_small,
+          yelpThreeUrl: responseJson.businesses[2].mobile_url,
           yelpThreeReviewCount: responseJson.businesses[2].review_count,
           yelpThreeCategory: responseJson.businesses[2].categories[0][0],
+          yelpThreeImageUrl: responseJson.businesses[2].rating_img_url_small,
         });
       })
       .catch((error) => {
@@ -230,7 +236,7 @@ class SonderView extends Component {
       .catch((error) => {
         console.error(error);
       });
-    this.fetchYelpHoodRestaurants();
+    this.fetchYelpHoodCoffee();
   }).bind(this)
 
   clearpopupHoodData = (() => {
@@ -550,9 +556,9 @@ class SonderView extends Component {
           dialogStyle={{padding: 10}}
           actions={[
             <DialogButton
-              buttonStyle={{height: 20, justifyContent: 'center', marginTop: 10}}
-              textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}}
-              textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}}
+              buttonStyle={popupStyles.buttonStyle}
+              textContainerStyle={popupStyles.textContainerStyle}
+              textStyle={popupStyles.textStyle}
               text="CLOSE"
               align="center"
               onPress={this.closeDialog}
@@ -568,19 +574,16 @@ class SonderView extends Component {
         >
 
           <ScrollView>
-            <View  style={{alignItems: 'center', marginHorizontal: 20}}>
+            <View  style={popupStyles.scrollView}>
               <Image
-                style={{marginVertical: 5, resizeMode: 'contain'}}
+                style={popupStyles.wikiImage}
                 source={{uri: this.state.popupImageUrl}}
                 width={this.state.popupImageWidth}
                 height={this.state.popupImageHeight}
                 maintainAspectRatio={true}
               />
               <Text
-                style={{
-                  fontSize: 16,
-                  textAlign: 'justify'
-                }}
+                style={popupStyles.wikiExtract}
               >
               {this.state.popupExtract}
               </Text>
@@ -595,8 +598,28 @@ class SonderView extends Component {
                   }}
                 >{this.state.wikiUrl ? "Wikipedia" : ""}
               </Text>
-              <YelpView />
             </View>
+            <YelpView
+              name={this.state.yelpOneName}
+              url={this.state.yelpOneUrl}
+              reviewCount={this.state.yelpOneReviewCount}
+              category={this.state.yelpOneCategory}
+              imageUrl={this.state.yelpOneImageUrl}
+            />
+            <YelpView
+              name={this.state.yelpTwoName}
+              url={this.state.yelpTwoUrl}
+              reviewCount={this.state.yelpTwoReviewCount}
+              category={this.state.yelpTwoCategory}
+              imageUrl={this.state.yelpTwoImageUrl}
+            />
+            <YelpView
+              name={this.state.yelpThreeName}
+              url={this.state.yelpThreeUrl}
+              reviewCount={this.state.yelpThreeReviewCount}
+              category={this.state.yelpThreeCategory}
+              imageUrl={this.state.yelpThreeImageUrl}
+            />
           </ScrollView>
 
         </PopupDialog>
@@ -608,11 +631,6 @@ class SonderView extends Component {
           <TouchableOpacity><Login /></TouchableOpacity>
         </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
-        <View style={{ minHeight: 200 }}>
-          <ScrollView>
-            <YelpView />
-          </ScrollView>
-        </View>
       </View>
     );
   }
@@ -624,29 +642,36 @@ class YelpView extends Component {
   constructor(props){
     super(props)
   }
+  onTitlePress = () => {
+    // https://www.yelp.com/biz/the-sentinel-san-francisco
+    // yelp:///biz/the-sentinel-san-francisco
+    const deepLinkUrl = `yelp:///${this.props.url.slice(18)}`;
+    Linking.canOpenURL(deepLinkUrl)
+      .then(supported => {
+        if (!supported) {
+          Linking.openURL(this.props.url)
+        } else {
+          return Linking.openURL(deepLinkUrl);
+        }
+      })
+      .catch(err => console.error('An error occurred', err))
+  }
   render(){
-    // let listItems = this.props.yelpData.map((item) => {
-    //   return (
-    //     <View>
-    //       <Text>Blue Bottle Coffee Co</Text>
-    //       <Text>Coffee & Tea</Text>
-    //       <Image source={{uri: 'https://s3-media4.fl.yelpcdn.com/assets/2/www/img/c2f3dd9799a5/ico/stars/v1/stars_4.png'}}
-    //       />
-    //     </View>
-    //   )
-    // }
-
     return(
       // <View>{listItems}</View>
       <View>
-        <View style={popupStyles.yelpTitleContainer} >
-          <Text style={popupStyles.yelpTitle} >Blue Bottle Coffee Co</Text>
-          <Image style={popupStyles.yelpRating} source={{uri: 'https://s3-media4.fl.yelpcdn.com/assets/2/www/img/c2f3dd9799a5/ico/stars/v1/stars_4.png'}}
+        <View style={popupStyles.yelpTitleContainer}>
+        <Text style={popupStyles.yelpTitle} onPress={() => this.onTitlePress()}>
+          {this.props.name}
+        </Text>
+          <Image style={popupStyles.yelpRating} source={{uri: this.props.imageUrl}}
           />
         </View>
         <View style={popupStyles.yelpCategoriesContainer} >
-          <Text style={popupStyles.yelpCategories} >Coffee & Tea</Text>
-          <Text style={popupStyles.yelpReviewCount} >1200 Reviews</Text>
+          <Text style={popupStyles.yelpCategories} >{this.props.category}</Text>
+          <Text style={popupStyles.yelpReviewCount} >
+            {this.props.reviewCount ? this.props.reviewCount + ' Reviews' : ''}
+          </Text>
         </View>
       </View>
     )
