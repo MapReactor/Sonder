@@ -129,14 +129,20 @@ export const calculateRegionCenter = (coordinates) => {
 */
 export const hoodToAnnotations = (feature, annotationSettings) => {
   const type = feature.geometry.type;
+  if (type === 'MultiPolygon') {
+    console.tron.log('DANGER WILL ROBINSON: MultiPolygon is trying to be rendered!');
+  }
   const properties = feature.properties;
   const coords = feature.geometry.coordinates;
-  const mergeSettings = (coords) => Object.assign({
-    coordinates: reverseTuples(coords[0]),
-    type: 'polygon'
-  }, annotationSettings);
+  const mergeSettings = (coords, index = 0) =>
+    Object.assign(
+      { coordinates: reverseTuples(coords[0]),
+        type: 'polygon' }, 
+      annotationSettings,
+      { id: annotationSettings.id+' '+index }
+    );
   return (type === 'MultiPolygon') ? 
-    coords.map(coords => mergeSettings(coords)) :
+    coords.map((coords, index) => mergeSettings(coords, index)) :
     [mergeSettings(coords)];
 };
 

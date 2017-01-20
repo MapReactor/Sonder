@@ -20,6 +20,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
+import popupStyles from './Styles/PopupStyle'
 import loginStyles from './Styles/SonderLoginStyle'
 import Compass from '../Lib/Compass'
 import {
@@ -51,41 +52,31 @@ class SonderView extends Component {
     userTrackingMode: Mapbox.userTrackingMode.follow,
     facingHood: {},
     annotations: [],
-
-    // this.setState({
-    //   annotations: this.state.annotations.map(annotation => {
-    //     if (annotation.id !== 'marker2') { return annotation; }
-    //     return {
-    //       coordinates: [40.714541341726175,-74.00579452514648],
-    //       'type': 'point',
-    //       title: 'New Title!',
-    //       subtitle: 'New Subtitle',
-    //       annotationImage: {
-    //         source: { uri: 'https://cldup.com/7NLZklp8zS.png' },
-    //         height: 25,
-    //         width: 25
-    //       },
-    //       id: 'marker2'
-    //     };
-    //   })
-    // });
-
     /*
-    annotations array order:
-      [0] compassLine
-      [1] currentHood
-      [2] currentHoodCenter
-      [3] adjacentHood,adjacentHoodCenter
-    */
     /*<--- Popup state --->*/
-      // popupDialog: {},
       popupView: 'current', // alternatively, 'facing'
       popupTitle: '',
+      popupLat: 0,
+      popupLon: 0,
       popupExtract: '',
       popupImageUrl: '',
       popupImageWidth: 0,
       popupImageHeight: 0,
-      yelpData: '',
+      yelpOneName: '',
+      yelpOneUrl: '',
+      yelpOneReviewCount: '',
+      yelpOneCategory: '',
+      yelpOneImageUrl: '',
+      yelpTwoName: '',
+      yelpTwoUrl: '',
+      yelpTwoReviewCount: '',
+      yelpTwoCategory: '',
+      yelpTwoImageUrl: '',
+      yelpThreeName: '',
+      yelpThreeUrl: '',
+      yelpThreeReviewCount: '',
+      yelpThreeCategory: '',
+      yelpThreeImageUrl: '',
     /*<--- Popup state --->*/
       center: {
         longitude: -122.40258693695068,
@@ -94,38 +85,12 @@ class SonderView extends Component {
   };
 
   /*<----------------------------- Popup methods ---------------------------->*/
-  // this.setTitle = ((title) => {
-  //   this.props.setTitle(title);
-  // }).bind(this);
-  // this.setExtract = ((extract) => {
-  //   this.props.setExtract(extract);
-  // }).bind(this);
-  // this.setImageUrl = ((imageUrl) => {
-  //   this.props.setImageUrl(imageUrl);
-  // }).bind(this);
-  // this.setImageWidth = ((imageWidth) => {
-  //   this.props.setImageWidth(imageWidth);
-  // }).bind(this);
-  // this.setImageHeight = ((imageHeight) => {
-  //   this.props.setImageHeight(imageHeight);
-  // }).bind(this);
-  // this.reset = (() => {
-  //   this.props.reset();
-  // }).bind(this);
-
   openDialog = (() => {
     this.popupDialog.openDialog();
   }).bind(this)
 
   closeDialog = (() => {
     this.popupDialog.closeDialog();
-  }).bind(this)
-
-  setPopupHoodName = (() => {
-    const popupTitle = this.state.popupView === 'current' ?
-      this.state.entities.hoods.current.name :
-      this.state.facingHood.name
-    this.setState({ popupTitle: popupTitle })
   }).bind(this)
 
   fetchWikiHoodInfo = (() => {
@@ -138,7 +103,6 @@ class SonderView extends Component {
       explaintext: '',
       inprop: 'url',
       titles: `${ this.state.popupTitle }, San Francisco`
-      // titles: `Civic Center, San Francisco`
     }
     const url = makeUrl(baseUrl, params);
 
@@ -154,58 +118,11 @@ class SonderView extends Component {
             popupExtract: page.extract.replace(/\n/g,"\n\n"),
             wikiUrl: page.fullurl
           });
-          // this.setTitle(page.title)
-          // this.setExtract(page.extract.replace(/\n/g,"\n\n"))
-          // this.setImageUrl(page.fullurl)
           return page.pageprops.page_image_free
         }
       })
       .catch((error) => {
         console.log(error);
-        // this.fetchWikimapiaHoodInfo();
-      });
-  }).bind(this)
-
-  // Fetch the image url, width and height of the main page url
-  fetchWikiHoodImageUrl = ((imageName) => {
-    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
-    const params = {
-      action: "query",
-      format: "json",
-      titles: `File:${imageName}`,
-      prop: "imageinfo",
-      iiprop: "url|size",
-      iiurlwidth: "200",
-    }
-    const url = makeUrl(baseUrl, params);
-    fetch(url)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        for ( var key in responseJson.query.pages["-1"].imageinfo) {
-          let image = responseJson.query.pages["-1"].imageinfo[key]
-          this.setState({
-            popupImageUrl: image.thumburl,
-            popupImageWidth: image.thumbwidth,
-            popupImageHeight: image.thumbheight
-          });
-          // this.setImageUrl(image.thumburl)
-          // this.setImageWidth(image.thumbwidth)
-          // this.setImageHeight(image.thumbheight)
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }).bind(this)
-
-  getpopupHoodData = (() => {
-    this.setPopupHoodName();
-    this.fetchWikiHoodInfo()
-      .then((imageName) => {
-        this.fetchWikiHoodImageUrl(imageName)
-      })
-      .catch((error) => {
-        console.error(error);
       });
   }).bind(this)
 
@@ -241,9 +158,9 @@ class SonderView extends Component {
   }).bind(this)
 
   // TODO
-  fetchYelpHoodRestaurants = (() => {
-    const lat = 37.78477457373192
-    const lng = -122.40258693695068
+  fetchYelpHoodCoffee = (() => {
+    const lat = this.state.popupLat
+    const lng = this.state.popupLon
     const latlng = "ll=" + String(lat) + "," + String(lng)
 
     const oauth = new OAuthSimple('eUUiBEeoxTfKX2YGudP_6g', yelpTokenSecret)
@@ -251,7 +168,7 @@ class SonderView extends Component {
     const request = oauth.sign({
       action: "GET",
       path: "https://api.yelp.com/v2/search",
-      parameters: "term=coffee&" + latlng,
+      parameters: "term=coffee&radius_filter=800&" + latlng,
       signatures: {
         api_key: 'eUUiBEeoxTfKX2YGudP_6g',
         shared_secret: yelpConsumerSecret,
@@ -263,19 +180,70 @@ class SonderView extends Component {
     return fetch(request.signed_url)
       .then((response) => response.json())
       .then((responseJson) => {
-        console.tron.log(JSON.stringify(responseJson));
-        this.setState({ yelpData: responseJson });
+        console.log(JSON.stringify(responseJson.businesses[0]));
+        this.setState({
+          yelpOneName: responseJson.businesses[0].name,
+          yelpOneUrl: responseJson.businesses[0].mobile_url,
+          yelpOneReviewCount: responseJson.businesses[0].review_count,
+          yelpOneCategory: responseJson.businesses[0].categories[0][0],
+          yelpOneImageUrl: responseJson.businesses[0].rating_img_url_small,
+          yelpTwoName: responseJson.businesses[1].name,
+          yelpTwoUrl: responseJson.businesses[1].mobile_url,
+          yelpTwoReviewCount: responseJson.businesses[1].review_count,
+          yelpTwoCategory: responseJson.businesses[1].categories[0][0],
+          yelpTwoImageUrl: responseJson.businesses[1].rating_img_url_small,
+          yelpThreeName: responseJson.businesses[2].name,
+          yelpThreeUrl: responseJson.businesses[2].mobile_url,
+          yelpThreeReviewCount: responseJson.businesses[2].review_count,
+          yelpThreeCategory: responseJson.businesses[2].categories[0][0],
+          yelpThreeImageUrl: responseJson.businesses[2].rating_img_url_small,
+        });
       })
       .catch((error) => {
         console.log(error);
       });
   }).bind(this)
 
+  setPopupHoodData = (() => {
+    const popupTitle = this.state.popupView === 'current' ?
+      this.state.entities.hoods.current.name :
+      this.state.facingHood.name
+    let popupCoord;
+    if (this.state.popupView === 'current') {
+      popupCoord = this.state.annotations
+        .filter(annotation => annotation.id === 'currentHoodCenter')[0]
+        .coordinates
+    } else {
+      popupCoord = this.state.annotations
+        .filter(annotation => annotation.id === 'adjacentHoodCenter')[0]
+        .coordinates
+    }
+
+    this.setState({
+      popupTitle: popupTitle,
+      popupLat: popupCoord[0],
+      popupLon: popupCoord[1],
+    })
+
+  }).bind(this)
+
+  getpopupHoodData = (() => {
+    this.setPopupHoodData();
+    this.fetchWikiHoodInfo()
+      .then((imageName) => {
+        this.fetchWikiHoodImageUrl(imageName)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    this.fetchYelpHoodCoffee();
+  }).bind(this)
 
   clearpopupHoodData = (() => {
-    // this.reset()
     this.setState({
       popupTitle: '',
+      popupLat: 0,
+      popupLon: 0,
       popupExtract: '',
       popupImageUrl: '',
       popupImageWidth: 0,
@@ -290,30 +258,17 @@ class SonderView extends Component {
     this.setState({ currentZoom: location.zoomLevel });
     console.log('onRegionDidChange', location);
   };
-  onRegionWillChange = (location) => {
-    console.log('onRegionWillChange', location);
-  };
-  onUpdateUserLocation = (location) => {
-    console.log('onUpdateUserLocation', location);
-  };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
-    if (annotation.id !== 'currentHoodCenter' || 'adjacentHoodCenter') {
+
+    if (annotation.id !== 'currentHoodCenter' && annotation.id !== 'adjacentHoodCenter') {
       return;
     }
     const popupView = annotation.id === 'currentHoodCenter' ?
-      'current' : 'facing'
+      'current' : 'facing';
     this.setState({popupView: popupView})
-    this.popupDialog.openDialog();
-  };
-  onRightAnnotationTapped = (e) => {
-    console.log('onRightAnnotationTapped', e);
-  };
-  onLongPress = (location) => {
-    console.log('onLongPress', location);
-  };
-  onTap = (location) => {
-    console.log('onTap', location);
+    this.openDialog();
+
   };
   onChangeUserTrackingMode = (userTrackingMode) => {
     this.setState({ userTrackingMode });
@@ -323,27 +278,36 @@ class SonderView extends Component {
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
     compassTuple = [compassTuple[0].reverse(), compassTuple[1].reverse()]
-    if (!this.state.annotations[0]) {
+
+    const compassLineObj = {
+      id: 'compassLine',
+      coordinates: compassTuple,
+      type: 'polyline',
+      strokeColor: '#00FB00',
+      strokeWidth: 4,
+      strokeAlpha: .5
+    }
+
+    const compassAnnotationExists = this.state.annotations
+      .filter(annotation => annotation.id === 'compassLine')
+      .length === 1;
+
+    if (compassAnnotationExists) {
       this.setState({
-        heading: headingData.heading,
-        annotations: [{
-          id: 'compassLine',
-          coordinates: compassTuple,
-          type: 'polyline',
-          strokeColor: '#00FB00',
-          strokeWidth: 4,
-          strokeAlpha: .5
-        }]
-      });
+        annotations: this.state.annotations.map(annotation => {
+          if (annotation.id === 'compassLine') {
+            return compassLineObj
+          } else {
+            return annotation
+          }
+        })
+      })
     } else {
+      const annotations = this.state.annotations.slice();
+      annotations.push(compassLineObj)
       this.setState({
-        heading: headingData.heading,
-        annotations: this.state.annotations.map(annotation =>
-          (annotation.id !== 'compassLine') ?
-            annotation :
-            Object.assign({},annotation,{ coordinates: compassTuple })
-        )
-      });
+        annotations: annotations
+      })
     }
   }
 
@@ -351,10 +315,12 @@ class SonderView extends Component {
     if (!this.state.entities) {
       return
     }
+
     let annotations = this.state.annotations.slice();
     let coordinates = this.state.entities.hoods.current.coordinates[0]
     let center = calculateRegionCenter(coordinates);
-    annotations[1] = {
+
+    const currentHoodObj = {
       coordinates: reverseTuples(coordinates),
       type: 'polygon',
       fillAlpha: 0.3,
@@ -362,25 +328,51 @@ class SonderView extends Component {
       fillColor: '#0000ff',
       id: 'currentHood',
     }
-    annotations[2] = {
+
+    const currentHoodCenterObj = {
       coordinates: reverseTuples(center),
       type: 'point',
       id: 'currentHoodCenter',
     }
-    this.setState({
-      annotations: annotations
-    })
+
+    const currentHoodAnnotationExists = this.state.annotations
+      .filter(annotation => annotation.id === 'currentHood')
+      .length === 1;
+
+    if (currentHoodAnnotationExists) {
+      this.setState({
+        annotations: this.state.annotations.map(annotation => {
+          if (annotation.id === 'currentHood') {
+            return currentHoodObj
+          } else if (annotation.id === 'currentHoodCenter') {
+            return currentHoodCenterObj
+          } else {
+            return annotation
+          }
+        })
+      })
+    } else {
+      const annotations = this.state.annotations.slice();
+      annotations.push(currentHoodObj)
+      annotations.push(currentHoodCenterObj)
+      this.setState({
+        annotations: annotations
+      })
+    }
   }
 
   setAdjacentHoodAnnotation() {
+    this.setFacingHood();
+
     if (!this.state.entities) {
       return
     }
-    this.setFacingHood();
+
+    let annotations = this.state.annotations.slice();
     let coordinates = this.state.facingHood.coordinates[0]
     let center = calculateRegionCenter(coordinates);
-    let annotations = this.state.annotations.slice();
-    annotations[3] = {
+
+    const adjacentHoodObj = {
       coordinates: reverseTuples(coordinates),
       type: 'polygon',
       fillAlpha: 0.3,
@@ -388,15 +380,76 @@ class SonderView extends Component {
       fillColor: '#00e6e6',
       id: 'adjacentHood',
     }
-    annotations[4] = {
+
+    const adjacentHoodCenterObj = {
       coordinates: reverseTuples(center),
       type: 'point',
       id: 'adjacentHoodCenter',
     }
-    this.setState({
-      annotations: annotations,
-    })
+
+    const adjacentHoodAnnotationExists = this.state.annotations
+      .filter(annotation => annotation.id === 'adjacentHood')
+      .length === 1;
+
+    if (adjacentHoodAnnotationExists) {
+      this.setState({
+        annotations: this.state.annotations.map(annotation => {
+          if (annotation.id === 'adjacentHood') {
+            return adjacentHoodObj
+          } else if (annotation.id === 'adjacentHoodCenter') {
+            return adjacentHoodCenterObj
+          } else {
+            return annotation
+          }
+        })
+      })
+    } else {
+      const annotations = this.state.annotations.slice();
+      annotations.push(adjacentHoodObj)
+      annotations.push(adjacentHoodCenterObj)
+      this.setState({
+        annotations: annotations
+      })
+    }
   }
+  /*<---------------------------- / Map methods ----------------------------->*/
+
+  /*<---------------- Component mounting/unmounting methods ----------------->*/
+  componentWillMount() {
+    Compass.start({
+      minAngle: 1,
+      radius: 10,
+      onInitialPosition: (initialPosition) => {
+        this.setState({ initialPosition })
+      },
+      onInitialHoods: ({ currentHood, adjacentHoods, hoodLatLngs, streetLatLngs}) => {
+        this.setState({
+          currentHood,
+          adjacentHoods,
+          hoods: hoodLatLngs,
+          streets: streetLatLngs,
+        });
+      },
+      onHeadingSupported: (headingIsSupported) =>
+        this.setState({ headingIsSupported }),
+      onPositionChange: (lastPosition) =>
+        this.setState({ lastPosition }),
+      onHeadingChange: (headingData) => {
+        this.setCompassAnnotation(headingData)
+        this.setAdjacentHoodAnnotation()
+      },
+      onEntitiesDetected: (entities) => {
+        this.setState({ entities });
+        this.setCurrentHoodAnnotation();
+        this.setAdjacentHoodAnnotation();
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    Compass.stop();
+  }
+  /*<--------------- / Component mounting/unmounting methods ---------------->*/
 
   setFacingHood() {
     if (!this.state.entities) {
@@ -503,9 +556,9 @@ class SonderView extends Component {
           dialogStyle={{padding: 10}}
           actions={[
             <DialogButton
-              buttonStyle={{height: 20, justifyContent: 'center', marginTop: 10}}
-              textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}}
-              textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}}
+              buttonStyle={popupStyles.buttonStyle}
+              textContainerStyle={popupStyles.textContainerStyle}
+              textStyle={popupStyles.textStyle}
               text="CLOSE"
               align="center"
               onPress={this.closeDialog}
@@ -518,31 +571,19 @@ class SonderView extends Component {
               title={this.state.popupTitle}
             />
           }
-          // Disabling animations as dialogue disappears after state changes
-          // see: https://github.com/jacklam718/react-native-popup-dialog/issues/19
-          // dialogAnimation = { new SlideAnimation({
-          //   slideFrom: 'bottom',
-          //   animationDuration: 100,
-          // }) }
         >
 
           <ScrollView>
-            <View  style={{alignItems: 'center', marginHorizontal: 20}}>
+            <View  style={popupStyles.scrollView}>
               <Image
-                style={{marginVertical: 5, resizeMode: 'contain'}}
+                style={popupStyles.wikiImage}
                 source={{uri: this.state.popupImageUrl}}
                 width={this.state.popupImageWidth}
                 height={this.state.popupImageHeight}
                 maintainAspectRatio={true}
-                //onLoadStart={this.handleLoadStart}
-                //onProgress={this.handleProgress}
-                //onError={this.handleError}
               />
               <Text
-                style={{
-                  fontSize: 16,
-                  textAlign: 'justify'
-                }}
+                style={popupStyles.wikiExtract}
               >
               {this.state.popupExtract}
               </Text>
@@ -558,6 +599,27 @@ class SonderView extends Component {
                 >{this.state.wikiUrl ? "Wikipedia" : ""}
               </Text>
             </View>
+            <YelpView
+              name={this.state.yelpOneName}
+              url={this.state.yelpOneUrl}
+              reviewCount={this.state.yelpOneReviewCount}
+              category={this.state.yelpOneCategory}
+              imageUrl={this.state.yelpOneImageUrl}
+            />
+            <YelpView
+              name={this.state.yelpTwoName}
+              url={this.state.yelpTwoUrl}
+              reviewCount={this.state.yelpTwoReviewCount}
+              category={this.state.yelpTwoCategory}
+              imageUrl={this.state.yelpTwoImageUrl}
+            />
+            <YelpView
+              name={this.state.yelpThreeName}
+              url={this.state.yelpThreeUrl}
+              reviewCount={this.state.yelpThreeReviewCount}
+              category={this.state.yelpThreeCategory}
+              imageUrl={this.state.yelpThreeImageUrl}
+            />
           </ScrollView>
 
         </PopupDialog>
@@ -569,67 +631,54 @@ class SonderView extends Component {
           <TouchableOpacity><Login /></TouchableOpacity>
         </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
-
-      {/*---------------------------- Debugger View ------------------------ */}
-
-        {/* <View style={{ maxHeight: 200 }}>
-          <ScrollView>
-
-            <Text onPress={() => {
-              Linking.canOpenURL('yelp:///biz/the-sentinel-san-francisco')
-                .then(supported => {
-                  if (!supported) {
-                    Linking.openURL('https://www.yelp.com/biz/the-sentinel-san-francisco')
-                  } else {
-                    return Linking.openURL('yelp:///biz/the-sentinel-san-francisco');
-                  }
-                })
-                .catch(err => console.error('An error occurred', err))}}>
-              Click me to open yelp!
-            </Text>
-
-            <Text onPress={() => {this._map.selectAnnotation('??friend', animated = true);}}>
-              "Click me to toggle annotation"
-            </Text>
-
-            <Text onPress={() => {this.fetchYelpHoodRestaurants()}}>
-              {'Fetch Yelp Data:'}
-            </Text>
-
-            <Text>{this.state.yelpData ?
-              '*** this.state.yelpData: ' + JSON.stringify(this.state.yelpData) :
-              "Waiting for yelp Data..."}
-            </Text>
-
-            <Text>{this.state.entities ?
-              '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
-              "Waiting for entities..."}
-            </Text>
-
-            <Text>{this.state.headingIsSupported ?
-              '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
-              "Heading unsupported." }
-            </Text>
-
-            <Text>{this.state.entities ?
-              '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
-              "Normalizing reticulating splines..."}
-            </Text>
-
-            <Text>{this.state.annotations ?
-              '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
-              null}
-            </Text>
-
-          </ScrollView>
-        </View> */}
-
-      {/*--------------------------- / Debugger View ----------------------- */}
       </View>
     );
   }
 
 }
+
+{/*-------------------------------- Yelp View ------------------------------ */}
+class YelpView extends Component {
+  constructor(props){
+    super(props)
+  }
+  onTitlePress = () => {
+    // https://www.yelp.com/biz/the-sentinel-san-francisco
+    // yelp:///biz/the-sentinel-san-francisco
+    const deepLinkUrl = `yelp:///${this.props.url.slice(18)}`;
+    Linking.canOpenURL(deepLinkUrl)
+      .then(supported => {
+        if (!supported) {
+          Linking.openURL(this.props.url)
+        } else {
+          return Linking.openURL(deepLinkUrl);
+        }
+      })
+      .catch(err => console.error('An error occurred', err))
+  }
+  render(){
+    return(
+      // <View>{listItems}</View>
+      <View>
+        <View style={popupStyles.yelpTitleContainer}>
+        <Text style={popupStyles.yelpTitle} onPress={() => this.onTitlePress()}>
+          {this.props.name}
+        </Text>
+          <Image style={popupStyles.yelpRating} source={{uri: this.props.imageUrl}}
+          />
+        </View>
+        <View style={popupStyles.yelpCategoriesContainer} >
+          <Text style={popupStyles.yelpCategories} >{this.props.category}</Text>
+          <Text style={popupStyles.yelpReviewCount} >
+            {this.props.reviewCount ? this.props.reviewCount + ' Reviews' : ''}
+          </Text>
+        </View>
+      </View>
+    )
+  }
+}
+{/*------------------------------ / Yelp View ------------------------------ */}
+
 
 const mapStateToProps = (state) => {
   return {
