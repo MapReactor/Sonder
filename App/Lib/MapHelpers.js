@@ -103,13 +103,13 @@ export const calculateRegionCenter = (coordinates) => {
   return centroid(poly).geometry.coordinates;
 }
 /*
-  hoodToAnnotations() takes a geoJSON feature containing a Polygon or MultiPolygon
+  hoodToAnnotations() takes a geoJSON feature containing a Polygon or MultiPolygon 
   and spits out an array of Mapbox annotations.
     Notes:
       1. It only uses the outer-ring of the feature (ie. no holes)
       2. It takes the outer hood feature, not the underlying geometry
       3. It always returns an array. This is so that it can be spread unconditionally (see example)
-
+  
     Example usage:
     --------------
     const addHoodAnnotation = (hoodFeature) => {
@@ -118,10 +118,10 @@ export const calculateRegionCenter = (coordinates) => {
         strokeColor: '#00FB00',
         fillColor: generateCoolColorFromLabel(properties.label),
         title: properties.label
-      });
+      });      
 
       this.setState({
-        annotations: [...annotations,
+        annotations: [...annotations, 
           ...hoodToAnnotations(hoodFeature, settings)]
         ]
       })
@@ -129,13 +129,20 @@ export const calculateRegionCenter = (coordinates) => {
 */
 export const hoodToAnnotations = (feature, annotationSettings) => {
   const type = feature.geometry.type;
+  if (type === 'MultiPolygon') {
+    console.tron.log('DANGER WILL ROBINSON: MultiPolygon is trying to be rendered!');
+  }
   const properties = feature.properties;
   const coords = feature.geometry.coordinates;
-  const mergeSettings = (coords) => Object.assign({
-    coordinates: reverseTuples(coords[0]),
-    type: 'polygon'
-  }, annotationSettings);
-  return (type === 'MultiPolygon') ?
-    coords.map(coords => mergeSettings(coords)) :
+  const mergeSettings = (coords, index = 0) =>
+    Object.assign(
+      { coordinates: reverseTuples(coords[0]),
+        type: 'polygon' }, 
+      annotationSettings,
+      { id: annotationSettings.id+' '+index }
+    );
+  return (type === 'MultiPolygon') ? 
+    coords.map((coords, index) => mergeSettings(coords, index)) :
     [mergeSettings(coords)];
 };
+
