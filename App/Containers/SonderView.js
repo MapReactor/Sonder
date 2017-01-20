@@ -66,6 +66,8 @@ class SonderView extends Component {
       // popupDialog: {},
       popupView: 'current', // alternatively, 'facing'
       popupTitle: '',
+      popupLat: 0,
+      popupLon: 0,
       popupExtract: '',
       popupImageUrl: '',
       popupImageWidth: 0,
@@ -203,52 +205,10 @@ class SonderView extends Component {
       });
   }).bind(this)
 
-  getpopupHoodData = (() => {
-    this.setPopupHoodName();
-    this.fetchWikiHoodInfo()
-      .then((imageName) => {
-        this.fetchWikiHoodImageUrl(imageName)
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }).bind(this)
-
-  fetchWikiHoodImageUrl = ((imageName) => {
-    const baseUrl = 'https://en.wikipedia.org/w/api.php?'
-    const params = {
-      action: "query",
-      format: "json",
-      titles: `File:${imageName}`,
-      prop: "imageinfo",
-      iiprop: "url|size",
-      iiurlwidth: "200",
-    }
-    const url = makeUrl(baseUrl, params);
-    fetch(url)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        for ( var key in responseJson.query.pages["-1"].imageinfo) {
-          let image = responseJson.query.pages["-1"].imageinfo[key]
-          this.setState({
-            popupImageUrl: image.thumburl,
-            popupImageWidth: image.thumbwidth,
-            popupImageHeight: image.thumbheight
-          });
-          // this.setImageUrl(image.thumburl)
-          // this.setImageWidth(image.thumbwidth)
-          // this.setImageHeight(image.thumbheight)
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }).bind(this)
-
   // TODO
   fetchYelpHoodRestaurants = (() => {
-    const lat = 37.78477457373192
-    const lng = -122.40258693695068
+    const lat = this.state.popupLat
+    const lng = this.state.popupLon
     const latlng = "ll=" + String(lat) + "," + String(lng)
 
     const oauth = new OAuthSimple('eUUiBEeoxTfKX2YGudP_6g', yelpTokenSecret)
@@ -315,6 +275,8 @@ class SonderView extends Component {
     // this.reset()
     this.setState({
       popupTitle: '',
+      popupLat: 0,
+      popupLon: 0,
       popupExtract: '',
       popupImageUrl: '',
       popupImageWidth: 0,
