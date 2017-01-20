@@ -10,6 +10,7 @@ let namesAndPictures = {}
 function websocketInitChannel() {
   return eventChannel( emitter => {
     // init the connection
+    // const ws = new WebSocket('ws://sonder.herokuapp.com')
     const ws = new WebSocket('ws://sondersf.com')
 
     ws.onopen = () => {
@@ -41,7 +42,7 @@ function websocketInitChannel() {
 
     ws.onerror = (error) => {
       console.log('ws error: ', error)
-      ws.close()
+      //ws.close()
     }
 
     ws.onmessage = (e) => {
@@ -83,10 +84,10 @@ function websocketInitChannel() {
 
 // watcher saga
  const websocketSaga = function * () {
-   if (!open) {
-     channel = yield call(websocketInitChannel)
-  }
   while (true) {
+    if (!open) {
+      channel = yield call(websocketInitChannel)
+    }
     const action = yield take(channel)
     yield put(action)
   }
