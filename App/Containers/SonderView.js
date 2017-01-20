@@ -53,26 +53,6 @@ class SonderView extends Component {
     userTrackingMode: Mapbox.userTrackingMode.follow,
     facingHood: {},
     annotations: [],
-
-    // this.setState({
-    //   annotations: this.state.annotations.map(annotation => {
-    //     if (annotation.id !== 'marker2') { return annotation; }
-    //     return {
-    //       coordinates: [40.714541341726175,-74.00579452514648],
-    //       'type': 'point',
-    //       title: 'New Title!',
-    //       subtitle: 'New Subtitle',
-    //       annotationImage: {
-    //         source: { uri: 'https://cldup.com/7NLZklp8zS.png' },
-    //         height: 25,
-    //         width: 25
-    //       },
-    //       id: 'marker2'
-    //     };
-    //   })
-    // });
-
-
     bounceValue: new Animated.Value(100),  //This is the initial position of the subview
     // buttonText: "Show Subview",
     /*
@@ -154,13 +134,6 @@ class SonderView extends Component {
     this.popupDialog.closeDialog();
   }).bind(this)
 
-  setPopupHoodName = (() => {
-    const popupTitle = this.state.popupView === 'current' ?
-      this.state.entities.hoods.current.name :
-      this.state.facingHood.name
-    this.setState({ popupTitle: popupTitle })
-  }).bind(this)
-
   fetchWikiHoodInfo = (() => {
     const baseUrl = 'https://en.wikipedia.org/w/api.php?'
     const params = {
@@ -171,7 +144,6 @@ class SonderView extends Component {
       explaintext: '',
       inprop: 'url',
       titles: `${ this.state.popupTitle }, San Francisco`
-      // titles: `Civic Center, San Francisco`
     }
     const url = makeUrl(baseUrl, params);
 
@@ -304,6 +276,40 @@ class SonderView extends Component {
       });
   }).bind(this)
 
+  setPopupHoodData = (() => {
+    const popupTitle = this.state.popupView === 'current' ?
+      this.state.entities.hoods.current.name :
+      this.state.facingHood.name
+    let popupCoord;
+    if (this.state.popupView === 'current') {
+      popupCoord = this.state.annotations
+        .filter(annotation => annotation.id === 'currentHoodCenter')[0]
+        .coordinates
+    } else {
+      popupCoord = this.state.annotations
+        .filter(annotation => annotation.id === 'adjacentHoodCenter')[0]
+        .coordinates
+    }
+
+    this.setState({
+      popupTitle: popupTitle,
+      popupLat: popupCoord[0],
+      popupLon: popupCoord[1],
+    })
+
+  }).bind(this)
+
+  getpopupHoodData = (() => {
+    this.setPopupHoodData();
+    this.fetchWikiHoodInfo()
+      .then((imageName) => {
+        this.fetchWikiHoodImageUrl(imageName)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    this.fetchYelpHoodRestaurants();
+  }).bind(this)
 
   clearpopupHoodData = (() => {
     // this.reset()
@@ -331,13 +337,15 @@ class SonderView extends Component {
   };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
-    if (annotation.id !== 'currentHoodCenter' || 'adjacentHoodCenter') {
+
+    if (annotation.id !== 'currentHoodCenter' && annotation.id !== 'adjacentHoodCenter') {
       return;
     }
     const popupView = annotation.id === 'currentHoodCenter' ?
-      'current' : 'facing'
+      'current' : 'facing';
     this.setState({popupView: popupView})
-    this.popupDialog.openDialog();
+    this.openDialog();
+
   };
   onRightAnnotationTapped = (e) => {
     console.log('onRightAnnotationTapped', e);
@@ -356,27 +364,36 @@ class SonderView extends Component {
   setCompassAnnotation(headingData) {
     let compassTuple = toTuples(headingData.compassLine);
     compassTuple = [compassTuple[0].reverse(), compassTuple[1].reverse()]
-    if (!this.state.annotations[0]) {
+
+    const compassLineObj = {
+      id: 'compassLine',
+      coordinates: compassTuple,
+      type: 'polyline',
+      strokeColor: '#00FB00',
+      strokeWidth: 4,
+      strokeAlpha: .5
+    }
+
+    const compassAnnotationExists = this.state.annotations
+      .filter(annotation => annotation.id === 'compassLine')
+      .length === 1;
+
+    if (compassAnnotationExists) {
       this.setState({
-        heading: headingData.heading,
-        annotations: [{
-          id: 'compassLine',
-          coordinates: compassTuple,
-          type: 'polyline',
-          strokeColor: '#00FB00',
-          strokeWidth: 4,
-          strokeAlpha: .5
-        }]
-      });
+        annotations: this.state.annotations.map(annotation => {
+          if (annotation.id === 'compassLine') {
+            return compassLineObj
+          } else {
+            return annotation
+          }
+        })
+      })
     } else {
+      const annotations = this.state.annotations.slice();
+      annotations.push(compassLineObj)
       this.setState({
-        heading: headingData.heading,
-        annotations: this.state.annotations.map(annotation =>
-          (annotation.id !== 'compassLine') ?
-            annotation :
-            Object.assign({},annotation,{ coordinates: compassTuple })
-        )
-      });
+        annotations: annotations
+      })
     }
   }
 
@@ -384,10 +401,12 @@ class SonderView extends Component {
     if (!this.state.entities) {
       return
     }
+
     let annotations = this.state.annotations.slice();
     let coordinates = this.state.entities.hoods.current.coordinates[0]
     let center = calculateRegionCenter(coordinates);
-    annotations[1] = {
+
+    const currentHoodObj = {
       coordinates: reverseTuples(coordinates),
       type: 'polygon',
       fillAlpha: 0.3,
@@ -395,25 +414,51 @@ class SonderView extends Component {
       fillColor: '#0000ff',
       id: 'currentHood',
     }
-    annotations[2] = {
+
+    const currentHoodCenterObj = {
       coordinates: reverseTuples(center),
       type: 'point',
       id: 'currentHoodCenter',
     }
-    this.setState({
-      annotations: annotations
-    })
+
+    const currentHoodAnnotationExists = this.state.annotations
+      .filter(annotation => annotation.id === 'currentHood')
+      .length === 1;
+
+    if (currentHoodAnnotationExists) {
+      this.setState({
+        annotations: this.state.annotations.map(annotation => {
+          if (annotation.id === 'currentHood') {
+            return currentHoodObj
+          } else if (annotation.id === 'currentHoodCenter') {
+            return currentHoodCenterObj
+          } else {
+            return annotation
+          }
+        })
+      })
+    } else {
+      const annotations = this.state.annotations.slice();
+      annotations.push(currentHoodObj)
+      annotations.push(currentHoodCenterObj)
+      this.setState({
+        annotations: annotations
+      })
+    }
   }
 
   setAdjacentHoodAnnotation() {
+    this.setFacingHood();
+
     if (!this.state.entities) {
       return
     }
-    this.setFacingHood();
+
+    let annotations = this.state.annotations.slice();
     let coordinates = this.state.facingHood.coordinates[0]
     let center = calculateRegionCenter(coordinates);
-    let annotations = this.state.annotations.slice();
-    annotations[3] = {
+
+    const adjacentHoodObj = {
       coordinates: reverseTuples(coordinates),
       type: 'polygon',
       fillAlpha: 0.3,
@@ -421,14 +466,37 @@ class SonderView extends Component {
       fillColor: '#00e6e6',
       id: 'adjacentHood',
     }
-    annotations[4] = {
+
+    const adjacentHoodCenterObj = {
       coordinates: reverseTuples(center),
       type: 'point',
       id: 'adjacentHoodCenter',
     }
-    this.setState({
-      annotations: annotations,
-    })
+
+    const adjacentHoodAnnotationExists = this.state.annotations
+      .filter(annotation => annotation.id === 'adjacentHood')
+      .length === 1;
+
+    if (adjacentHoodAnnotationExists) {
+      this.setState({
+        annotations: this.state.annotations.map(annotation => {
+          if (annotation.id === 'adjacentHood') {
+            return adjacentHoodObj
+          } else if (annotation.id === 'adjacentHoodCenter') {
+            return adjacentHoodCenterObj
+          } else {
+            return annotation
+          }
+        })
+      })
+    } else {
+      const annotations = this.state.annotations.slice();
+      annotations.push(adjacentHoodObj)
+      annotations.push(adjacentHoodCenterObj)
+      this.setState({
+        annotations: annotations
+      })
+    }
   }
   /*<---------------------------- / Map methods ----------------------------->*/
 
