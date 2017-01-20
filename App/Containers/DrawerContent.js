@@ -40,16 +40,6 @@ class DrawerContent extends Component {
   //   NavigationActions.compassView()
   // }
 
-  handlePressMapBoxExampleView = () => {
-    this.toggleDrawer()
-    NavigationActions.mapBoxExampleView()
-  }
-
-  handlePressMapBoxExampleSfView = () => {
-    this.toggleDrawer()
-    NavigationActions.mapBoxExampleSfView()
-  }
-
   handlePressSonderView = () => {
     this.toggleDrawer()
     NavigationActions.sonderView()
@@ -94,10 +84,10 @@ class DrawerContent extends Component {
         <Image source={Images.logo} style={styles.logo} />
         <DrawerButton text='Sonder' onPress={this.handlePressSonderView} />
         {/*<DrawerButton text='Compass (deprecated)' onPress={this.handlePressCompassView} />*/}
-        <DrawerButton text='Mapbox Example' onPress={this.handlePressMapBoxExampleView} />
-        <DrawerButton text='Mapbox Example SF' onPress={this.handlePressMapBoxExampleSfView} />
-        <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
-        {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
+        {/*<DrawerButton text='Mapbox Example' onPress={this.handlePressMapBoxExampleView} />*/}
+        {/*<DrawerButton text='Mapbox Example SF' onPress={this.handlePressMapBoxExampleSfView} />*/}
+        {/*<DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />*/}
+        {/*{loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}*/}
       </ScrollView>
     )
   }
