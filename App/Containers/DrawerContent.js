@@ -55,11 +55,6 @@ class DrawerContent extends Component {
     NavigationActions.sonderView()
   }
 
-  handlePressStorageTestView = () => {
-    this.toggleDrawer()
-    NavigationActions.storageTestView()
-  }
-
   handlePressWelcomeView = () => {
     this.toggleDrawer()
     NavigationActions.welcomeView()
@@ -101,7 +96,6 @@ class DrawerContent extends Component {
         {/*<DrawerButton text='Compass (deprecated)' onPress={this.handlePressCompassView} />*/}
         <DrawerButton text='Mapbox Example' onPress={this.handlePressMapBoxExampleView} />
         <DrawerButton text='Mapbox Example SF' onPress={this.handlePressMapBoxExampleSfView} />
-        <DrawerButton text='Storage Test' onPress={this.handlePressStorageTestView} />
         <DrawerButton text='Friends View' onPress={this.handlePressFriendsView} />
         {loggedIn ? this.renderLogoutButton() : this.renderLoginButton()}
       </ScrollView>
