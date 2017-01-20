@@ -258,6 +258,12 @@ class SonderView extends Component {
     this.setState({ currentZoom: location.zoomLevel });
     console.log('onRegionDidChange', location);
   };
+  onRegionWillChange = (location) => {
+    console.log('onRegionWillChange', location);
+  };
+  onUpdateUserLocation = (location) => {
+    console.log('onUpdateUserLocation', location);
+  };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
 
