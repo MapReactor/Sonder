@@ -7,7 +7,7 @@ export default {
   subview: {
     backgroundColor: "black",
     opacity: 0.8,
-    height: 100,
+    height: 110,
     position: "absolute",
     left: 0,
     bottom: 0,
@@ -28,6 +28,7 @@ export default {
   },
   textButton: {
     color: "white",
+    fontSize: 14,
     marginTop: 5,
     marginBottom: 5,
     paddingTop: 5,
@@ -39,6 +40,12 @@ export default {
     borderColor: "white",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  buttonContainer: {
+    // padding: 5,
+    // height: 45,
+    overflow: 'hidden',
+    // borderRadius: 4,
   },
   facebookButton: {
     marginTop: 5,
