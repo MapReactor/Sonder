@@ -34,7 +34,6 @@ export default {
   },
   yelpTitle: {
     fontSize: 15,
-    fontWeight: 500,
   },
   yelpTitleContainer: {
     flex: 1,
