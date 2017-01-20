@@ -249,6 +249,21 @@ class SonderView extends Component {
       popupImageWidth: 0,
       popupImageHeight: 0,
       wikiUrl: '',
+      yelpOneName: '',
+      yelpOneUrl: '',
+      yelpOneReviewCount: '',
+      yelpOneCategory: '',
+      yelpOneImageUrl: '',
+      yelpTwoName: '',
+      yelpTwoUrl: '',
+      yelpTwoReviewCount: '',
+      yelpTwoCategory: '',
+      yelpTwoImageUrl: '',
+      yelpThreeName: '',
+      yelpThreeUrl: '',
+      yelpThreeReviewCount: '',
+      yelpThreeCategory: '',
+      yelpThreeImageUrl: '',
     })
   }).bind(this)
   /*<--------------------------- / Popup methods ---------------------------->*/
