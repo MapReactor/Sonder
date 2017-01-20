@@ -11,6 +11,7 @@ import {
   ScrollView,
   Image,
   Linking,
+  TouchableOpacity,
 } from 'react-native';
 import PopupDialog, {
   DialogTitle,
@@ -19,6 +20,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
+import loginStyles from './Styles/SonderLoginStyle'
 import Compass from '../Lib/Compass'
 import {
   reverseTuples,
@@ -28,7 +30,8 @@ import {
 } from '../Lib/MapHelpers';
 import { makeUrl } from '../Lib/Utilities'
 import FriendsHelpers from '../Lib/FriendsHelpers'
-import Menu from './MenuView'
+// import Menu from './MenuView'
+import Login from './FBLoginView'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -561,12 +564,15 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*--------------------------- Menu Subview -------------------------- */}
-        <Menu />
+        {/* <Menu /> */}
+        <View style={loginStyles.subview}>
+          <TouchableOpacity><Login /></TouchableOpacity>
+        </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
 
       {/*---------------------------- Debugger View ------------------------ */}
 
-        <View style={{ maxHeight: 200 }}>
+        {/* <View style={{ maxHeight: 200 }}>
           <ScrollView>
 
             <Text onPress={() => {
@@ -616,7 +622,7 @@ class SonderView extends Component {
             </Text>
 
           </ScrollView>
-        </View>
+        </View> */}
 
       {/*--------------------------- / Debugger View ----------------------- */}
       </View>
