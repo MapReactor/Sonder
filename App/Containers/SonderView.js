@@ -165,7 +165,7 @@ class SonderView extends Component {
     const request = oauth.sign({
       action: "GET",
       path: "https://api.yelp.com/v2/search",
-      parameters: "term=coffee&" + latlng,
+      parameters: "term=coffee&radius_filter=800&" + latlng,
       signatures: {
         api_key: 'eUUiBEeoxTfKX2YGudP_6g',
         shared_secret: yelpConsumerSecret,
