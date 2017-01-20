@@ -1,38 +1,67 @@
-import { call, put } from 'redux-saga/effects'
+import { call, put, take, fork, } from 'redux-saga/effects'
 import { path } from 'ramda'
+import { eventChannel } from 'redux-saga'
 import LocationActions from '../Redux/LocationRedux'
 import LocationService from '../Services/LocationService'
+import LocationApi from '../Services/LocationApi'
 
-const getLocation = function * (api, action) {
-  const { id } = action
-  // make the call to the api
-  const response = yield call(api.getLocation, id)
+let open = false
+let channel
+let location
+const api = LocationApi.create()
 
-  // success?
-  if (response.ok) {
-    yield put(LocationActions.locationSuccess(response.data, 'bonus'))
-  } else {
-    yield put(LocationActions.locationFailure())
+function postLocation(emitter, location) {
+  return fetch('http://sondersf.com/api/location', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      },
+      body: JSON.stringify(location)
+  }).then((response)=>{
+    if (response.ok) {
+      return emitter( { type: 'LOCATION_UPDATE', location: location } )
+    } else {
+      console.log("LOCATION POST NOT OK:" + response);
+    }
+  }).catch((error)=>{
+    console.log("LOCATION ERROR:" + error);
+  })
+}
+
+function locationInitChannel() {
+  return eventChannel( emitter => {
+    const locationWatcher = navigator.geolocation.watchPosition(
+      position => {
+        let newLocation = Object.assign({}, location);
+        if (position.coords) {
+          newLocation.latitude = position.coords.latitude;
+          newLocation.longitude = position.coords.longitude;
+          newLocation.bearing = position.coords.heading;
+          console.log("NEWLOCATION:" + JSON.stringify(newLocation));
+          postLocation(emitter, newLocation);
+        }
+      }
+    );
+    open = true;
+    return () => {
+      console.log("CLOSING LOCATION SAGA CHANNEL")
+      open = false;
+      navigator.geolocation.clearWatch(locationWatcher);
+    }
+  });
+}
+
+const updateLocation = function * (action) {
+  if (!open) {
+    location = action.location
+    channel = yield call(locationInitChannel)
+  }
+  while (true) {
+    const action = yield take(channel)
+    yield put(action)
   }
 }
 
-const updateLocation = function * (api, action) {
-  const { location } = action
-  const currentLocation = yield call(LocationService.getCurrentDeviceLocation);
-  if (currentLocation.position.coords) {
-    //console.tron.log('currentLocation.position:'+JSON.stringify(currentLocation.position));
-    location.latitude = currentLocation.position.coords.latitude;
-    location.longitude = currentLocation.position.coords.longitude;
-    location.bearing = currentLocation.position.coords.heading;
-  }
-
-  const response = yield call(api.updateLocation, location)
-  // success?
-  if (response.ok) {
-    yield put(LocationActions.locationSuccess(response.data.id, 'bonus'))
-  } else {
-    yield put(LocationActions.locationFailure())
-  }
-}
-
-module.exports = { getLocation, updateLocation };
+module.exports = { updateLocation };

@@ -9,7 +9,6 @@ export default () => {
   const rootReducer = combineReducers({
     location: require('./LocationRedux').reducer,
     user: require('./UserRedux').reducer,
-    // search: require('./SearchRedux').reducer,
     storageTest: require('./StorageTestRedux').reducer,
     friendsLocations: require('./FriendsLocationsRedux').reducer,
   })
