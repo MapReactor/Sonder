@@ -26,6 +26,8 @@ import { clone } from 'cloneextend';
 import vis from 'code42day-vis-why';
 import nextFrame from 'next-frame';
 
+import HoodSmith from './HoodSelector';
+
 const offset = new Offset();
 
 const toRadians = (heading) => heading * (Math.PI / 180);
@@ -42,7 +44,9 @@ class Compass {
                     'onHeadingChange',
                     'onCompassReady',
                     'onInitialHoods',
-                    'onEntitiesDetected'];
+                    'onEntitiesDetected',
+                    'onHoodChange',
+                  ];
     this.EVENTS.forEach(event => {
       this['_'+event] = () => {};
       this[event] = (func) => {
@@ -55,6 +59,8 @@ class Compass {
     this._heading = null;
     this._debugStreets = this.getDebugStreets();
     this._debugHoods = this.getDebugHoods();
+    // Delegate hood changes to HoodSmith
+    HoodSmith.onHoodChange((data) => this._onHoodChange(data));
   }
   getDebugHoods() {
     return FixtureApi.getNeighborhoodBoundaries('San Francisco').data;
@@ -96,8 +102,9 @@ class Compass {
       .then(position => {
         if (!this._currentPosition) {
           this._currentPosition = position.coords;
+          HoodSmith.refresh(this._currentPosition);
         }
-        this._onInitialPosition(position);
+        this._onInitialPosition(position); // probably should pass position.coords
         this.__frameCounter = 0;
         startTime = Date.now();
         return this._processNeighborhoods(position);
@@ -110,7 +117,8 @@ class Compass {
 
     this.watchID = navigator.geolocation.watchPosition(position => {
       this._currentPosition = position.coords;
-      this._onPositionChange(position);
+      HoodSmith.refresh(this._currentPosition);
+      this._onPositionChange(position); // probably should pass position.coords
     });
 
     ReactNativeHeading.start(opts.minAngle || 1)
@@ -119,7 +127,7 @@ class Compass {
     DeviceEventEmitter.addListener('headingUpdated', data => {
       const heading = this._heading = data.heading;
       const compassLine = this._compassLine = this.getCompassLine();
-      // Note: just as here, it might be best to eventually forward both position and heading to all Compass 
+      // Note: just as here, it might be best to eventually forward both position and heading to all Compass
       //lifecycle functions
       this._onHeadingChange({ heading, compassLine, position: this._currentPosition });
       if (this._detectionPending) {
@@ -185,7 +193,7 @@ class Compass {
 
   // Probably just wrap this in a requestAnimationFrame for now
   async getHoodCollisions(compassLineFeature = this._getCompassLineFeature(),
-                    adjacentHoods = this._hoodData.adjacentHoods, 
+                    adjacentHoods = this._hoodData.adjacentHoods,
                     currentHood = this._hoodData.currentHood) {
     var adjacents = [];
     var startHeading = this._heading;
@@ -252,17 +260,19 @@ class Compass {
 
   async _processNeighborhoods(position) {
     let startTime = Date.now();
-    const rawHoods = this._debugHoods;
-    await nextFrame(); this.__frameCounter++;
-    console.tron.log('getDebugHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString());
+    const adjacentHoods = HoodSmith.getAdjacentHoods();
+    const currentHood = HoodSmith.getCurrentHood();
+    // const rawHoods = this._debugHoods;
+    // await nextFrame(); this.__frameCounter++;
+    // console.tron.log('getDebugHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString());
     const streets = this._debugStreets;
     await nextFrame(); this.__frameCounter++;
-    const currentHood = await this._findCurrentHood(position, rawHoods.features);
-    await nextFrame(); this.__frameCounter++;
-    console.tron.log('findCurrentHood: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
-    const adjacentHoods = await this._findAdjacentHoods(currentHood, rawHoods.features);
-    await nextFrame(); this.__frameCounter++;
-    console.tron.log('findAdjacentHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
+    // const currentHood = await this._findCurrentHood(position, rawHoods.features);
+    // await nextFrame(); this.__frameCounter++;
+    // console.tron.log('findCurrentHood: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
+    // const adjacentHoods = await this._findAdjacentHoods(currentHood, rawHoods.features);
+    // await nextFrame(); this.__frameCounter++;
+    // console.tron.log('findAdjacentHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
     const hoodLatLngs = this.mapifyHoods(adjacentHoods);
     await nextFrame(); this.__frameCounter++;
     console.tron.log('mapifyHoods: ' + (Date.now()-startTime).toString()+'ms frames: ' + this.__frameCounter.toString())
