@@ -11,10 +11,7 @@ import {
   ScrollView,
   Image,
   Linking,
-  AppRegistry,
-  TouchableHighlight,
   TouchableOpacity,
-  Animated,
 } from 'react-native';
 import PopupDialog, {
   DialogTitle,
@@ -23,7 +20,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
-import menuStyles from './Styles/MenuStyle'
+import loginStyles from './Styles/SonderLoginStyle'
 import Compass from '../Lib/Compass'
 import {
   reverseTuples,
@@ -33,6 +30,7 @@ import {
 } from '../Lib/MapHelpers';
 import { makeUrl } from '../Lib/Utilities'
 import FriendsHelpers from '../Lib/FriendsHelpers'
+// import Menu from './MenuView'
 import Login from './FBLoginView'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
@@ -43,9 +41,9 @@ import qs from 'querystring'
 import OAuthSimple from 'oauthsimple'
 import nonce from 'nonce'
 const n = nonce();
-import { yelpConsumerSecret, yelpTokenSecret } from '../../config'
+import { yelpConsumerSecret, yelpTokenSecret } from '../../config.js'
 
-let menuIsHidden = true;
+
 
 class SonderView extends Component {
   state = {
@@ -53,8 +51,6 @@ class SonderView extends Component {
     userTrackingMode: Mapbox.userTrackingMode.follow,
     facingHood: {},
     annotations: [],
-    bounceValue: new Animated.Value(100),  //This is the initial position of the subview
-    // buttonText: "Show Subview",
     /*
     /*<--- Popup state --->*/
       popupView: 'current', // alternatively, 'facing'
@@ -72,34 +68,6 @@ class SonderView extends Component {
         latitude: 37.78477457373192
       },
   };
-
-  /*<------------------------------ Menu Helpers ---------------------------->*/
-
-  _toggleSubview() {
-    // this.setState({
-    //   buttonText: !menuIsHidden ? "Show Subview" : "Hide Subview"
-    // });
-
-    let toValue = 100;
-
-    if(menuIsHidden) {
-      toValue = 20;
-    }
-
-    //This will animate the transalteY of the subview between 0 & 100 depending on its current state
-    //100 comes from the style below, which is the height of the subview.
-    Animated.spring(
-      this.state.bounceValue,
-      {
-        toValue: toValue,
-        velocity: 4,
-        tension: 3,
-        friction: 5,
-      }
-    ).start();
-
-    menuIsHidden = !menuIsHidden;
-  }
 
   /*<----------------------------- Popup methods ---------------------------->*/
   openDialog = (() => {
@@ -546,7 +514,6 @@ class SonderView extends Component {
         />
       {/*----------------------------- / Map View ---------------------------*/}
 
-
       {/*---------------------------- Popup View --------------------------- */}
         <PopupDialog
           // ref={(popupDialog) => { this.setState({popupDialog: popupDialog}); }}
@@ -610,84 +577,11 @@ class SonderView extends Component {
       {/*--------------------------- / Popup View -------------------------- */}
 
       {/*--------------------------- Menu Subview -------------------------- */}
-        <TouchableOpacity onPress={()=> {this._toggleSubview()}}>
-          <Image source={require('../Images/mapreactor.png')} style={menuStyles.sonderButton}></Image>
-        </TouchableOpacity>
-
-        <View style={menuStyles.container}>
-          <Animated.View
-            style={[
-              menuStyles.subview,
-              {transform: [{translateY: this.state.bounceValue}]}
-            ]}
-          >
-            {/* <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
-              <Text style={menuStyles.textButton}>Logout</Text>
-            </TouchableHighlight> */}
-            <Login style={menuStyles.facebookButton} />
-            <TouchableHighlight underlayColor="rgba(225, 225, 225, 0.3)" onPress={()=> {this._toggleSubview()}}>
-              <Text style={menuStyles.textButton}>Cancel</Text>
-            </TouchableHighlight>
-
-          </Animated.View>
+        {/* <Menu /> */}
+        <View style={loginStyles.subview}>
+          <TouchableOpacity><Login /></TouchableOpacity>
         </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
-
-      {/*---------------------------- Debugger View ------------------------ */}
-
-        <View style={{ maxHeight: 200 }}>
-          <ScrollView>
-
-            <Text onPress={() => {
-              Linking.canOpenURL('yelp:///biz/the-sentinel-san-francisco')
-                .then(supported => {
-                  if (!supported) {
-                    Linking.openURL('https://www.yelp.com/biz/the-sentinel-san-francisco')
-                  } else {
-                    return Linking.openURL('yelp:///biz/the-sentinel-san-francisco');
-                  }
-                })
-                .catch(err => console.error('An error occurred', err))}}>
-              Click me to open yelp!
-            </Text>
-
-            <Text onPress={() => {this._map.selectAnnotation('??friend', animated = true);}}>
-              "Click me to toggle annotation"
-            </Text>
-
-            <Text onPress={() => {this.fetchYelpHoodRestaurants()}}>
-              {'Fetch Yelp Data:'}
-            </Text>
-
-            <Text>{this.state.yelpData ?
-              '*** this.state.yelpData: ' + JSON.stringify(this.state.yelpData) :
-              "Waiting for yelp Data..."}
-            </Text>
-
-            <Text>{this.state.entities ?
-              '*** this.state.entities.hoods: ' + JSON.stringify(this.state.entities.hoods) :
-              "Waiting for entities..."}
-            </Text>
-
-            <Text>{this.state.headingIsSupported ?
-              '*** this.state.heading: ' + getPrettyBearing(this.state.heading) :
-              "Heading unsupported." }
-            </Text>
-
-            <Text>{this.state.entities ?
-              '*** this.state.entities.streets: ' + JSON.stringify(this.state.entities.streets) :
-              "Normalizing reticulating splines..."}
-            </Text>
-
-            <Text>{this.state.annotations ?
-              '*** this.state.annotations: ' + JSON.stringify( this.state.annotations ) :
-              null}
-            </Text>
-
-          </ScrollView>
-        </View>
-
-      {/*--------------------------- / Debugger View ----------------------- */}
       </View>
     );
   }

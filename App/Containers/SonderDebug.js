@@ -13,7 +13,7 @@ import {
 
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
-import { getPrettyBearing, toTuples } from '../Lib/MapHelpers'
+import { hoodToAnnotations, reverseTuples, getPrettyBearing, toTuples } from '../Lib/MapHelpers'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -71,11 +71,25 @@ class SonderView extends Component {
       },
       onHeadingSupported: (headingIsSupported) => 
         this.setState({ headingIsSupported }),
-      onPositionChange: (lastPosition) => 
-        this.setState({ lastPosition }),
+      onPositionChange: (lastPosition) => {
+        const { latitude, longitude } = lastPosition.coords;
+        const ops = { latitude, longitude };
+        if (this._lastHeading) { ops.direction = this._lastHeading }
+        if (this._map) {
+          this._map.easeTo(ops, true, () => {});
+        }
+        this.setState({ lastPosition })
+      },
       onHeadingChange: (headingData) => {
-        this._map.setDirection(headingData.heading);
-        this.setCompassAnnotation(headingData);
+        this._lastHeading = headingData.heading;
+        const direction = headingData.heading;    
+        if (headingData.position) {
+          const { latitude, longitude } = headingData.position;
+          this._map.easeTo({ direction, latitude, longitude }, true, () => {});
+        } else {
+          this._map.setDirection(headingData.heading);
+        }
+        // this.setCompassAnnotation(headingData);
       },
       onEntitiesDetected: (entities) => 
         this.setState({ entities })
@@ -84,6 +98,42 @@ class SonderView extends Component {
 
   componentWillUnmount() {
     Compass.stop();
+  }
+
+  setHoodAnnotations(currentHood, adjacentHoods) {
+    // Draw the hood annotation, with random color, then with BinduRGB
+    const currentHoodAnnotations = hoodToAnnotations(currentHood, {
+      id: 'currentHood',
+      // fillAlpha: 0.5,
+      // alpha: 0.5,
+      fillColor: '#AA2222',
+      strokeColor: '#FFFFFF',
+      strokeWidth: 10,
+      // strokeAlpha: .5,
+    });
+    // alert(JSON.stringify(currentHoodAnnotations));
+    const adjacentHoodAnnotations = [];
+    for (let adjacentHood of adjacentHoods) {
+      const annotations = hoodToAnnotations(adjacentHood, {
+        id: Math.random().toString(), // Just doing this in a pinch, bleh
+        // fillAlpha: 0.5,
+        // alpha: 0.5,
+        fillColor: '#2222AA',
+        strokeColor: '#FFFFFF',
+        strokeWidth: 10,
+        // strokeAlpha: .5,
+      });
+      adjacentHoodAnnotations.push(...annotations);
+    }
+
+    this.setState({
+      annotations: [
+        ...this.state.annotations, 
+        ...currentHoodAnnotations,
+        ...adjacentHoodAnnotations,
+      ]
+    }) 
+    // Draw the adjacenthood annotations, with random color, then with BinduRGB
   }
 
   setCompassAnnotation(headingData) {
