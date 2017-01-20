@@ -56,14 +56,7 @@ class SonderView extends Component {
     bounceValue: new Animated.Value(100),  //This is the initial position of the subview
     // buttonText: "Show Subview",
     /*
-    annotations array order:
-      [0] compassLine
-      [1] currentHood
-      [2] currentHoodCenter
-      [3] adjacentHood,adjacentHoodCenter
-    */
     /*<--- Popup state --->*/
-      // popupDialog: {},
       popupView: 'current', // alternatively, 'facing'
       popupTitle: '',
       popupLat: 0,
@@ -109,25 +102,6 @@ class SonderView extends Component {
   }
 
   /*<----------------------------- Popup methods ---------------------------->*/
-  // this.setTitle = ((title) => {
-  //   this.props.setTitle(title);
-  // }).bind(this);
-  // this.setExtract = ((extract) => {
-  //   this.props.setExtract(extract);
-  // }).bind(this);
-  // this.setImageUrl = ((imageUrl) => {
-  //   this.props.setImageUrl(imageUrl);
-  // }).bind(this);
-  // this.setImageWidth = ((imageWidth) => {
-  //   this.props.setImageWidth(imageWidth);
-  // }).bind(this);
-  // this.setImageHeight = ((imageHeight) => {
-  //   this.props.setImageHeight(imageHeight);
-  // }).bind(this);
-  // this.reset = (() => {
-  //   this.props.reset();
-  // }).bind(this);
-
   openDialog = (() => {
     this.popupDialog.openDialog();
   }).bind(this)
@@ -161,19 +135,14 @@ class SonderView extends Component {
             popupExtract: page.extract.replace(/\n/g,"\n\n"),
             wikiUrl: page.fullurl
           });
-          // this.setTitle(page.title)
-          // this.setExtract(page.extract.replace(/\n/g,"\n\n"))
-          // this.setImageUrl(page.fullurl)
           return page.pageprops.page_image_free
         }
       })
       .catch((error) => {
         console.log(error);
-        // this.fetchWikimapiaHoodInfo();
       });
   }).bind(this)
 
-  // Fetch the image url, width and height of the main page url
   fetchWikiHoodImageUrl = ((imageName) => {
     const baseUrl = 'https://en.wikipedia.org/w/api.php?'
     const params = {
@@ -272,7 +241,6 @@ class SonderView extends Component {
   }).bind(this)
 
   clearpopupHoodData = (() => {
-    // this.reset()
     this.setState({
       popupTitle: '',
       popupLat: 0,
@@ -291,12 +259,6 @@ class SonderView extends Component {
     this.setState({ currentZoom: location.zoomLevel });
     console.log('onRegionDidChange', location);
   };
-  onRegionWillChange = (location) => {
-    console.log('onRegionWillChange', location);
-  };
-  onUpdateUserLocation = (location) => {
-    console.log('onUpdateUserLocation', location);
-  };
   onOpenAnnotation = (annotation) => {
     console.log('onOpenAnnotation', annotation);
 
@@ -308,15 +270,6 @@ class SonderView extends Component {
     this.setState({popupView: popupView})
     this.openDialog();
 
-  };
-  onRightAnnotationTapped = (e) => {
-    console.log('onRightAnnotationTapped', e);
-  };
-  onLongPress = (location) => {
-    console.log('onLongPress', location);
-  };
-  onTap = (location) => {
-    console.log('onTap', location);
   };
   onChangeUserTrackingMode = (userTrackingMode) => {
     this.setState({ userTrackingMode });
@@ -620,12 +573,6 @@ class SonderView extends Component {
               title={this.state.popupTitle}
             />
           }
-          // Disabling animations as dialogue disappears after state changes
-          // see: https://github.com/jacklam718/react-native-popup-dialog/issues/19
-          // dialogAnimation = { new SlideAnimation({
-          //   slideFrom: 'bottom',
-          //   animationDuration: 100,
-          // }) }
         >
 
           <ScrollView>
@@ -636,9 +583,6 @@ class SonderView extends Component {
                 width={this.state.popupImageWidth}
                 height={this.state.popupImageHeight}
                 maintainAspectRatio={true}
-                //onLoadStart={this.handleLoadStart}
-                //onProgress={this.handleProgress}
-                //onError={this.handleError}
               />
               <Text
                 style={{
