@@ -48,7 +48,7 @@ import { yelpConsumerSecret, yelpTokenSecret } from '../../config.js'
 
 class SonderView extends Component {
   state = {
-    initialZoomLevel: 12,
+    initialZoomLevel: 8,
     userTrackingMode: Mapbox.userTrackingMode.follow,
     facingHood: {},
     annotations: [],
