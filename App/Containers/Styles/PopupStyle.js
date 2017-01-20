@@ -26,19 +26,21 @@ export default {
       textAlign: 'justify'
   },
   yelpRating: {
-    height: 20,
-    width: 100,
+    height: 15,
+    width: 75,
     right: 0,
+    top: 3,
     position: "absolute",
   },
   yelpTitle: {
     fontSize: 15,
+    fontWeight: 500,
   },
   yelpTitleContainer: {
     flex: 1,
     flexDirection: "row",
     marginTop: 5,
-    marginHorizontal: 0,
+    marginHorizontal: 20,
   },
   yelpCategories: {
     color: "gray",
@@ -51,9 +53,6 @@ export default {
     position: "absolute",
   },
   yelpCategoriesContainer: {
-    marginTop: 0,
-    marginBottom: 0,
-    marginRight: 0,
-    marginLeft: 0,
+    marginHorizontal: 20,
   },
 }

@@ -64,15 +64,15 @@ class SonderView extends Component {
       popupImageHeight: 0,
       yelpOneName: '',
       yelpOneUrl: '',
-      yelpOneReviewCount: 0,
+      yelpOneReviewCount: '',
       yelpOneCategory: '',
       yelpTwoName: '',
       yelpTwoUrl: '',
-      yelpTwoReviewCount: 0,
+      yelpTwoReviewCount: '',
       yelpTwoCategory: '',
       yelpThreeName: '',
       yelpThreeUrl: '',
-      yelpThreeReviewCount: 0,
+      yelpThreeReviewCount: '',
       yelpThreeCategory: '',
     /*<--- Popup state --->*/
       center: {
@@ -230,7 +230,7 @@ class SonderView extends Component {
       .catch((error) => {
         console.error(error);
       });
-    this.fetchYelpHoodRestaurants();
+    this.fetchYelpHoodCoffee();
   }).bind(this)
 
   clearpopupHoodData = (() => {
@@ -593,7 +593,24 @@ class SonderView extends Component {
                 >{this.state.wikiUrl ? "Wikipedia" : ""}
               </Text>
             </View>
-            <YelpView />
+            <YelpView
+              name={this.state.yelpOneName}
+              url={this.state.yelpOneUrl}
+              reviewCount={this.state.yelpOneReviewCount}
+              category={this.state.yelpOneCategory}
+            />
+            <YelpView
+              name={this.state.yelpTwoName}
+              url={this.state.yelpTwoUrl}
+              reviewCount={this.state.yelpTwoReviewCount}
+              category={this.state.yelpTwoCategory}
+            />
+            <YelpView
+              name={this.state.yelpThreeName}
+              url={this.state.yelpThreeUrl}
+              reviewCount={this.state.yelpThreeReviewCount}
+              category={this.state.yelpThreeCategory}
+            />
           </ScrollView>
 
         </PopupDialog>
@@ -605,11 +622,6 @@ class SonderView extends Component {
           <TouchableOpacity><Login /></TouchableOpacity>
         </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
-        <View style={{ minHeight: 200 }}>
-          <ScrollView>
-            <YelpView />
-          </ScrollView>
-        </View>
       </View>
     );
   }
@@ -622,28 +634,19 @@ class YelpView extends Component {
     super(props)
   }
   render(){
-    // let listItems = this.props.yelpData.map((item) => {
-    //   return (
-    //     <View>
-    //       <Text>Blue Bottle Coffee Co</Text>
-    //       <Text>Coffee & Tea</Text>
-    //       <Image source={{uri: 'https://s3-media4.fl.yelpcdn.com/assets/2/www/img/c2f3dd9799a5/ico/stars/v1/stars_4.png'}}
-    //       />
-    //     </View>
-    //   )
-    // }
-
     return(
       // <View>{listItems}</View>
       <View>
         <View style={popupStyles.yelpTitleContainer} >
-          <Text style={popupStyles.yelpTitle} >Blue Bottle Coffee Co</Text>
-          <Image style={popupStyles.yelpRating} source={{uri: 'https://s3-media4.fl.yelpcdn.com/assets/2/www/img/c2f3dd9799a5/ico/stars/v1/stars_4.png'}}
+          <Text style={popupStyles.yelpTitle} >{this.props.name}</Text>
+          <Image style={popupStyles.yelpRating} source={{uri: this.props.url}}
           />
         </View>
         <View style={popupStyles.yelpCategoriesContainer} >
-          <Text style={popupStyles.yelpCategories} >Coffee & Tea</Text>
-          <Text style={popupStyles.yelpReviewCount} >1200 Reviews</Text>
+          <Text style={popupStyles.yelpCategories} >{this.props.category}</Text>
+          <Text style={popupStyles.yelpReviewCount} >
+            {this.props.reviewCount ? this.props.reviewCount + ' Reviews' : ''}
+          </Text>
         </View>
       </View>
     )
