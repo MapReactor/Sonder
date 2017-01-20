@@ -62,7 +62,18 @@ class SonderView extends Component {
       popupImageUrl: '',
       popupImageWidth: 0,
       popupImageHeight: 0,
-      yelpData: '',
+      yelpOneName: '',
+      yelpOneUrl: '',
+      yelpOneReviewCount: 0,
+      yelpOneCategory: '',
+      yelpTwoName: '',
+      yelpTwoUrl: '',
+      yelpTwoReviewCount: 0,
+      yelpTwoCategory: '',
+      yelpThreeName: '',
+      yelpThreeUrl: '',
+      yelpThreeReviewCount: 0,
+      yelpThreeCategory: '',
     /*<--- Popup state --->*/
       center: {
         longitude: -122.40258693695068,
@@ -166,8 +177,21 @@ class SonderView extends Component {
     return fetch(request.signed_url)
       .then((response) => response.json())
       .then((responseJson) => {
-        console.tron.log(JSON.stringify(responseJson));
-        this.setState({ yelpData: responseJson });
+        console.log(JSON.stringify(responseJson.businesses[0]));
+        this.setState({
+          yelpOneName: responseJson.businesses[0].name,
+          yelpOneUrl: responseJson.businesses[0].rating_img_url_small,
+          yelpOneReviewCount: responseJson.businesses[0].review_count,
+          yelpOneCategory: responseJson.businesses[0].categories[0][0],
+          yelpTwoName: responseJson.businesses[1].name,
+          yelpTwoUrl: responseJson.businesses[1].rating_img_url_small,
+          yelpTwoReviewCount: responseJson.businesses[1].review_count,
+          yelpTwoCategory: responseJson.businesses[1].categories[0][0],
+          yelpThreeName: responseJson.businesses[2].name,
+          yelpThreeUrl: responseJson.businesses[2].rating_img_url_small,
+          yelpThreeReviewCount: responseJson.businesses[2].review_count,
+          yelpThreeCategory: responseJson.businesses[2].categories[0][0],
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -584,13 +608,11 @@ class SonderView extends Component {
           <TouchableOpacity><Login /></TouchableOpacity>
         </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
-
         <View style={{ minHeight: 200 }}>
           <ScrollView>
             <YelpView />
           </ScrollView>
         </View>
-
       </View>
     );
   }
