@@ -550,9 +550,9 @@ class SonderView extends Component {
           dialogStyle={{padding: 10}}
           actions={[
             <DialogButton
-              buttonStyle={{height: 20, justifyContent: 'center', marginTop: 10}}
-              textContainerStyle={{paddingVertical: 0, paddingHorizontal: 0}}
-              textStyle={{fontSize: 12, color: 'grey', fontWeight: '300'}}
+              buttonStyle={popupStyles.buttonStyle}
+              textContainerStyle={popupStyles.textContainerStyle}
+              textStyle={popupStyles.textStyle}
               text="CLOSE"
               align="center"
               onPress={this.closeDialog}
@@ -568,19 +568,16 @@ class SonderView extends Component {
         >
 
           <ScrollView>
-            <View  style={{alignItems: 'center', marginHorizontal: 20}}>
+            <View  style={popupStyles.scrollView}>
               <Image
-                style={{marginVertical: 5, resizeMode: 'contain'}}
+                style={popupStyles.wikiImage}
                 source={{uri: this.state.popupImageUrl}}
                 width={this.state.popupImageWidth}
                 height={this.state.popupImageHeight}
                 maintainAspectRatio={true}
               />
               <Text
-                style={{
-                  fontSize: 16,
-                  textAlign: 'justify'
-                }}
+                style={popupStyles.wikiExtract}
               >
               {this.state.popupExtract}
               </Text>
