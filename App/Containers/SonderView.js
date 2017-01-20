@@ -66,14 +66,17 @@ class SonderView extends Component {
       yelpOneUrl: '',
       yelpOneReviewCount: '',
       yelpOneCategory: '',
+      yelpOneImageUrl: '',
       yelpTwoName: '',
       yelpTwoUrl: '',
       yelpTwoReviewCount: '',
       yelpTwoCategory: '',
+      yelpTwoImageUrl: '',
       yelpThreeName: '',
       yelpThreeUrl: '',
       yelpThreeReviewCount: '',
       yelpThreeCategory: '',
+      yelpThreeImageUrl: '',
     /*<--- Popup state --->*/
       center: {
         longitude: -122.40258693695068,
@@ -155,7 +158,7 @@ class SonderView extends Component {
   }).bind(this)
 
   // TODO
-  fetchYelpHoodRestaurants = (() => {
+  fetchYelpHoodCoffee = (() => {
     const lat = this.state.popupLat
     const lng = this.state.popupLon
     const latlng = "ll=" + String(lat) + "," + String(lng)
@@ -180,17 +183,20 @@ class SonderView extends Component {
         console.log(JSON.stringify(responseJson.businesses[0]));
         this.setState({
           yelpOneName: responseJson.businesses[0].name,
-          yelpOneUrl: responseJson.businesses[0].rating_img_url_small,
+          yelpOneUrl: responseJson.businesses[0].mobile_url,
           yelpOneReviewCount: responseJson.businesses[0].review_count,
           yelpOneCategory: responseJson.businesses[0].categories[0][0],
+          yelpOneImageUrl: responseJson.businesses[0].rating_img_url_small,
           yelpTwoName: responseJson.businesses[1].name,
-          yelpTwoUrl: responseJson.businesses[1].rating_img_url_small,
+          yelpTwoUrl: responseJson.businesses[1].mobile_url,
           yelpTwoReviewCount: responseJson.businesses[1].review_count,
           yelpTwoCategory: responseJson.businesses[1].categories[0][0],
+          yelpTwoImageUrl: responseJson.businesses[1].rating_img_url_small,
           yelpThreeName: responseJson.businesses[2].name,
-          yelpThreeUrl: responseJson.businesses[2].rating_img_url_small,
+          yelpThreeUrl: responseJson.businesses[2].mobile_url,
           yelpThreeReviewCount: responseJson.businesses[2].review_count,
           yelpThreeCategory: responseJson.businesses[2].categories[0][0],
+          yelpThreeImageUrl: responseJson.businesses[2].rating_img_url_small,
         });
       })
       .catch((error) => {
@@ -598,18 +604,21 @@ class SonderView extends Component {
               url={this.state.yelpOneUrl}
               reviewCount={this.state.yelpOneReviewCount}
               category={this.state.yelpOneCategory}
+              imageUrl={this.state.yelpOneImageUrl}
             />
             <YelpView
               name={this.state.yelpTwoName}
               url={this.state.yelpTwoUrl}
               reviewCount={this.state.yelpTwoReviewCount}
               category={this.state.yelpTwoCategory}
+              imageUrl={this.state.yelpTwoImageUrl}
             />
             <YelpView
               name={this.state.yelpThreeName}
               url={this.state.yelpThreeUrl}
               reviewCount={this.state.yelpThreeReviewCount}
               category={this.state.yelpThreeCategory}
+              imageUrl={this.state.yelpThreeImageUrl}
             />
           </ScrollView>
 
@@ -633,13 +642,29 @@ class YelpView extends Component {
   constructor(props){
     super(props)
   }
+  onTitlePress = () => {
+    // https://www.yelp.com/biz/the-sentinel-san-francisco
+    // yelp:///biz/the-sentinel-san-francisco
+    const deepLinkUrl = `yelp:///${this.props.url.slice(18)}`;
+    Linking.canOpenURL(deepLinkUrl)
+      .then(supported => {
+        if (!supported) {
+          Linking.openURL(this.props.url)
+        } else {
+          return Linking.openURL(deepLinkUrl);
+        }
+      })
+      .catch(err => console.error('An error occurred', err))
+  }
   render(){
     return(
       // <View>{listItems}</View>
       <View>
-        <View style={popupStyles.yelpTitleContainer} >
-          <Text style={popupStyles.yelpTitle} >{this.props.name}</Text>
-          <Image style={popupStyles.yelpRating} source={{uri: this.props.url}}
+        <View style={popupStyles.yelpTitleContainer}>
+        <Text style={popupStyles.yelpTitle} onPress={() => this.onTitlePress()}>
+          {this.props.name}
+        </Text>
+          <Image style={popupStyles.yelpRating} source={{uri: this.props.imageUrl}}
           />
         </View>
         <View style={popupStyles.yelpCategoriesContainer} >
