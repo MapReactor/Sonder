@@ -20,6 +20,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 
 import Styles from './Styles/MapViewStyle'
+import popupStyles from './Styles/PopupStyle'
 import loginStyles from './Styles/SonderLoginStyle'
 import Compass from '../Lib/Compass'
 import {
@@ -570,6 +571,7 @@ class SonderView extends Component {
                   }}
                 >{this.state.wikiUrl ? "Wikipedia" : ""}
               </Text>
+              <YelpView />
             </View>
           </ScrollView>
 
@@ -582,11 +584,54 @@ class SonderView extends Component {
           <TouchableOpacity><Login /></TouchableOpacity>
         </View>
       {/*-------------------------- / Menu Subview ------------------------- */}
+
+        <View style={{ minHeight: 200 }}>
+          <ScrollView>
+            <YelpView />
+          </ScrollView>
+        </View>
+
       </View>
     );
   }
 
 }
+
+{/*-------------------------------- Yelp View ------------------------------ */}
+class YelpView extends Component {
+  constructor(props){
+    super(props)
+  }
+  render(){
+    // let listItems = this.props.yelpData.map((item) => {
+    //   return (
+    //     <View>
+    //       <Text>Blue Bottle Coffee Co</Text>
+    //       <Text>Coffee & Tea</Text>
+    //       <Image source={{uri: 'https://s3-media4.fl.yelpcdn.com/assets/2/www/img/c2f3dd9799a5/ico/stars/v1/stars_4.png'}}
+    //       />
+    //     </View>
+    //   )
+    // }
+
+    return(
+      // <View>{listItems}</View>
+      <View>
+        <View style={popupStyles.yelpTitleContainer} >
+          <Text style={popupStyles.yelpTitle} >Blue Bottle Coffee Co</Text>
+          <Image style={popupStyles.yelpRating} source={{uri: 'https://s3-media4.fl.yelpcdn.com/assets/2/www/img/c2f3dd9799a5/ico/stars/v1/stars_4.png'}}
+          />
+        </View>
+        <View style={popupStyles.yelpCategoriesContainer} >
+          <Text style={popupStyles.yelpCategories} >Coffee & Tea</Text>
+          <Text style={popupStyles.yelpReviewCount} >1200 Reviews</Text>
+        </View>
+      </View>
+    )
+  }
+}
+{/*------------------------------ / Yelp View ------------------------------ */}
+
 
 const mapStateToProps = (state) => {
   return {
