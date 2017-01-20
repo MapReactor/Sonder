@@ -592,8 +592,8 @@ class SonderView extends Component {
                   }}
                 >{this.state.wikiUrl ? "Wikipedia" : ""}
               </Text>
-              <YelpView />
             </View>
+            <YelpView />
           </ScrollView>
 
         </PopupDialog>

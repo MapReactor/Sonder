@@ -26,18 +26,18 @@ export default {
       textAlign: 'justify'
   },
   yelpRating: {
-    height: 25,
-    width: 125,
+    height: 20,
+    width: 100,
     right: 0,
     position: "absolute",
   },
   yelpTitle: {
-    fontSize: 18,
+    fontSize: 15,
   },
   yelpTitleContainer: {
     flex: 1,
     flexDirection: "row",
-    // marginTop: 5,
+    marginTop: 5,
     marginHorizontal: 0,
   },
   yelpCategories: {
@@ -47,12 +47,13 @@ export default {
     color: "gray",
     fontSize: 10,
     right: 0,
-    // position: "absolute",
+    top: 0,
+    position: "absolute",
   },
   yelpCategoriesContainer: {
-    // marginTop: 5,
-    // marginBottom: 5,
-    // marginRight: 5,
-    // marginLeft: 5,
+    marginTop: 0,
+    marginBottom: 0,
+    marginRight: 0,
+    marginLeft: 0,
   },
 }
