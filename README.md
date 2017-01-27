@@ -1,6 +1,6 @@
-# Project Name
+# Sonder
 
-> Pithy project description
+> Neighborhood discovery app
 
 ## Team
 
@@ -55,7 +55,7 @@ $(PROJECT_DIR)/../node_modules/react-native-mapbox-gl
 
 ### Roadmap
 
-View the project roadmap [here](https://waffle.io/MapReactor/MapReactor)
+View the project roadmap [here](https://waffle.io/MapReactor/Sonder)
 
 
 ## Contributing
