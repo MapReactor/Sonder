@@ -1,6 +1,6 @@
 # Sonder
 
-> Neighborhood discovery app
+> Sonder is a neighborhood discovery walking app for IOS and Android built on React Native.
 
 ## Team
 
@@ -17,10 +17,6 @@
     1. [Tasks](#tasks)
 1. [Team](#team)
 1. [Contributing](#contributing)
-
-## Usage
-
-> Some usage instructions
 
 ## Requirements
 
